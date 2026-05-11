@@ -1,0 +1,10 @@
+[project]
+name = "mah"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "lz4>=4.4.5",
+    "msgpack>=1.1.2",
+]
