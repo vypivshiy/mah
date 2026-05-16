@@ -10,3 +10,10 @@ wheels/
 .venv
 .max_creds
 .max_credits
+# for dumper files, databases
+*.exe
+*.msi
+*core.dll
+*.id*
+*.nam
+*.til
