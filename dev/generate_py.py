@@ -227,6 +227,8 @@ class PythonCodegen:
 
         self._models = self._raw.get("models", {})
         self._packets = self._raw.get("packets", [])
+        self._events = self._raw.get("events", [])
+        self._all_entries = self._packets + self._events
         self._error_def = self._raw.get("error", {})
         self._string_enums: list[str] = self._raw.get("string_enums", [])
 
@@ -290,7 +292,7 @@ class PythonCodegen:
 
     def _build_opcode_map(self) -> dict[int, dict[str, Any]]:
         opcode_map: dict[int, dict[str, Any]] = {}
-        for packet in self._packets:
+        for packet in self._all_entries:
             op = packet["opcode"]
             req = packet.get("request")
             resp = packet.get("response")
@@ -310,7 +312,7 @@ class PythonCodegen:
 
     def generate_opcodes(self) -> str:
         opcode_names: dict[int, str] = {}
-        for packet in self._packets:
+        for packet in self._all_entries:
             op = packet["opcode"]
             resp = packet.get("response")
             req = packet.get("request")
@@ -501,7 +503,7 @@ class PythonCodegen:
                 poly_names.add(normalize_struct_name(variant_name))
 
         packet_names: set[str] = set()
-        for packet in self._packets:
+        for packet in self._all_entries:
             req = packet.get("request")
             resp = packet.get("response")
             if req:
@@ -708,7 +710,7 @@ class PythonCodegen:
             "import models as m\n"
         )
 
-        for packet in self._packets:
+        for packet in self._all_entries:
             req = packet.get("request")
             resp = packet.get("response")
 
@@ -741,7 +743,7 @@ class PythonCodegen:
         if not name:
             return str(opcode)
         seen: dict[str, int] = {}
-        for pkt in self._packets:
+        for pkt in self._all_entries:
             r = pkt.get("response")
             if not r or not r.get("full_name"):
                 continue
@@ -868,7 +870,7 @@ class PythonCodegen:
         return "\n".join(lines)
 
     def _get_packet_kind(self, opcode: int, side: str) -> str:
-        for packet in self._packets:
+        for packet in self._all_entries:
             if packet["opcode"] == opcode:
                 obj = packet.get(side)
                 if obj:

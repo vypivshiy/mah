@@ -788,20 +788,22 @@ def main():
     if m_warn:
         logger.info("  Models with warnings: %d", m_warn)
 
-    # ── Merge packets + events + special -> unified list ──────────────────────
-    seen_opcodes = {p["opcode"] for p in out_packets}
-    merged_packets = list(out_packets)
-    for ev in out_events:
-        if ev["opcode"] not in seen_opcodes:
-            merged_packets.append(ev)
-            seen_opcodes.add(ev["opcode"])
+    # ── Classify into packets vs events (no merge) ─────────────────────────
+    seen_opcodes = {p["opcode"] for p in out_packets} | {e["opcode"] for e in out_events}
+    final_packets = list(out_packets)
+    final_events = list(out_events)
+
     for sp in out_special_packets:
-        if sp["opcode"] not in seen_opcodes:
-            merged_packets.append(sp)
-            seen_opcodes.add(sp["opcode"])
+        if sp["opcode"] in seen_opcodes:
+            continue
+        seen_opcodes.add(sp["opcode"])
+        if sp["base_kind"] == "BaseEvent":
+            final_events.append(sp)
+        else:
+            final_packets.append(sp)
 
     # ── Stage 5b: Inheritance / derived types ──────────────────────────────────
-    derived_models = collect_inheritance_models(models, merged_packets)
+    derived_models = collect_inheritance_models(models, final_packets + final_events)
     if derived_models:
         # Remove derived variants from flat models; base types remain in models
         for base_name, group in derived_models.items():
@@ -824,7 +826,8 @@ def main():
             logger.info("  Models from polymorphic variants: %d", len(new_models))
 
         logger.info("  Total models (after excluding derived): %d", len(models))
-    merged_packets.sort(key=lambda x: x["opcode"])
+    final_packets.sort(key=lambda x: x["opcode"])
+    final_events.sort(key=lambda x: x["opcode"])
 
     # ── Save JSON ─────────────────────────────────────────────────────────────
     idb_path = idc.get_idb_path()
@@ -836,7 +839,8 @@ def main():
         "app_version": app_version,
         "build_number": build_number,
         "rpc_ver": common.VER,
-        "packets": merged_packets,
+        "packets": final_packets,
+        "events": final_events,
         "models": models,
         "polymorphic_models": derived_models,
         "string_enums": string_enums,
@@ -857,8 +861,11 @@ def main():
     ok_rpc = total_rpc - warn_count
     ok_events = total_events - event_warn_count
     logger.info("")
-    logger.info("Done. packets=%d (rpc=%d ok=%d warn=%d, events=%d ok=%d warn=%d, special=%d), models=%d",
-                len(merged_packets),
+    logger.info("Done. packets=%d (rpc=%d ok=%d warn=%d, special=%d), events=%d (duplex=%d ok=%d warn=%d, special=%d), models=%d",
+                len(final_packets),
                 total_rpc, ok_rpc, warn_count,
+                sum(1 for sp in out_special_packets if sp["base_kind"] != "BaseEvent"),
+                len(final_events),
                 total_events, ok_events, event_warn_count,
-                total_special, len(models))
+                sum(1 for sp in out_special_packets if sp["base_kind"] == "BaseEvent"),
+                len(models))

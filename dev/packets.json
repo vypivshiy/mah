@@ -5,29 +5,6 @@
   "rpc_ver": 11,
   "packets": [
     {
-      "opcode": 1,
-      "kind": "special_packet",
-      "full_name": "Api::OneMe::Packets::Ping",
-      "base_kind": "BaseEvent",
-      "offset": "0x5c0430",
-      "request": {
-        "full_name": "Api::OneMe::Packets::Ping::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x8b59e0",
-        "fields": [
-          {
-            "name": "interactive",
-            "type": "bool",
-            "required": true
-          }
-        ],
-        "warn": null
-      },
-      "response": null,
-      "warn": null
-    },
-    {
       "opcode": 5,
       "request": {
         "full_name": "Api::OneMe::Packets::Log::Parameters",
@@ -3731,461 +3708,6 @@
       }
     },
     {
-      "opcode": 120,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationCallAcceptedData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bad10",
-        "fields": [
-          {
-            "name": "conversationId",
-            "type": "std::string",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 121,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationCallFinishData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bade0",
-        "fields": [
-          {
-            "name": "conversationId",
-            "type": "std::string",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 128,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationMessageData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5b9dd0",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "postId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "message",
-            "type": "Api::OneMe::Types::Message",
-            "required": true
-          },
-          {
-            "name": "prevMessageId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "unread",
-            "type": "std::optional<int>",
-            "required": true
-          },
-          {
-            "name": "mark",
-            "type": "std::optional<__int64>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 129,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::TypingData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5ba6a0",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "userId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "type",
-            "type": "std::optional<std::string>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 130,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationMarkData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bb220",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "userId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "mark",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "unread",
-            "type": "std::optional<int>",
-            "required": true
-          },
-          {
-            "name": "setAsUnread",
-            "type": "std::optional<bool>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 131,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationContactData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5baf80",
-        "fields": [
-          {
-            "name": "contact",
-            "type": "Api::OneMe::Types::Contact",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 132,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::PresenceNotificationMessageData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5ba500",
-        "fields": [
-          {
-            "name": "userId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "presence",
-            "type": "Api::OneMe::Types::Presence",
-            "required": true
-          },
-          {
-            "name": "time",
-            "type": "std::optional<__int64>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 134,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::ConfigChangeData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5b9d00",
-        "fields": [
-          {
-            "name": "config",
-            "type": "Api::OneMe::Types::Configuration",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 135,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationChatData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5baeb0",
-        "fields": [
-          {
-            "name": "chat",
-            "type": "Api::OneMe::Types::Chat",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 136,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationAttachData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bab50",
-        "fields": [
-          {
-            "name": "videoId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "audioId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "fileId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "error",
-            "type": "std::optional<std::string>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 137,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Types::IncomingCall",
-        "kind": "IncomingCall",
-        "name_method": "hexrays",
-        "offset": "0x209300",
-        "fields": [
-          {
-            "name": "conversationId",
-            "type": "std::string",
-            "required": true
-          },
-          {
-            "name": "callerId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "chatId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "sdpOffer",
-            "type": "std::optional<std::string>",
-            "required": true
-          },
-          {
-            "name": "type",
-            "type": "std::optional<std::string>",
-            "required": true
-          },
-          {
-            "name": "isContact",
-            "type": "std::optional<bool>",
-            "required": true
-          },
-          {
-            "name": "country",
-            "type": "std::optional<std::string>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 140,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::MessagesDeleteRangeData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5ba9c0",
-        "fields": [
-          {
-            "name": "chat",
-            "type": "Api::OneMe::Types::Chat",
-            "required": true
-          },
-          {
-            "name": "startTime",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "endTime",
-            "type": "__int64",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 142,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::MessagesDeleteData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5ba820",
-        "fields": [
-          {
-            "name": "chat",
-            "type": "Api::OneMe::Types::Chat",
-            "required": true
-          },
-          {
-            "name": "messageIds",
-            "type": "std::vector<__int64>",
-            "required": true
-          },
-          {
-            "name": "ttl",
-            "type": "std::optional<bool>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
       "opcode": 145,
       "request": {
         "full_name": "Api::OneMe::Packets::Bot::BotInfo::Parameters",
@@ -4227,201 +3749,6 @@
       }
     },
     {
-      "opcode": 150,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Types::Assets::UpdateContent",
-        "kind": "UpdateContent",
-        "name_method": "hexrays",
-        "offset": "0x1dd180",
-        "fields": [
-          {
-            "name": "type",
-            "type": "std::string",
-            "required": true
-          },
-          {
-            "name": "id",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "ids",
-            "type": "std::optional<std::vector<__int64>>",
-            "required": true
-          },
-          {
-            "name": "updateType",
-            "type": "std::string",
-            "required": true
-          },
-          {
-            "name": "position",
-            "type": "std::optional<int>",
-            "required": true
-          },
-          {
-            "name": "sync",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "recentsList",
-            "type": "std::optional<std::vector<Api::OneMe::Types::Assets::RecentItem>>",
-            "required": true
-          },
-          {
-            "name": "recentEmojiList",
-            "type": "std::optional<std::vector<Api::OneMe::Types::Assets::RecentEmojiItem>>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 154,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationMessageDelayedData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5ba060",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "userId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "updateTypeId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "message",
-            "type": "std::optional<Api::OneMe::Types::Message>",
-            "required": true
-          },
-          {
-            "name": "messageIds",
-            "type": "std::optional<std::vector<__int64>>",
-            "required": true
-          },
-          {
-            "name": "lastDelayedUpdateTime",
-            "type": "__int64",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 155,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::ReactionsChangedData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bb520",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "postId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "messageId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "totalCount",
-            "type": "int",
-            "required": true
-          },
-          {
-            "name": "counters",
-            "type": "std::optional<std::vector<Api::OneMe::Types::MessageReactionCounter>>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 156,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::YouReactedData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bb750",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "postId",
-            "type": "std::optional<__int64>",
-            "required": true
-          },
-          {
-            "name": "messageId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "reactionInfo",
-            "type": "std::optional<Api::OneMe::Types::MessageReactionInfo>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
       "opcode": 158,
       "request": {
         "full_name": "Api::OneMe::Packets::Calls::CallsToken::Parameters",
@@ -4447,31 +3774,6 @@
             "name": "token",
             "type": "std::string",
             "required": false
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 159,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationProfiletData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bb450",
-        "fields": [
-          {
-            "name": "profile",
-            "type": "Api::OneMe::Types::Profile",
-            "required": true
           }
         ],
         "warn": null
@@ -5412,46 +4714,6 @@
       }
     },
     {
-      "opcode": 277,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationFoldersData::Response",
-        "kind": "Response",
-        "name_method": "hexrays",
-        "offset": "0x5bb050",
-        "fields": [
-          {
-            "name": "folderSync",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "folders",
-            "type": "std::optional<std::vector<Api::OneMe::Types::ChatFolder>>",
-            "required": true
-          },
-          {
-            "name": "foldersOrder",
-            "type": "std::optional<std::vector<std::string>>",
-            "required": true
-          },
-          {
-            "name": "allFilterExcludeFolders",
-            "type": "std::optional<std::vector<std::string>>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
       "opcode": 288,
       "request": {
         "full_name": "Api::OneMe::Packets::EmptyParameters",
@@ -5557,51 +4819,6 @@
           {
             "name": "passwordChallenge",
             "type": "std::optional<Api::OneMe::Packets::Auth::OneMe::PasswordChallenge>",
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
-      "opcode": 293,
-      "request": {
-        "full_name": "Api::OneMe::Packets::Events::NoParameters",
-        "kind": "NoParameters",
-        "name_method": null,
-        "offset": null,
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "full_name": "Api::OneMe::Packets::Events::NotificationTranscriptionData::Payload",
-        "kind": "Payload",
-        "name_method": "hexrays",
-        "offset": "0x5ba2d0",
-        "fields": [
-          {
-            "name": "chatId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "messageId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "mediaId",
-            "type": "__int64",
-            "required": true
-          },
-          {
-            "name": "transcription",
-            "type": "std::optional<std::string>",
-            "required": false
-          },
-          {
-            "name": "transcriptionStatus",
-            "type": "signed char",
             "required": true
           }
         ],
@@ -5888,6 +5105,810 @@
           {
             "name": "polls",
             "type": "std::vector<Api::OneMe::Types::Poll>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    }
+  ],
+  "events": [
+    {
+      "opcode": 1,
+      "kind": "special_packet",
+      "full_name": "Api::OneMe::Packets::Ping",
+      "base_kind": "BaseEvent",
+      "offset": "0x5c0430",
+      "request": {
+        "full_name": "Api::OneMe::Packets::Ping::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x8b59e0",
+        "fields": [
+          {
+            "name": "interactive",
+            "type": "bool",
+            "required": true
+          }
+        ],
+        "warn": null
+      },
+      "response": null,
+      "warn": null
+    },
+    {
+      "opcode": 20,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::LogoutData::Response",
+        "kind": "Response",
+        "name_method": null,
+        "offset": "0x82ea40",
+        "fields": [],
+        "warn": "no data found"
+      }
+    },
+    {
+      "opcode": 120,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationCallAcceptedData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bad10",
+        "fields": [
+          {
+            "name": "conversationId",
+            "type": "std::string",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 121,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationCallFinishData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bade0",
+        "fields": [
+          {
+            "name": "conversationId",
+            "type": "std::string",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 128,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationMessageData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5b9dd0",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "postId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "message",
+            "type": "Api::OneMe::Types::Message",
+            "required": true
+          },
+          {
+            "name": "prevMessageId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "unread",
+            "type": "std::optional<int>",
+            "required": true
+          },
+          {
+            "name": "mark",
+            "type": "std::optional<__int64>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 129,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::TypingData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5ba6a0",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "type",
+            "type": "std::optional<std::string>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 130,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationMarkData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bb220",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "mark",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "unread",
+            "type": "std::optional<int>",
+            "required": true
+          },
+          {
+            "name": "setAsUnread",
+            "type": "std::optional<bool>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 131,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationContactData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5baf80",
+        "fields": [
+          {
+            "name": "contact",
+            "type": "Api::OneMe::Types::Contact",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 132,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::PresenceNotificationMessageData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5ba500",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "presence",
+            "type": "Api::OneMe::Types::Presence",
+            "required": true
+          },
+          {
+            "name": "time",
+            "type": "std::optional<__int64>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 134,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::ConfigChangeData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5b9d00",
+        "fields": [
+          {
+            "name": "config",
+            "type": "Api::OneMe::Types::Configuration",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 135,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationChatData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5baeb0",
+        "fields": [
+          {
+            "name": "chat",
+            "type": "Api::OneMe::Types::Chat",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 136,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationAttachData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bab50",
+        "fields": [
+          {
+            "name": "videoId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "audioId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "fileId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "error",
+            "type": "std::optional<std::string>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 137,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Types::IncomingCall",
+        "kind": "IncomingCall",
+        "name_method": "hexrays",
+        "offset": "0x209300",
+        "fields": [
+          {
+            "name": "conversationId",
+            "type": "std::string",
+            "required": true
+          },
+          {
+            "name": "callerId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "chatId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "sdpOffer",
+            "type": "std::optional<std::string>",
+            "required": true
+          },
+          {
+            "name": "type",
+            "type": "std::optional<std::string>",
+            "required": true
+          },
+          {
+            "name": "isContact",
+            "type": "std::optional<bool>",
+            "required": true
+          },
+          {
+            "name": "country",
+            "type": "std::optional<std::string>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 140,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::MessagesDeleteRangeData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5ba9c0",
+        "fields": [
+          {
+            "name": "chat",
+            "type": "Api::OneMe::Types::Chat",
+            "required": true
+          },
+          {
+            "name": "startTime",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "endTime",
+            "type": "__int64",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 142,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::MessagesDeleteData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5ba820",
+        "fields": [
+          {
+            "name": "chat",
+            "type": "Api::OneMe::Types::Chat",
+            "required": true
+          },
+          {
+            "name": "messageIds",
+            "type": "std::vector<__int64>",
+            "required": true
+          },
+          {
+            "name": "ttl",
+            "type": "std::optional<bool>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 150,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Types::Assets::UpdateContent",
+        "kind": "UpdateContent",
+        "name_method": "hexrays",
+        "offset": "0x1dd180",
+        "fields": [
+          {
+            "name": "type",
+            "type": "std::string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "ids",
+            "type": "std::optional<std::vector<__int64>>",
+            "required": true
+          },
+          {
+            "name": "updateType",
+            "type": "std::string",
+            "required": true
+          },
+          {
+            "name": "position",
+            "type": "std::optional<int>",
+            "required": true
+          },
+          {
+            "name": "sync",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "recentsList",
+            "type": "std::optional<std::vector<Api::OneMe::Types::Assets::RecentItem>>",
+            "required": true
+          },
+          {
+            "name": "recentEmojiList",
+            "type": "std::optional<std::vector<Api::OneMe::Types::Assets::RecentEmojiItem>>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 154,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationMessageDelayedData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5ba060",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "updateTypeId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "message",
+            "type": "std::optional<Api::OneMe::Types::Message>",
+            "required": true
+          },
+          {
+            "name": "messageIds",
+            "type": "std::optional<std::vector<__int64>>",
+            "required": true
+          },
+          {
+            "name": "lastDelayedUpdateTime",
+            "type": "__int64",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 155,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::ReactionsChangedData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bb520",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "postId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "messageId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "totalCount",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "counters",
+            "type": "std::optional<std::vector<Api::OneMe::Types::MessageReactionCounter>>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 156,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::YouReactedData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bb750",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "postId",
+            "type": "std::optional<__int64>",
+            "required": true
+          },
+          {
+            "name": "messageId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "reactionInfo",
+            "type": "std::optional<Api::OneMe::Types::MessageReactionInfo>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 159,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationProfiletData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bb450",
+        "fields": [
+          {
+            "name": "profile",
+            "type": "Api::OneMe::Types::Profile",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 277,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationFoldersData::Response",
+        "kind": "Response",
+        "name_method": "hexrays",
+        "offset": "0x5bb050",
+        "fields": [
+          {
+            "name": "folderSync",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "folders",
+            "type": "std::optional<std::vector<Api::OneMe::Types::ChatFolder>>",
+            "required": true
+          },
+          {
+            "name": "foldersOrder",
+            "type": "std::optional<std::vector<std::string>>",
+            "required": true
+          },
+          {
+            "name": "allFilterExcludeFolders",
+            "type": "std::optional<std::vector<std::string>>",
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 293,
+      "request": {
+        "full_name": "Api::OneMe::Packets::Events::NoParameters",
+        "kind": "NoParameters",
+        "name_method": null,
+        "offset": null,
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "full_name": "Api::OneMe::Packets::Events::NotificationTranscriptionData::Payload",
+        "kind": "Payload",
+        "name_method": "hexrays",
+        "offset": "0x5ba2d0",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "messageId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "mediaId",
+            "type": "__int64",
+            "required": true
+          },
+          {
+            "name": "transcription",
+            "type": "std::optional<std::string>",
+            "required": false
+          },
+          {
+            "name": "transcriptionStatus",
+            "type": "signed char",
             "required": true
           }
         ],
@@ -9768,6 +9789,260 @@
   "polymorphic_models": {
     "Api::OneMe::Types::BaseAttachment": {
       "variants": {
+        "Api::OneMe::Types::Log::RegistrationEventParams": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "screen",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "reason",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "value",
+              "type": "std::optional<__int64>",
+              "required": true
+            },
+            {
+              "name": "phoneCountry",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "source",
+              "type": "std::optional<signed char>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x2cb720"
+        },
+        "Api::OneMe::Types::Outgoing::ShareAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "shareId",
+              "type": "__int64",
+              "required": true
+            },
+            {
+              "name": "url",
+              "type": "std::string",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27af60"
+        },
+        "Api::OneMe::Types::Outgoing::ControlAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "event",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "chatType",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "title",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "userIds",
+              "type": "std::optional<std::vector<__int64>>",
+              "required": true
+            },
+            {
+              "name": "startPayload",
+              "type": "std::optional<std::string>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27aa00"
+        },
+        "Api::OneMe::Types::Log::LogEventParams": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "msg",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "details",
+              "type": "std::optional<std::string>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x907250"
+        },
+        "Api::OneMe::Types::ReplyKeyboardAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "keyboard",
+              "type": "std::vector<std::vector<Api::OneMe::Types::ReplyButton>>",
+              "required": true
+            },
+            {
+              "name": "defaultInputDisabled",
+              "type": "std::optional<bool>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x8feda0"
+        },
+        "Api::OneMe::Types::ShareAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "shareId",
+              "type": "__int64",
+              "required": true
+            },
+            {
+              "name": "url",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "title",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "std::optional<std::string>",
+              "required": false
+            },
+            {
+              "name": "host",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "image",
+              "type": "std::optional<Api::OneMe::Types::PhotoAttachment>",
+              "required": true
+            },
+            {
+              "name": "media",
+              "type": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment,Api::OneMe::Types::BaseAttachment>>",
+              "required": true
+            },
+            {
+              "name": "isSensitive",
+              "type": "std::optional<bool>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x8feeb0"
+        },
+        "Api::OneMe::Types::Log::SearchEventParams": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "inputQuery",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "sections",
+              "type": "Api::OneMe::Types::Log::SearchEventParams::Sections",
+              "required": true
+            },
+            {
+              "name": "counters",
+              "type": "Api::OneMe::Types::Log::SearchEventParams::Counters",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x2cd6f0"
+        },
         "Api::OneMe::Types::Outgoing::ContactAttachment": {
           "fields": [
             {
@@ -9789,53 +10064,6 @@
           "name_method": "hexrays",
           "warn": null,
           "offset": "0x27a950"
-        },
-        "Api::OneMe::Types::CallAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "conversationId",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "callType",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "hangupType",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "duration",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "contactIds",
-              "type": "std::optional<std::vector<__int64>>",
-              "required": true
-            },
-            {
-              "name": "joinLink",
-              "type": "std::optional<std::string>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x8fd180"
         },
         "Api::OneMe::Types::AudioAttachment": {
           "fields": [
@@ -9878,6 +10106,43 @@
           "name_method": "hexrays",
           "warn": null,
           "offset": "0x8fcf50"
+        },
+        "Api::OneMe::Types::Outgoing::VideoAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "token",
+              "type": "std::optional<std::string>",
+              "required": false
+            },
+            {
+              "name": "duration",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "wave",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            },
+            {
+              "name": "thumbhash",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27b140"
         },
         "Api::OneMe::Types::PollAttachment": {
           "fields": [
@@ -9941,7 +10206,7 @@
           "warn": null,
           "offset": "0x8fe550"
         },
-        "Api::OneMe::Types::WidgetAttachment": {
+        "Api::OneMe::Types::Outgoing::FileAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -9954,16 +10219,16 @@
               "required": true
             },
             {
-              "name": "message",
-              "type": "std::vector<Api::OneMe::Types::WidgetContent>",
-              "required": true
+              "name": "token",
+              "type": "std::optional<std::string>",
+              "required": false
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x900220"
+          "offset": "0x27ac30"
         },
-        "Api::OneMe::Types::Outgoing::ControlAttachment": {
+        "Api::OneMe::Types::Log::CallEventParams": {
           "fields": [
             {
               "name": "_type",
@@ -9976,83 +10241,49 @@
               "required": true
             },
             {
-              "name": "event",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "chatType",
+              "name": "call_id",
               "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "title",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "userIds",
-              "type": "std::optional<std::vector<__int64>>",
-              "required": true
-            },
-            {
-              "name": "startPayload",
-              "type": "std::optional<std::string>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27aa00"
-        },
-        "Api::OneMe::Types::Outgoing::PhotoAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
+              "name": "is_group",
               "type": "std::optional<bool>",
               "required": true
             },
             {
-              "name": "photoToken",
+              "name": "event_label_str",
               "type": "std::optional<std::string>",
               "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27aec0"
-        },
-        "Api::OneMe::Types::ReplyKeyboardAttachment": {
-          "fields": [
+            },
             {
-              "name": "_type",
-              "type": "std::string",
+              "name": "event_label_int",
+              "type": "std::optional<int>",
               "required": true
             },
             {
-              "name": "deleted",
-              "type": "std::optional<bool>",
+              "name": "custom_feedback",
+              "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "keyboard",
-              "type": "std::vector<std::vector<Api::OneMe::Types::ReplyButton>>",
+              "name": "error_type",
+              "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "defaultInputDisabled",
+              "name": "source",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "is_wave",
               "type": "std::optional<bool>",
               "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x8feda0"
+          "offset": "0x2b3dd0"
         },
         "Api::OneMe::Types::ContactAttachment": {
           "fields": [
@@ -10101,7 +10332,7 @@
           "warn": null,
           "offset": "0x8fd420"
         },
-        "Api::OneMe::Types::Outgoing::AudioAttachment": {
+        "Api::OneMe::Types::GeoPositionAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -10114,9 +10345,219 @@
               "required": true
             },
             {
+              "name": "latitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "longitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "zoom",
+              "type": "std::optional<float>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x8fde70"
+        },
+        "Api::OneMe::Types::Outgoing::GeoPositionAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "latitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "longitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "zoom",
+              "type": "std::optional<float>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27acd0"
+        },
+        "Api::OneMe::Types::Outgoing::StickerAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "stickerId",
+              "type": "__int64",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27b090"
+        },
+        "Api::OneMe::Types::Outgoing::PhotoAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "photoToken",
+              "type": "std::optional<std::string>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27aec0"
+        },
+        "Api::OneMe::Types::ControlAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "event",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "userIds",
+              "type": "std::optional<std::vector<__int64>>",
+              "required": true
+            },
+            {
+              "name": "title",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
               "name": "token",
               "type": "std::optional<std::string>",
               "required": false
+            },
+            {
+              "name": "photoToken",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "crop",
+              "type": "std::optional<Api::OneMe::Types::Crop>",
+              "required": true
+            },
+            {
+              "name": "userId",
+              "type": "std::optional<__int64>",
+              "required": true
+            },
+            {
+              "name": "url",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "fullUrl",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "message",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "shortMessage",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "showHistory",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "chatType",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "pinnedMessage",
+              "type": "std::optional<Api::OneMe::Types::Message>",
+              "required": true
+            },
+            {
+              "name": "startPayload",
+              "type": "std::optional<std::string>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x8fd6a0"
+        },
+        "Api::OneMe::Types::CallAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "conversationId",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "callType",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "hangupType",
+              "type": "std::optional<std::string>",
+              "required": true
             },
             {
               "name": "duration",
@@ -10124,85 +10565,36 @@
               "required": true
             },
             {
-              "name": "wave",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27a6c0"
-        },
-        "Api::OneMe::Types::Outgoing::FileAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
+              "name": "contactIds",
+              "type": "std::optional<std::vector<__int64>>",
               "required": true
             },
             {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "token",
-              "type": "std::optional<std::string>",
-              "required": false
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27ac30"
-        },
-        "Api::OneMe::Types::UnsupportedAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "AttachmentConverter",
-              "type": "std::optional<float>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x26bad0"
-        },
-        "Api::OneMe::Types::Log::LogEventParams": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "msg",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "details",
+              "name": "joinLink",
               "type": "std::optional<std::string>",
               "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x907250"
+          "offset": "0x8fd180"
+        },
+        "Api::OneMe::Types::Log::EventParams": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": "no data found",
+          "offset": "0x64430"
         },
         "Api::OneMe::Types::InlineKeyboardAttachment": {
           "fields": [
@@ -10230,63 +10622,6 @@
           "name_method": "hexrays",
           "warn": null,
           "offset": "0x8fe320"
-        },
-        "Api::OneMe::Types::ShareAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "shareId",
-              "type": "__int64",
-              "required": true
-            },
-            {
-              "name": "url",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "title",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "description",
-              "type": "std::optional<std::string>",
-              "required": false
-            },
-            {
-              "name": "host",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "image",
-              "type": "std::optional<Api::OneMe::Types::PhotoAttachment>",
-              "required": true
-            },
-            {
-              "name": "media",
-              "type": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment,Api::OneMe::Types::BaseAttachment>>",
-              "required": true
-            },
-            {
-              "name": "isSensitive",
-              "type": "std::optional<bool>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x8feeb0"
         },
         "Api::OneMe::Types::StickerAttachment": {
           "fields": [
@@ -10385,87 +10720,6 @@
           "warn": null,
           "offset": "0x8ff1e0"
         },
-        "Api::OneMe::Types::Outgoing::GeoPositionAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "latitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "longitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "zoom",
-              "type": "std::optional<float>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27acd0"
-        },
-        "Api::OneMe::Types::Outgoing::ShareAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "shareId",
-              "type": "__int64",
-              "required": true
-            },
-            {
-              "name": "url",
-              "type": "std::string",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27af60"
-        },
-        "Api::OneMe::Types::Outgoing::StickerAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "stickerId",
-              "type": "__int64",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27b090"
-        },
         "Api::OneMe::Types::FileAttachment": {
           "fields": [
             {
@@ -10508,7 +10762,7 @@
           "warn": null,
           "offset": "0x8fdc10"
         },
-        "Api::OneMe::Types::Log::CallEventParams": {
+        "Api::OneMe::Types::Outgoing::PollAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -10521,49 +10775,118 @@
               "required": true
             },
             {
-              "name": "call_id",
-              "type": "std::optional<std::string>",
+              "name": "pollId",
+              "type": "std::optional<__int64>",
               "required": true
             },
             {
-              "name": "is_group",
+              "name": "title",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "answers",
+              "type": "std::vector<Api::OneMe::Types::PollAnswer>",
+              "required": true
+            },
+            {
+              "name": "settings",
+              "type": "int",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x28ae30"
+        },
+        "Api::OneMe::Types::WidgetAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
               "type": "std::optional<bool>",
               "required": true
             },
             {
-              "name": "event_label_str",
+              "name": "message",
+              "type": "std::vector<Api::OneMe::Types::WidgetContent>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x900220"
+        },
+        "Api::OneMe::Types::PhotoAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "photoId",
+              "type": "std::optional<__int64>",
+              "required": true
+            },
+            {
+              "name": "url",
               "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "event_label_int",
+              "name": "baseUrl",
+              "type": "std::optional<std::string>",
+              "required": false
+            },
+            {
+              "name": "width",
               "type": "std::optional<int>",
               "required": true
             },
             {
-              "name": "custom_feedback",
+              "name": "height",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "gif",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "previewData",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            },
+            {
+              "name": "mp4Url",
               "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "error_type",
+              "name": "photoToken",
               "type": "std::optional<std::string>",
               "required": true
             },
             {
-              "name": "source",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "is_wave",
+              "name": "sensitive",
               "type": "std::optional<bool>",
               "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x2b3dd0"
+          "offset": "0x88d0a0"
         },
         "Api::OneMe::Types::Log::NavEventParams": {
           "fields": [
@@ -10622,7 +10945,7 @@
           "warn": null,
           "offset": "0x2c75f0"
         },
-        "Api::OneMe::Types::Log::EventParams": {
+        "Api::OneMe::Types::AppAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -10633,11 +10956,63 @@
               "name": "deleted",
               "type": "std::optional<bool>",
               "required": true
+            },
+            {
+              "name": "appId",
+              "type": "__int64",
+              "required": true
+            },
+            {
+              "name": "name",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "icon",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "message",
+              "type": "std::optional<std::string>",
+              "required": true
+            },
+            {
+              "name": "state",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "timeout",
+              "type": "std::optional<__int64>",
+              "required": true
             }
           ],
           "name_method": "hexrays",
-          "warn": "no data found",
-          "offset": "0x64430"
+          "warn": null,
+          "offset": "0x8fccc0"
+        },
+        "Api::OneMe::Types::UnsupportedAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "AttachmentConverter",
+              "type": "std::optional<float>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x26bad0"
         },
         "Api::OneMe::Types::VideoAttachment": {
           "fields": [
@@ -10736,76 +11111,7 @@
           "warn": null,
           "offset": "0x8ffa70"
         },
-        "Api::OneMe::Types::Log::SearchEventParams": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "inputQuery",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "sections",
-              "type": "Api::OneMe::Types::Log::SearchEventParams::Sections",
-              "required": true
-            },
-            {
-              "name": "counters",
-              "type": "Api::OneMe::Types::Log::SearchEventParams::Counters",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x2cd6f0"
-        },
-        "Api::OneMe::Types::Outgoing::PollAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "pollId",
-              "type": "std::optional<__int64>",
-              "required": true
-            },
-            {
-              "name": "title",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "answers",
-              "type": "std::vector<Api::OneMe::Types::PollAnswer>",
-              "required": true
-            },
-            {
-              "name": "settings",
-              "type": "int",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x28ae30"
-        },
-        "Api::OneMe::Types::Outgoing::VideoAttachment": {
+        "Api::OneMe::Types::Outgoing::AudioAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -10831,18 +11137,13 @@
               "name": "wave",
               "type": "std::optional<std::vector<enum std::byte>>",
               "required": true
-            },
-            {
-              "name": "thumbhash",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x27b140"
+          "offset": "0x27a6c0"
         },
-        "Api::OneMe::Types::PhotoAttachment": {
+        "Api::OneMe::Types::BaseAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -10853,153 +11154,18 @@
               "name": "deleted",
               "type": "std::optional<bool>",
               "required": true
-            },
-            {
-              "name": "photoId",
-              "type": "std::optional<__int64>",
-              "required": true
-            },
-            {
-              "name": "url",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "baseUrl",
-              "type": "std::optional<std::string>",
-              "required": false
-            },
-            {
-              "name": "width",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "height",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "gif",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "previewData",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
-            },
-            {
-              "name": "mp4Url",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "photoToken",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "sensitive",
-              "type": "std::optional<bool>",
-              "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x88d0a0"
-        },
-        "Api::OneMe::Types::AppAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "appId",
-              "type": "__int64",
-              "required": true
-            },
-            {
-              "name": "name",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "icon",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "message",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "state",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "timeout",
-              "type": "std::optional<__int64>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x8fccc0"
-        },
-        "Api::OneMe::Types::GeoPositionAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "latitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "longitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "zoom",
-              "type": "std::optional<float>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x8fde70"
-        },
+          "offset": "0x88ad40"
+        }
+      }
+    },
+    "Api::OneMe::Types::Log::EventParams": {
+      "variants": {
         "Api::OneMe::Types::Log::RegistrationEventParams": {
           "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
             {
               "name": "screen",
               "type": "std::optional<int>",
@@ -11030,119 +11196,6 @@
           "warn": null,
           "offset": "0x2cb720"
         },
-        "Api::OneMe::Types::ControlAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "event",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "userIds",
-              "type": "std::optional<std::vector<__int64>>",
-              "required": true
-            },
-            {
-              "name": "title",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "token",
-              "type": "std::optional<std::string>",
-              "required": false
-            },
-            {
-              "name": "photoToken",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "crop",
-              "type": "std::optional<Api::OneMe::Types::Crop>",
-              "required": true
-            },
-            {
-              "name": "userId",
-              "type": "std::optional<__int64>",
-              "required": true
-            },
-            {
-              "name": "url",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "fullUrl",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "message",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "shortMessage",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "showHistory",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "chatType",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "pinnedMessage",
-              "type": "std::optional<Api::OneMe::Types::Message>",
-              "required": true
-            },
-            {
-              "name": "startPayload",
-              "type": "std::optional<std::string>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x8fd6a0"
-        },
-        "Api::OneMe::Types::BaseAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x88ad40"
-        }
-      }
-    },
-    "Api::OneMe::Types::Log::EventParams": {
-      "variants": {
         "Api::OneMe::Types::Log::CallEventParams": {
           "fields": [
             {
@@ -11254,38 +11307,6 @@
           "warn": null,
           "offset": "0x907250"
         },
-        "Api::OneMe::Types::Log::RegistrationEventParams": {
-          "fields": [
-            {
-              "name": "screen",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "reason",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "value",
-              "type": "std::optional<__int64>",
-              "required": true
-            },
-            {
-              "name": "phoneCountry",
-              "type": "std::optional<std::string>",
-              "required": true
-            },
-            {
-              "name": "source",
-              "type": "std::optional<signed char>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x2cb720"
-        },
         "Api::OneMe::Types::Log::SearchEventParams": {
           "fields": [
             {
@@ -11318,7 +11339,7 @@
     },
     "Api::OneMe::Types::Outgoing::BaseAttachment": {
       "variants": {
-        "Api::OneMe::Types::Outgoing::VideoAttachment": {
+        "Api::OneMe::Types::Outgoing::FileAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -11334,26 +11355,11 @@
               "name": "token",
               "type": "std::optional<std::string>",
               "required": false
-            },
-            {
-              "name": "duration",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "wave",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
-            },
-            {
-              "name": "thumbhash",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x27b140"
+          "offset": "0x27ac30"
         },
         "Api::OneMe::Types::Outgoing::ShareAttachment": {
           "fields": [
@@ -11381,28 +11387,6 @@
           "name_method": "hexrays",
           "warn": null,
           "offset": "0x27af60"
-        },
-        "Api::OneMe::Types::Outgoing::StickerAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "stickerId",
-              "type": "__int64",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27b090"
         },
         "Api::OneMe::Types::Outgoing::ControlAttachment": {
           "fields": [
@@ -11446,6 +11430,60 @@
           "warn": null,
           "offset": "0x27aa00"
         },
+        "Api::OneMe::Types::Outgoing::GeoPositionAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "latitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "longitude",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "zoom",
+              "type": "std::optional<float>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27acd0"
+        },
+        "Api::OneMe::Types::Outgoing::StickerAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "stickerId",
+              "type": "__int64",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27b090"
+        },
         "Api::OneMe::Types::Outgoing::PhotoAttachment": {
           "fields": [
             {
@@ -11467,82 +11505,6 @@
           "name_method": "hexrays",
           "warn": null,
           "offset": "0x27aec0"
-        },
-        "Api::OneMe::Types::Outgoing::ContactAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "contactId",
-              "type": "__int64",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27a950"
-        },
-        "Api::OneMe::Types::Outgoing::AudioAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "token",
-              "type": "std::optional<std::string>",
-              "required": false
-            },
-            {
-              "name": "duration",
-              "type": "std::optional<int>",
-              "required": true
-            },
-            {
-              "name": "wave",
-              "type": "std::optional<std::vector<enum std::byte>>",
-              "required": true
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27a6c0"
-        },
-        "Api::OneMe::Types::Outgoing::FileAttachment": {
-          "fields": [
-            {
-              "name": "_type",
-              "type": "std::string",
-              "required": true
-            },
-            {
-              "name": "deleted",
-              "type": "std::optional<bool>",
-              "required": true
-            },
-            {
-              "name": "token",
-              "type": "std::optional<std::string>",
-              "required": false
-            }
-          ],
-          "name_method": "hexrays",
-          "warn": null,
-          "offset": "0x27ac30"
         },
         "Api::OneMe::Types::Outgoing::PollAttachment": {
           "fields": [
@@ -11581,7 +11543,7 @@
           "warn": null,
           "offset": "0x28ae30"
         },
-        "Api::OneMe::Types::Outgoing::GeoPositionAttachment": {
+        "Api::OneMe::Types::Outgoing::ContactAttachment": {
           "fields": [
             {
               "name": "_type",
@@ -11594,24 +11556,83 @@
               "required": true
             },
             {
-              "name": "latitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "longitude",
-              "type": "float",
-              "required": true
-            },
-            {
-              "name": "zoom",
-              "type": "std::optional<float>",
+              "name": "contactId",
+              "type": "__int64",
               "required": true
             }
           ],
           "name_method": "hexrays",
           "warn": null,
-          "offset": "0x27acd0"
+          "offset": "0x27a950"
+        },
+        "Api::OneMe::Types::Outgoing::VideoAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "token",
+              "type": "std::optional<std::string>",
+              "required": false
+            },
+            {
+              "name": "duration",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "wave",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            },
+            {
+              "name": "thumbhash",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27b140"
+        },
+        "Api::OneMe::Types::Outgoing::AudioAttachment": {
+          "fields": [
+            {
+              "name": "_type",
+              "type": "std::string",
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": "std::optional<bool>",
+              "required": true
+            },
+            {
+              "name": "token",
+              "type": "std::optional<std::string>",
+              "required": false
+            },
+            {
+              "name": "duration",
+              "type": "std::optional<int>",
+              "required": true
+            },
+            {
+              "name": "wave",
+              "type": "std::optional<std::vector<enum std::byte>>",
+              "required": true
+            }
+          ],
+          "name_method": "hexrays",
+          "warn": null,
+          "offset": "0x27a6c0"
         },
         "Api::OneMe::Types::Outgoing::BaseAttachment": {
           "fields": [

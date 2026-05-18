@@ -219,7 +219,7 @@ def _base_container_name(cpp_full_name: str) -> str:
 
 def collect_all_types(packets_json: dict) -> Set[str]:
     types: Set[str] = set()
-    for packet in packets_json.get("packets", []):
+    for packet in packets_json.get("packets", []) + packets_json.get("events", []):
         for part in ("request", "response"):
             obj = packet.get(part)
             if obj and "fields" in obj:
@@ -299,6 +299,8 @@ class Codegen:
 
         self._models = self._raw_data["models"]
         self._packets = self._raw_data["packets"]
+        self._events = self._raw_data.get("events", [])
+        self._all_entries = self._packets + self._events
 
         raw_version: str = self._raw_data["app_version"]
         self._app_version = ".".join(raw_version.split(".")[:3])
@@ -417,7 +419,7 @@ class Codegen:
                 "}",
                 "",
             ])
-        for packet in self._packets:
+        for packet in self._all_entries:
             if not packet.get("request") and not packet.get("response"):
                 continue
             if packet.get("request"):
@@ -1198,7 +1200,7 @@ class Codegen:
 
     def _build_opcode_map(self) -> dict:
         opcode_map = {}
-        for packet in self._packets:
+        for packet in self._all_entries:
             op = packet["opcode"]
             req = packet.get("request")
             resp = packet.get("response")
@@ -1301,7 +1303,7 @@ class Codegen:
 
     def _generate_opcodes(self):
         opcode_names = {}
-        for packet in self._packets:
+        for packet in self._all_entries:
             op = packet["opcode"]
             resp = packet.get("response")
             if not resp or not resp.get("full_name"):
