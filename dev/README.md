@@ -79,13 +79,20 @@ chmod +x extract_msi.sh
 3. загрузить скрипт (File -> Script File...) dumper/run.py, ждать когда сохранит дамп 
 4. дамп сохранится в директории откуда загружали dll в IDA-PRO, не в папке со скриптом
 
+## Дамп конфигурации
+
+нужен `config.dll` клиента или `CM_FP_Unspecified.config.dll` из установочного файла. Требуется python 3.8+
+
+* распаковать в папку
+* запустить `python config_extractor.py CM_FP_Unspecified.config.dll`
+* в config.json будут дополнительные данные, которые могут пригодится ("api_version_uint" и "user_agent" )
+
 ### Пайплайн дампа
 
-```mermaid
-flowchart LR
-    A["*core.dll"] --> B["IDA Pro 7.1+"]
-    B --> C["dumper/run.py"]
-    C --> D["packets.json"]
+```
++-------------+     +---------+     +----------------+     +--------------+
+| *core.dll   |---->| IDA Pro |---->| dumper/run.py  |---->| packets.json |
++-------------+     +---------+     +----------------+     +--------------+
 ```
 
 ### Структура дампера
@@ -302,10 +309,10 @@ flowchart LR
 
 Примеры скриптов на python генерируют готовый шаблонный код в соответствии описанию структур с трансформацией c++ типов в его аналог:
 
-```mermaid
-flowchart LR
-    A["packets.json"] --> B["generate_py.py / generate_go.py"]
-    B --> C["*.py / *.go"]
+```
++---------------+     +-----------------------------+     +-------------+
+| packets.json  |---->| codegen_script              |---->| *.py / *.go | <--- любые расшиерния
++---------------+     +-----------------------------+     +-------------+
 ```
 
 Пример запуска генератора (из папки проекта):
@@ -378,8 +385,9 @@ code.extend([
 
 ### Замечания по финальным моделям
 
-* так как это неофициальный API, базирующийся на дампе, **100% стабильность и полнота структур не гарантируется**. Чтобы код неожиданно не падал в runtime, в архитектуру закладывайте следующие условия
+* так как это неофициальный API, базирующийся на дампе, **100% стабильность и полнота структур не гарантируется**. Чтобы код неожиданно не падал в runtime, в архитектуру закладывайте следующие условия:
   * для статик ЯП закладывайте safe геттеры и допускайте ситуации, что payload пакета может отличаться от сгенерированного: разработчики могут добавлять новые поля или убрать старые. Например, это явно видно явно на модели для настроек `Api::OneMe::Types::UserSettings` и на response `"opcode": 22, "Api::OneMe::Packets::Config"`
+  * `std::optional<T>` в большинстве случаев больше подходит по смыслу как `NotRequired` поле. Из дампа это узнать невозможно, ориентируйтесь на реальное поведение клиента
   * Может понадобиться делать патчи в файле `dev/dumper/PATCHES.py`, чтобы тип данных совпадал с реальным.
     * Например, в ["models"]["Api::OneMe::Types::Message"] дизассемблер определил поле `ttl` как `std::optional<int>`, но в реальности он bool:
 
@@ -408,11 +416,9 @@ code.extend([
     },
 
   ```
-
-  * для динамических ЯП не рекомендуется сериализовывать payload объекты в жесткие структуры (например python dataclasses, pydantic). Используйте хеш-таблицы с аннотациями.
-    * для python это [typing.TypedDict](https://docs.python.org/3/library/typing.html#typing.TypedDict) с параметром `total=False`.
-    * для javascript - [jsdoc](https://jsdoc.app/)
-
+* для динамических ЯП не рекомендуется сериализовывать payload объекты в жесткие структуры (например python dataclasses, pydantic). Используйте хеш-таблицы с аннотациями.
+  * для python это [typing.TypedDict](https://docs.python.org/3/library/typing.html#typing.TypedDict) с параметром `total=False`.
+  * для javascript - [jsdoc](https://jsdoc.app/)
 
 ### Как с этим работать?
 
@@ -464,38 +470,40 @@ struct: `!BHBHI` (network byte order / big-endian)
 
 #### Как отправить пакет
 
-```mermaid
-sequenceDiagram
-    participant App as Приложение
-    participant Client as BaseClient
-    participant TCP as TCP Socket (TLS)
-
-    App->>Client: send_raw(opcode, payload)
-    Note over Client: seq = (seq + 1) & 0xFF
-    Note over Client: pending[seq] = Future
-
-    Note over Client: payload_bytes = msgpack.packb(payload)
-    alt payload_bytes > 4096
-        Note over Client: compressed = lz4.compress(payload_bytes)
-        alt len(compressed) < len(payload_bytes)
-            Note over Client: comp_flag = 1<br/>payload_bytes = compressed
-        end
-    end
-
-    Note over Client: packed_len = (comp_flag << 24) | len(payload_bytes)
-    Note over Client: header = struct.pack("!BHBHI", 11, 0, seq, opcode, packed_len)
-
-    Client->>TCP: header + payload_bytes
-    TCP-->>Client: [сервер обрабатывает...]
-
-    Note over Client: _read_loop() получает ответ
-
-    Client-->>App: Packet(opcode, payload)
+```
+ Приложение                    BaseClient                     TCP Socket (TLS)
+     |                              |                                |
+     |  send_raw(opcode, payload)   |                                |
+     |----------------------------->|                                |
+     |                              | seq = (seq + 1) & 0xFF         |
+     |                              | pending[seq] = Future          |
+     |                              |                                |
+     |                              | payload= msgpack.packb(payload)|
+     |                              |                                |
+     |                              | [payload_bytes > 4096?]        |
+     |                              |   compressed = lz4.compress    |
+     |                              |   [len(compressed) < len?]     |
+     |                              |     comp_flag = 1              |
+     |                              |     payload_bytes = compressed |
+     |                              |                                |
+     |                              | packed_len = (comp_flag << 24) | len(payload_bytes)
+     |                              | HEADER                         | (header = struct.pack("!BHBHI", 11, 0, seq, opcode, packed_len))
+     |                              |                                |
+     |                              |   header + payload_bytes       |
+     |                              |------------------------------->|
+     |                              |                                |
+     |                              |   [сервер обрабатывает...]     |
+     |                              |<-------------------------------|
+     |                              |                                |
+     |                              | _read_loop() получает ответ    |
+     |                              |                                |
+     |   Packet(opcode, payload)    |                                |
+     |<-----------------------------|                                |
 ```
 
-**Кратко:**
+**TLDR**
 1. Сериализуем payload через msgpack
-2. Если результат > 4 KB — пытаемся сжать lz4, ставим флаг сжатия
+2. Если результат > 4 KB — пытаемся сжать lz4, ставим флаг сжатия (неизвестно, нужно ли это делать?)
 3. Собираем 10-байтный заголовок с `cmd=0`, текущим `seq` и нужным `opcode`
 4. Отправляем `header + payload` в TCP-сокет
 5. Сохраняем `seq → Future` в словарь pending-запросов
@@ -506,28 +514,90 @@ sequenceDiagram
 >[!warning]
 > В PoC реализации используется максимальный размер в 0xFFFFFF. Не исследовано какого максимального размера может быть реальный пакет. Учитывайте это, чтобы оптимизировать потребление памяти!
 
-```mermaid
-flowchart TD
-    A["_read_loop: фоновая корутина"] --> B["readexactly 10 bytes"]
-    B --> C["parse header: ver, cmd, seq, opcode, packed_len"]
-    C --> D["comp_flag = packed_len >> 24"]
-    C --> E["payload_len = packed_len & 0xFFFFFF"]
-    E --> F["readexactly payload_len bytes"]
-    F --> G{"comp_flag != 0?"}
-    G -->|Да| H["lz4.block.decompress"]
-    G -->|Нет| I["msgpack.unpackb"]
-    H --> I
-    I --> J["Packet объект"]
-    J --> K["_dispatch"]
-    K --> L{"pending есть по seq?"}
-    L -->|Да| M["resolve Future"]
-    L -->|Нет| N{"есть handler по opcode?"}
-    N -->|Да| O["вызвать handler"]
-    N -->|Нет| P["игнорировать"]
-    M --> Q["send_raw() получает результат"]
+```
+ +------------------------------+
+ | _read_loop: фоновая корутина |
+ +------------------------------+
+                |
+                v
+ +------------------------------+
+ | readexactly 10 bytes         |
+ +------------------------------+
+                |
+                v
+ +-------------------------------------------------+
+ | parse header: ver, cmd, seq, opcode, packed_len |
+ +-------------------------------------------------+
+                |
+       +--------+--------+
+       |                 |
+       v                 v
+ +--------------------+  +--------------------------------+
+ | comp_flag =        |  | payload_len =                  |
+ | packed_len >> 24   |  | packed_len & 0xFFFFFF          |
+ +--------------------+  +--------------------------------+
+                              |
+                              v
+                +-------------------------------+
+                | readexactly payload_len bytes |
+                +-------------------------------+
+                              |
+                              v
+                    +-------------------+
+                    | comp_flag != 0 ?  |
+                    +-------------------+
+                     /                 \
+                   Да                  Нет
+                    |                   |
+                    v                   |
+ +---------------------------+          |
+ | lz4.block.decompress      |          |
+ +---------------------------+          |
+                    |                   |
+                    +--------+----------+
+                             |
+                             v
+                +------------------------------+
+                | msgpack.unpackb              |
+                +------------------------------+
+                             |
+                             v
+                +------------------------------+
+                | Packet объект                |
+                +------------------------------+
+                             |
+                             v
+                +------------------------------+
+                | _dispatch                    |
+                +------------------------------+
+                             |
+                    +--------+--------+
+                    |                 |
+                    v                 v
+          +----------------+  +--------------------+
+          | pending есть   |  | нет pending по seq |
+          | по seq? - Да   |  |                    |
+          +----------------+  +--------------------+
+                    |                 |
+                    v                 v
+          +----------------+  +--------------------+
+          | resolve Future |  | есть handler по    |
+          +----------------+  | opcode?            |
+                    |         +--------------------+
+                    |          /           \
+                    |        Да            Нет
+                    |         |             |
+                    |         v             v
+                    | +----------------+ +-------------+
+                    | | вызвать handler| | игнорировать|
+                    | +----------------+ +-------------+
+                    v
+          +-------------------------------+
+          | send_raw() получает результат |
+          +-------------------------------+
 ```
 
-**Кратко:**
+**TLDR:**
 1. Фоновая корутина `_read_loop()` вечно читает из сокета
    1. Чтобы не оборвалось соединение: как оригинальный клиент, присылайте каждые 30 секунд команду PING (opcode=1) и читайте
 2. Сначала reads exactly 10 байт — заголовок
