@@ -28,10 +28,10 @@ try {
     }
 
     Write-Host ""
-    Write-Host "Searching for *core.dll ..."
+    Write-Host "Searching for *.core.dll and *.config.dll ..."
     Write-Host ""
     # real file name in researches: CM_FP_Unspecified.core.dll
-    $dlls = Get-ChildItem $Out -Recurse -Filter *.core.dll -ErrorAction SilentlyContinue
+    $dlls = Get-ChildItem $Out -Recurse -Include *.core.dll,*.config.dll -ErrorAction SilentlyContinue
 
     if ($dlls) {
         $dlls | Select-Object FullName, Length | Format-Table -AutoSize

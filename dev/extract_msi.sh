@@ -31,10 +31,10 @@ echo "Extracting MSI..."
 7z x "$MSI" "-o$OUT" -y > /dev/null
 
 echo ""
-echo "Searching for *.core.dll ..."
+echo "Searching for *.core.dll and *.config.dll ..."
 echo ""
 
-DLLS=$(find "$OUT" -type f -name "*.core.dll")
+DLLS=$(find "$OUT" -type f \( -name "*.core.dll" -o -name "*.config.dll" \))
 
 if [ -n "$DLLS" ]; then
   echo "$DLLS"
