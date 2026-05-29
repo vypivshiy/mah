@@ -15,6 +15,8 @@ if ROOT not in sys.path:
 import field_extractor
 import analyzer
 import PATCHES
+
+# ida-pro cache modules, needed manually reload after changes
 importlib.reload(PATCHES)
 importlib.reload(field_extractor)
 importlib.reload(analyzer)

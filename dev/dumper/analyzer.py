@@ -444,7 +444,7 @@ def _analyze_inheritance_group(owner_full_name):
         return {}
 
     result = {}
-    for class_name in derived_types:
+    for class_name in sorted(derived_types):
         if class_name in result:
             continue
 
@@ -516,7 +516,7 @@ def collect_inheritance_models(models, packets):
         logger.info("  %s -> %s", base_short, ", ".join(
             d.split("::")[-1] for d in derived_names))
 
-        variants = {}
+        variants_unsorted = {}
         for class_name, info in classes.items():
             if class_name == base_name:
                 merged_fields = info["fields"]
@@ -530,12 +530,18 @@ def collect_inheritance_models(models, packets):
                         deduped.append(f)
                 merged_fields = deduped
 
-            variants[class_name] = {
+            variants_unsorted[class_name] = {
                 "fields": merged_fields,
                 "name_method": "hexrays",
                 "warn": info.get("warn"),
                 "offset": info.get("offset"),
             }
+
+        variants = {}
+        if base_name in variants_unsorted:
+            variants[base_name] = variants_unsorted.pop(base_name)
+        for name in sorted(variants_unsorted):
+            variants[name] = variants_unsorted[name]
 
         result[base_name] = {"variants": variants}
 
