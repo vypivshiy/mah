@@ -34,6 +34,7 @@
   "privacy_policy_url": "https://legal.max.ru/pp",
   "user_agreement_url": "https://legal.max.ru/ps",
   "how_to_register_url": "https://help.max.ru/help/about/kak-zaregistrirovatsya-v-max",
+  "self_recovery_url": "https://go.max.ru/selfrecovery",
   "start_app_param": "startapp",
   "support_bot_url": "max://max.ru/support",
   "check_connection_timeout": 30,
