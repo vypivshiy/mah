@@ -43,6 +43,8 @@
   "min_miniapp_width": 388,
   "min_miniapp_height": 631,
   "update_fallback_url": "https://download.max.ru/?version={}#desktop",
+  "update_fallback_url_self_service_win": "softwarecenter:SoftwareID=ScopeId_62870913-F37D-4CC9-9FE3-D11CFBE99683/Application_8d2f16c9-cee9-412e-b3d2-0079fdda2078",
+  "update_fallback_url_self_service_mac": "jamfselfservice://content?entity=policy&id=899&action=view",
   "allow_message_text_with_files": false,
   "prevalidate_public_link_on_client": false,
   "send_error_logs_to_crash_server": false,
