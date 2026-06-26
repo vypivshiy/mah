@@ -15,6 +15,10 @@ wheels/
 *.msi
 *core.dll
 *config.dll
+# ida database
 *.id*
 *.nam
 *.til
+# binary ninja database
+*.bndb
+*.i64
