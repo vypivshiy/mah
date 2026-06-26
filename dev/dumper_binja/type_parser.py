@@ -13,6 +13,8 @@ Example:
         "map": False,
         "map_key": None,
         "map_value": None,
+        "polymorphic": False,
+        "polymorphic_base": None,
     }
 """
 import template_parser
@@ -103,6 +105,21 @@ def normalize_type(raw):
     return "{}<{}>".format(tpl_name, ", ".join(norm_args))
 
 
+def _extract_polymorphic_base(s):
+    """Return the normalized first arg T from a Polymorphic<T> substring, or None.
+
+    Detection is by substring presence: any occurrence of "Polymorphic<"
+    marks the type as polymorphic, regardless of how deeply it is nested
+    inside std::optional / std::vector / std::map.
+    """
+    idx = s.find("Polymorphic<")
+    if idx == -1:
+        return None
+    inner = s[idx + len("Polymorphic<"):]
+    first = template_parser._extract_first_tpl_arg(inner)
+    return normalize_type(first) if first else None
+
+
 def decompose_type(raw_type):
     """
     Decompose a raw C++ type string into a structured dict.
@@ -116,9 +133,13 @@ def decompose_type(raw_type):
             "map": bool,        # is std::map<K,V>
             "map_key": str | None,
             "map_value": str | None,
+            "polymorphic": bool,        # contains Api::OneMe::Types::Polymorphic<T>
+            "polymorphic_base": str | None,  # inner base type T
         }
     """
     full = normalize_type(raw_type)
+
+    poly_base = _extract_polymorphic_base(full)
 
     result = {
         "full_type": full,
@@ -128,6 +149,8 @@ def decompose_type(raw_type):
         "map": False,
         "map_key": None,
         "map_value": None,
+        "polymorphic": poly_base is not None,
+        "polymorphic_base": poly_base,
     }
 
     current = full

@@ -410,13 +410,15 @@ def _make_field(name, raw_type, flag):
     The ``type`` key nests all type-related attributes::
 
         "type": {
-            "full":      "std::optional<bool>",   # normalised full type
-            "name":      "bool",                  # base type after unwrapping
-            "optional":  true,                    # wrapped in std::optional
-            "array":     false,                   # wrapped in std::vector
-            "map":       false,                   # is std::map / unordered_map
-            "map_key":   null,                    # map key type (if map)
-            "map_value": null,                    # map value type (if map)
+            "full":             "std::optional<bool>",   # normalised full type
+            "name":             "bool",                  # base type after unwrapping
+            "optional":         true,                    # wrapped in std::optional
+            "array":            false,                   # wrapped in std::vector
+            "map":              false,                   # is std::map / unordered_map
+            "map_key":          null,                    # map key type (if map)
+            "map_value":        null,                    # map value type (if map)
+            "polymorphic":      false,                   # contains Polymorphic<T>
+            "polymorphic_base": null,                    # inner base type T (if polymorphic)
         }
     """
     if raw_type:
@@ -429,6 +431,8 @@ def _make_field(name, raw_type, flag):
             "map": decomposed["map"],
             "map_key": decomposed["map_key"],
             "map_value": decomposed["map_value"],
+            "polymorphic": decomposed["polymorphic"],
+            "polymorphic_base": decomposed["polymorphic_base"],
         }
     else:
         type_info = {
@@ -439,6 +443,8 @@ def _make_field(name, raw_type, flag):
             "map": False,
             "map_key": None,
             "map_value": None,
+            "polymorphic": False,
+            "polymorphic_base": None,
         }
 
     return {

@@ -7,7 +7,6 @@ handles polymorphic types, and saves structured JSON.
 """
 import json
 import os
-import re
 import time
 import logging
 
@@ -59,6 +58,8 @@ def _apply_field_fixes(full_name, fields):
                 "map": decomposed["map"],
                 "map_key": decomposed["map_key"],
                 "map_value": decomposed["map_value"],
+                "polymorphic": decomposed["polymorphic"],
+                "polymorphic_base": decomposed["polymorphic_base"],
             }
         fixed.append(f)
     return fixed
@@ -465,16 +466,16 @@ def collect_inheritance_models(models, packets):
     For types used in Polymorphic<>, discover derived types and group them.
     Returns list of {name, offset, variants: [{name, fields}]}.
     """
-    poly_re = re.compile(r"Polymorphic<([^,>]+)")
     polymorphic_bases = set()
 
     def scan_fields(fields):
         for f in fields:
-            ft = f.get("type", {}).get("full", "")
-            for m in poly_re.finditer(ft):
-                base = binja_utils.normalize_name(m.group(1))
-                if binja_utils.is_api_oneme_name(base):
-                    polymorphic_bases.add(base)
+            ti = f.get("type", {})
+            if not ti.get("polymorphic"):
+                continue
+            base = ti.get("polymorphic_base")
+            if base and binja_utils.is_api_oneme_name(base):
+                polymorphic_bases.add(base)
 
     for model in models:
         scan_fields(model.get("fields", []))
