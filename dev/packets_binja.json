@@ -607,8 +607,8 @@
           {
             "name": "chatCacheFingerprint",
             "type": {
-              "full": "std::optional<std::vector<enum std::byte>>",
-              "name": "enum std::byte",
+              "full": "std::optional<std::vector<std::byte>>",
+              "name": "std::byte",
               "optional": true,
               "array": true,
               "map": false,
@@ -617,7 +617,7 @@
               "polymorphic": false,
               "polymorphic_base": null
             },
-            "required": true
+            "required": false
           },
           {
             "name": "chatsSync",
@@ -1880,7 +1880,7 @@
     {
       "opcode": 35,
       "request": {
-        "offset": "0x14b6d0",
+        "offset": "0xe1560",
         "name": "Api::OneMe::Packets::Contact::Presence::Parameters",
         "fields": [
           {
@@ -2404,7 +2404,7 @@
     {
       "opcode": 48,
       "request": {
-        "offset": "0xca080",
+        "offset": "0x1466b0",
         "name": "Api::OneMe::Packets::Chat::ChatInfo::Parameters",
         "fields": [
           {
@@ -3780,7 +3780,7 @@
     {
       "opcode": 62,
       "request": {
-        "offset": "0x4f0c0",
+        "offset": "0xf2580",
         "name": "Api::OneMe::Packets::LiveStream::LiveStreamInfo::Parameters",
         "fields": [
           {
@@ -6775,7 +6775,7 @@
     {
       "opcode": 106,
       "request": {
-        "offset": "0x14e850",
+        "offset": "0x12b7b0",
         "name": "Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Parameters",
         "fields": [
           {
@@ -7204,7 +7204,7 @@
     {
       "opcode": 112,
       "request": {
-        "offset": "0x148910",
+        "offset": "0x96430",
         "name": "Api::OneMe::Packets::Auth::OneMe::CreateTrack::Parameters",
         "fields": [
           {
@@ -7712,7 +7712,7 @@
     {
       "opcode": 158,
       "request": {
-        "offset": "0xb2a00",
+        "offset": "0x146000",
         "name": "Api::OneMe::Packets::Calls::CallsToken::Parameters",
         "fields": [
           {
@@ -8034,7 +8034,7 @@
     {
       "opcode": 163,
       "request": {
-        "offset": "0xb0af0",
+        "offset": "0x1497b0",
         "name": "Api::OneMe::Packets::Calls::History::Get::Parameters",
         "fields": [
           {
@@ -8111,7 +8111,7 @@
     {
       "opcode": 164,
       "request": {
-        "offset": "0xb0950",
+        "offset": "0x147700",
         "name": "Api::OneMe::Packets::Calls::History::Clear::Parameters",
         "fields": [
           {
@@ -9063,7 +9063,7 @@
     {
       "opcode": 209,
       "request": {
-        "offset": "0x14d070",
+        "offset": "0x126230",
         "name": "Api::OneMe::Packets::Stories::StoriesListByOwnerId::Parameters",
         "fields": [
           {
@@ -9110,7 +9110,7 @@
     {
       "opcode": 210,
       "request": {
-        "offset": "0x14c9e0",
+        "offset": "0x125ba0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Parameters",
         "fields": [
           {
@@ -9172,7 +9172,7 @@
     {
       "opcode": 211,
       "request": {
-        "offset": "0x125fa0",
+        "offset": "0x14cde0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetStats::Parameters",
         "fields": [
           {
@@ -9512,7 +9512,7 @@
     {
       "opcode": 218,
       "request": {
-        "offset": "0x125920",
+        "offset": "0x14c760",
         "name": "Api::OneMe::Packets::Stories::StoriesDelete::Parameters",
         "fields": [
           {
@@ -9790,7 +9790,7 @@
     {
       "opcode": 258,
       "request": {
-        "offset": "0x5d320",
+        "offset": "0x149af0",
         "name": "Api::OneMe::Packets::Reactions::GetChatReactions::Parameters",
         "fields": [
           {
@@ -10788,7 +10788,7 @@
     {
       "opcode": 302,
       "request": {
-        "offset": "0xaa3c0",
+        "offset": "0x145cc0",
         "name": "Api::OneMe::Packets::Banners::BannersGet::Parameters",
         "fields": [
           {
@@ -16910,7 +16910,7 @@
     },
     {
       "name": "Api::OneMe::Types::MapSubject",
-      "offset": "0xc90c0",
+      "offset": "0xd6f10",
       "fields": [
         {
           "name": "organizationIds",
@@ -16932,7 +16932,7 @@
     },
     {
       "name": "Api::OneMe::Types::MenuButton",
-      "offset": "0xed870",
+      "offset": "0xd3ce0",
       "fields": [
         {
           "name": "text",
@@ -21715,7 +21715,7 @@
     },
     {
       "name": "Api::OneMe::Types::ShowWebappSearchCase",
-      "offset": "0x103170",
+      "offset": "0x16a8c0",
       "fields": [
         {
           "name": "items",
@@ -23649,8 +23649,8 @@
         {
           "name": "previewData",
           "type": {
-            "full": "std::optional<std::vector<enum std::byte>>",
-            "name": "enum std::byte",
+            "full": "std::optional<std::vector<std::byte>>",
+            "name": "std::byte",
             "optional": true,
             "array": true,
             "map": false,
@@ -23659,7 +23659,7 @@
             "polymorphic": false,
             "polymorphic_base": null
           },
-          "required": true
+          "required": false
         },
         {
           "name": "mp4Url",
@@ -24209,8 +24209,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -24219,7 +24219,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "token",
@@ -25669,8 +25669,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -25679,7 +25679,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             }
           ]
         },
@@ -26299,8 +26299,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -26309,13 +26309,13 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "thumbhash",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -26324,7 +26324,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             }
           ]
         },
@@ -26454,8 +26454,8 @@
             {
               "name": "previewData",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -26464,7 +26464,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "mp4Url",
@@ -27399,8 +27399,8 @@
             {
               "name": "previewData",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -27409,7 +27409,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "paid",
@@ -27459,8 +27459,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -27469,13 +27469,13 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "thumbhash",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -27484,7 +27484,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "MP4_1080",
@@ -27557,7 +27557,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::EventParams",
-      "offset": "0x82e20",
+      "offset": "0x8a680",
       "variants": [
         {
           "name": "Api::OneMe::Types::Log::EventParams",
@@ -28085,8 +28085,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -28095,7 +28095,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             }
           ]
         },
@@ -28715,8 +28715,8 @@
             {
               "name": "wave",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -28725,13 +28725,13 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             },
             {
               "name": "thumbhash",
               "type": {
-                "full": "std::optional<std::vector<enum std::byte>>",
-                "name": "enum std::byte",
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
                 "optional": true,
                 "array": true,
                 "map": false,
@@ -28740,7 +28740,7 @@
                 "polymorphic": false,
                 "polymorphic_base": null
               },
-              "required": true
+              "required": false
             }
           ]
         }
