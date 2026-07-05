@@ -447,8 +447,19 @@ def _make_field(name, raw_type, flag):
             "polymorphic_base": None,
         }
 
+    # required flag resolution:
+    #   - Runtime flag (1=required, 2=optional) takes precedence when detected.
+    #   - When the binary flag is missing, fall back to the C++ type wrapper:
+    #     std::optional<T> means NotRequired, everything else defaults to required.
+    if flag is not None:
+        required = (flag != 2)
+    elif raw_type and type_info["optional"]:
+        required = False
+    else:
+        required = True
+
     return {
         "name": name,
         "type": type_info,
-        "required": (flag != 2) if flag is not None else True,
+        "required": required,
     }

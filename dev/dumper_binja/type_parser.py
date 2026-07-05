@@ -19,7 +19,7 @@ Example:
 """
 import template_parser
 
-_QUALIFIERS = ("class ", "struct ", "const ", "volatile ")
+_QUALIFIERS = ("class ", "struct ", "enum ", "const ", "volatile ")
 
 
 def _strip_qualifiers(s):
