@@ -185,6 +185,14 @@ def decompose_type(raw_type):
                 current = inner
                 continue
 
+        # Utilities::StrongTypedef<T> — transparent wrapper: serializes as T,
+        # so unwrap to expose the inner wrapper chain (e.g. optional/array).
+        if current.startswith("Utilities::StrongTypedef<"):
+            inner = _unwrap_single_template(current, "Utilities::StrongTypedef")
+            if inner is not None:
+                current = inner
+                continue
+
         # std::map<K, V, ...> / std::unordered_map<K, V, ...>
         if current.startswith(("std::map<", "std::unordered_map<")):
             k, v = _unwrap_map_args(current)
@@ -197,7 +205,13 @@ def decompose_type(raw_type):
 
         break
 
-    result["type"] = normalize_type(current) if current else None
+    # Polymorphic types: the base type T is carried by `polymorphic_base`.
+    # Don't leak the Polymorphic<T> wrapper into `type`/`name` — downstream
+    # consumers key off polymorphic + polymorphic_base, not the raw wrapper.
+    if poly_base is not None:
+        result["type"] = poly_base
+    else:
+        result["type"] = normalize_type(current) if current else None
     return result
 
 

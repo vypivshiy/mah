@@ -2404,7 +2404,7 @@
     {
       "opcode": 48,
       "request": {
-        "offset": "0x1466b0",
+        "offset": "0xcfe30",
         "name": "Api::OneMe::Packets::Chat::ChatInfo::Parameters",
         "fields": [
           {
@@ -3780,7 +3780,7 @@
     {
       "opcode": 62,
       "request": {
-        "offset": "0xf2580",
+        "offset": "0x14a510",
         "name": "Api::OneMe::Packets::LiveStream::LiveStreamInfo::Parameters",
         "fields": [
           {
@@ -4319,7 +4319,7 @@
             "name": "attachments",
             "type": {
               "full": "std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>>>",
-              "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>",
+              "name": "Api::OneMe::Types::Outgoing::BaseAttachment",
               "optional": true,
               "array": true,
               "map": false,
@@ -6113,7 +6113,7 @@
     {
       "opcode": 87,
       "request": {
-        "offset": "0xa7090",
+        "offset": "0x149490",
         "name": "Api::OneMe::Packets::Attachments::FileUpload::Parameters",
         "fields": [
           {
@@ -6775,7 +6775,7 @@
     {
       "opcode": 106,
       "request": {
-        "offset": "0x12b7b0",
+        "offset": "0x14e850",
         "name": "Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Parameters",
         "fields": [
           {
@@ -7972,7 +7972,7 @@
     {
       "opcode": 162,
       "request": {
-        "offset": "0x147da0",
+        "offset": "0x488d0",
         "name": "Api::OneMe::Packets::ComplainReasonsGet::Parameters",
         "fields": [
           {
@@ -8034,7 +8034,7 @@
     {
       "opcode": 163,
       "request": {
-        "offset": "0x1497b0",
+        "offset": "0xb0af0",
         "name": "Api::OneMe::Packets::Calls::History::Get::Parameters",
         "fields": [
           {
@@ -8111,7 +8111,7 @@
     {
       "opcode": 164,
       "request": {
-        "offset": "0x147700",
+        "offset": "0xb0950",
         "name": "Api::OneMe::Packets::Calls::History::Clear::Parameters",
         "fields": [
           {
@@ -9110,7 +9110,7 @@
     {
       "opcode": 210,
       "request": {
-        "offset": "0x125ba0",
+        "offset": "0x14c9e0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Parameters",
         "fields": [
           {
@@ -9172,7 +9172,7 @@
     {
       "opcode": 211,
       "request": {
-        "offset": "0x14cde0",
+        "offset": "0x125fa0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetStats::Parameters",
         "fields": [
           {
@@ -9512,7 +9512,7 @@
     {
       "opcode": 218,
       "request": {
-        "offset": "0x14c760",
+        "offset": "0x125920",
         "name": "Api::OneMe::Packets::Stories::StoriesDelete::Parameters",
         "fields": [
           {
@@ -9790,7 +9790,7 @@
     {
       "opcode": 258,
       "request": {
-        "offset": "0x149af0",
+        "offset": "0x47ac0",
         "name": "Api::OneMe::Packets::Reactions::GetChatReactions::Parameters",
         "fields": [
           {
@@ -10788,7 +10788,7 @@
     {
       "opcode": 302,
       "request": {
-        "offset": "0x145cc0",
+        "offset": "0xe50d0",
         "name": "Api::OneMe::Packets::Banners::BannersGet::Parameters",
         "fields": [
           {
@@ -11225,7 +11225,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0xfd1d0",
+        "offset": "0x1553c0",
         "name": "Api::OneMe::Packets::Events::LogoutData::Response",
         "fields": [],
         "warn": "no data found"
@@ -13267,7 +13267,7 @@
           "name": "params",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Log::EventParams>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Log::EventParams>",
+            "name": "Api::OneMe::Types::Log::EventParams",
             "optional": true,
             "array": false,
             "map": false,
@@ -14214,7 +14214,7 @@
           "name": "media",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": false,
             "map": false,
@@ -16888,7 +16888,7 @@
           "name": "media",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": false,
             "map": false,
@@ -16910,7 +16910,7 @@
     },
     {
       "name": "Api::OneMe::Types::MapSubject",
-      "offset": "0xd6f10",
+      "offset": "0x183920",
       "fields": [
         {
           "name": "organizationIds",
@@ -16932,7 +16932,7 @@
     },
     {
       "name": "Api::OneMe::Types::MenuButton",
-      "offset": "0xd3ce0",
+      "offset": "0xda6b0",
       "fields": [
         {
           "name": "text",
@@ -17095,7 +17095,7 @@
           "name": "attaches",
           "type": {
             "full": "std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": true,
             "map": false,
@@ -17543,7 +17543,7 @@
           "name": "attachment",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": false,
             "map": false,
@@ -18026,7 +18026,7 @@
           "name": "attaches",
           "type": {
             "full": "std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>",
+            "name": "Api::OneMe::Types::Outgoing::BaseAttachment",
             "optional": true,
             "array": true,
             "map": false,
@@ -18701,12 +18701,6 @@
           "required": true
         }
       ],
-      "warn": null
-    },
-    {
-      "name": "Api::OneMe::Types::Polymorphic",
-      "offset": null,
-      "fields": [],
       "warn": null
     },
     {
@@ -21452,8 +21446,8 @@
           "name": "ab-status",
           "type": {
             "full": "Utilities::StrongTypedef<std::optional<int64_t>>",
-            "name": "Utilities::StrongTypedef<std::optional<int64_t>>",
-            "optional": false,
+            "name": "int64_t",
+            "optional": true,
             "array": false,
             "map": false,
             "map_key": null,
@@ -21715,7 +21709,7 @@
     },
     {
       "name": "Api::OneMe::Types::ShowWebappSearchCase",
-      "offset": "0x16a8c0",
+      "offset": "0x1801a0",
       "fields": [
         {
           "name": "items",
@@ -22198,7 +22192,7 @@
           "name": "media",
           "type": {
             "full": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": false,
             "array": false,
             "map": false,
@@ -23762,7 +23756,7 @@
           "name": "image",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": false,
             "map": false,
@@ -23918,7 +23912,7 @@
           "name": "media",
           "type": {
             "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-            "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+            "name": "Api::OneMe::Types::BaseAttachment",
             "optional": true,
             "array": false,
             "map": false,
@@ -24845,7 +24839,7 @@
               "name": "preview",
               "type": {
                 "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-                "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+                "name": "Api::OneMe::Types::BaseAttachment",
                 "optional": true,
                 "array": false,
                 "map": false,
@@ -26875,7 +26869,7 @@
               "name": "media",
               "type": {
                 "full": "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
-                "name": "Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>",
+                "name": "Api::OneMe::Types::BaseAttachment",
                 "optional": true,
                 "array": false,
                 "map": false,
@@ -27557,7 +27551,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::EventParams",
-      "offset": "0x8a680",
+      "offset": "0x7cda0",
       "variants": [
         {
           "name": "Api::OneMe::Types::Log::EventParams",
