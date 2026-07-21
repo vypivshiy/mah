@@ -1,12 +1,13 @@
 {
-  "is_local_history_enabled": true,
   "is_local_chat_list_enabled": true,
   "is_local_contact_list_enabled": true,
   "is_local_config_enabled": true,
   "is_local_folders_enabled": true,
+  "is_unreleased_languages_enabled": false,
   "is_polls_enabled": false,
   "chunk_size": 10485760,
   "client_friendly_name": "MAX",
+  "rooms_friendly_name": "MAX-ROOMS",
   "company_friendly_name": "Communication Platform",
   "code_confirmation_chat_name": "Коды подтверждения",
   "internal_url_scheme": "max",
@@ -17,6 +18,9 @@
   "update_url": "https://download.max.ru",
   "update_path": "",
   "update_appcast_filename": "update.xml",
+  "rooms_update_url": "",
+  "rooms_update_path": "",
+  "rooms_update_appcast_filename": "update_rooms.xml",
   "default_avatar_format": "png",
   "single_instance_id": "oneme_instance",
   "local_server_pipe_name": "oneme_local_pipe",
@@ -39,6 +43,7 @@
   "self_recovery_url": "https://go.max.ru/selfrecovery",
   "start_app_param": "startapp",
   "support_bot_url": "max://max.ru/support",
+  "booking_bot_url": "https://max.ru/max_rooms_bot",
   "check_connection_timeout": 30,
   "default_miniapp_width": 388,
   "default_miniapp_height": 631,
@@ -73,5 +78,6 @@
     "uz",
     "tk"
   ],
+  "override_polls_version": 0,
   "name_max_length": 64
 }

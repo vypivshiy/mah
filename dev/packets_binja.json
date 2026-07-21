@@ -1,13 +1,13 @@
 {
   "options": {
-    "app_version": "26.21.0",
-    "build_number": 73284
+    "app_version": "26.23.0",
+    "build_number": 74930
   },
   "packets": [
     {
       "opcode": 5,
       "request": {
-        "offset": "0x7b85e0",
+        "offset": "0x7f4fd0",
         "name": "Api::OneMe::Packets::Log::Parameters",
         "fields": [
           {
@@ -38,7 +38,7 @@
     {
       "opcode": 6,
       "request": {
-        "offset": "0x9ca9f0",
+        "offset": "0xa28c00",
         "name": "Api::OneMe::Packets::SessionInit::Payload",
         "fields": [
           {
@@ -90,7 +90,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x7a3090",
+        "offset": "0x7dfa80",
         "name": "Api::OneMe::Packets::SessionInit::Response",
         "fields": [
           {
@@ -175,7 +175,7 @@
     {
       "opcode": 16,
       "request": {
-        "offset": "0x6ab840",
+        "offset": "0x6e1e20",
         "name": "Api::OneMe::Packets::Profile::Parameters",
         "fields": [
           {
@@ -302,7 +302,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x6ac240",
+        "offset": "0x6e2820",
         "name": "Api::OneMe::Packets::Profile::Response",
         "fields": [
           {
@@ -327,7 +327,7 @@
     {
       "opcode": 17,
       "request": {
-        "offset": "0x898280",
+        "offset": "0x8f5430",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthRequest::Parameters",
         "fields": [
           {
@@ -379,7 +379,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x89a1b0",
+        "offset": "0x8f7360",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthRequest::Response",
         "fields": [
           {
@@ -464,7 +464,7 @@
     {
       "opcode": 18,
       "request": {
-        "offset": "0x897530",
+        "offset": "0x8f46e0",
         "name": "Api::OneMe::Packets::Auth::OneMe::Auth::Parameters",
         "fields": [
           {
@@ -516,7 +516,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x899340",
+        "offset": "0x8f64f0",
         "name": "Api::OneMe::Packets::Auth::OneMe::Auth::Response",
         "fields": [
           {
@@ -586,7 +586,7 @@
     {
       "opcode": 19,
       "request": {
-        "offset": "0x2919d0",
+        "offset": "0x2b1290",
         "name": "Api::OneMe::Packets::Auth::Login::Parameters",
         "fields": [
           {
@@ -758,7 +758,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x291f60",
+        "offset": "0x2b1820",
         "name": "Api::OneMe::Packets::Auth::Login::Response",
         "fields": [
           {
@@ -933,7 +933,7 @@
     {
       "opcode": 22,
       "request": {
-        "offset": "0x513720",
+        "offset": "0x548880",
         "name": "Api::OneMe::Packets::Config::Parameters",
         "fields": [
           {
@@ -1015,7 +1015,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x513b70",
+        "offset": "0x548cd0",
         "name": "Api::OneMe::Packets::Config::Response",
         "fields": [
           {
@@ -1070,7 +1070,7 @@
     {
       "opcode": 23,
       "request": {
-        "offset": "0x897d70",
+        "offset": "0x8f4f20",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthConfirm::Parameters",
         "fields": [
           {
@@ -1182,7 +1182,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x899c20",
+        "offset": "0x8f6dd0",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthConfirm::Response",
         "fields": [
           {
@@ -1243,7 +1243,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x407ea0",
+        "offset": "0x436260",
         "name": "Api::OneMe::Packets::Avatar::PresetAvatar::Response",
         "fields": [
           {
@@ -1268,7 +1268,7 @@
     {
       "opcode": 26,
       "request": {
-        "offset": "0x3b7a80",
+        "offset": "0x3dffe0",
         "name": "Api::OneMe::Packets::Assets::GetAsset::Common::Parameters",
         "fields": [
           {
@@ -1350,7 +1350,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b9690",
+        "offset": "0x3e1bf0",
         "name": "Api::OneMe::Packets::Assets::GetAsset::StickerSet::Response",
         "fields": [
           {
@@ -1390,7 +1390,7 @@
     {
       "opcode": 27,
       "request": {
-        "offset": "0x3b87a0",
+        "offset": "0x3e0d00",
         "name": "Api::OneMe::Packets::Assets::Update::Parameters",
         "fields": [
           {
@@ -1457,7 +1457,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b9cd0",
+        "offset": "0x3e2230",
         "name": "Api::OneMe::Packets::Assets::Update::Response",
         "fields": [
           {
@@ -1572,7 +1572,7 @@
     {
       "opcode": 28,
       "request": {
-        "offset": "0x3b7e20",
+        "offset": "0x3e0380",
         "name": "Api::OneMe::Packets::Assets::GetByIds::Common::Parameters",
         "fields": [
           {
@@ -1609,7 +1609,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b8e50",
+        "offset": "0x3e13b0",
         "name": "Api::OneMe::Packets::Assets::GetByIds::AnimojiSet::Response",
         "fields": [
           {
@@ -1634,7 +1634,7 @@
     {
       "opcode": 29,
       "request": {
-        "offset": "0x3b77d0",
+        "offset": "0x3dfd30",
         "name": "Api::OneMe::Packets::Assets::Add::Parameters",
         "fields": [
           {
@@ -1671,7 +1671,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b8a80",
+        "offset": "0x3e0fe0",
         "name": "Api::OneMe::Packets::Assets::Add::Response",
         "fields": [
           {
@@ -1711,7 +1711,7 @@
     {
       "opcode": 32,
       "request": {
-        "offset": "0x434eb0",
+        "offset": "0x466440",
         "name": "Api::OneMe::Packets::Contact::ContactInfo::Parameters",
         "fields": [
           {
@@ -1763,7 +1763,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436790",
+        "offset": "0x467d20",
         "name": "Api::OneMe::Packets::Contact::ContactInfo::Response",
         "fields": [
           {
@@ -1788,7 +1788,7 @@
     {
       "opcode": 34,
       "request": {
-        "offset": "0x537420",
+        "offset": "0x56c8f0",
         "name": "Api::OneMe::Packets::Contact::ContactUpdate::Parameters",
         "fields": [
           {
@@ -1855,7 +1855,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x537af0",
+        "offset": "0x56cfc0",
         "name": "Api::OneMe::Packets::Contact::ContactUpdate::Response",
         "fields": [
           {
@@ -1880,7 +1880,7 @@
     {
       "opcode": 35,
       "request": {
-        "offset": "0xe1560",
+        "offset": "0xfcb70",
         "name": "Api::OneMe::Packets::Contact::Presence::Parameters",
         "fields": [
           {
@@ -1902,7 +1902,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x9cc2b0",
+        "offset": "0xa2a510",
         "name": "Api::OneMe::Packets::Contact::Presence::Response",
         "fields": [
           {
@@ -1927,7 +1927,7 @@
     {
       "opcode": 36,
       "request": {
-        "offset": "0x52ec20",
+        "offset": "0x563e60",
         "name": "Api::OneMe::Packets::Contact::ContactList::Parameters",
         "fields": [
           {
@@ -1979,7 +1979,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x52eeb0",
+        "offset": "0x5640f0",
         "name": "Api::OneMe::Packets::Contact::ContactList::Response",
         "fields": [
           {
@@ -2004,7 +2004,7 @@
     {
       "opcode": 37,
       "request": {
-        "offset": "0x751d90",
+        "offset": "0x78e770",
         "name": "Api::OneMe::Packets::Search::Contact::Parameters",
         "fields": [
           {
@@ -2056,7 +2056,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x752110",
+        "offset": "0x78eaf0",
         "name": "Api::OneMe::Packets::Search::Contact::Response",
         "fields": [
           {
@@ -2111,7 +2111,7 @@
     {
       "opcode": 39,
       "request": {
-        "offset": "0x542a00",
+        "offset": "0x578030",
         "name": "Api::OneMe::Packets::Contact::ContactPhotos::Parameters",
         "fields": [
           {
@@ -2163,7 +2163,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5432e0",
+        "offset": "0x578910",
         "name": "Api::OneMe::Packets::Contact::ContactPhotos::Response",
         "fields": [
           {
@@ -2218,7 +2218,7 @@
     {
       "opcode": 41,
       "request": {
-        "offset": "0x537110",
+        "offset": "0x56c5e0",
         "name": "Api::OneMe::Packets::Contact::ContactCreate::Parameters",
         "fields": [
           {
@@ -2270,7 +2270,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5378f0",
+        "offset": "0x56cdc0",
         "name": "Api::OneMe::Packets::Contact::ContactCreate::Response",
         "fields": [
           {
@@ -2310,7 +2310,7 @@
     {
       "opcode": 43,
       "request": {
-        "offset": "0xe0ce0",
+        "offset": "0xfc2f0",
         "name": "Api::OneMe::Packets::Contact::RemoveContactPhoto::Parameters",
         "fields": [
           {
@@ -2332,7 +2332,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x543550",
+        "offset": "0x578b80",
         "name": "Api::OneMe::Packets::Contact::RemoveContactPhoto::Response",
         "fields": [
           {
@@ -2357,7 +2357,7 @@
     {
       "opcode": 46,
       "request": {
-        "offset": "0x536ef0",
+        "offset": "0x56c3c0",
         "name": "Api::OneMe::Packets::Contact::ContactByPhone::Parameters",
         "fields": [
           {
@@ -2379,7 +2379,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5376f0",
+        "offset": "0x56cbc0",
         "name": "Api::OneMe::Packets::Contact::ContactByPhone::Response",
         "fields": [
           {
@@ -2404,7 +2404,7 @@
     {
       "opcode": 48,
       "request": {
-        "offset": "0xcfe30",
+        "offset": "0xe4d70",
         "name": "Api::OneMe::Packets::Chat::ChatInfo::Parameters",
         "fields": [
           {
@@ -2426,7 +2426,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x49c110",
+        "offset": "0x4cc8c0",
         "name": "Api::OneMe::Packets::Chat::ChatInfo::Response",
         "fields": [
           {
@@ -2451,7 +2451,7 @@
     {
       "opcode": 49,
       "request": {
-        "offset": "0x46eee0",
+        "offset": "0x4a0600",
         "name": "Api::OneMe::Packets::Chat::ChatHistory::Parameters",
         "fields": [
           {
@@ -2578,7 +2578,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x48bd10",
+        "offset": "0x4bc4c0",
         "name": "Api::OneMe::Packets::Chat::ChatHistory::Response",
         "fields": [
           {
@@ -2603,7 +2603,7 @@
     {
       "opcode": 50,
       "request": {
-        "offset": "0x460580",
+        "offset": "0x491b10",
         "name": "Api::OneMe::Packets::Chat::ChatMark::Parameters",
         "fields": [
           {
@@ -2670,7 +2670,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x460880",
+        "offset": "0x491e10",
         "name": "Api::OneMe::Packets::Chat::ChatMark::Response",
         "fields": [
           {
@@ -2710,7 +2710,7 @@
     {
       "opcode": 51,
       "request": {
-        "offset": "0x4bdae0",
+        "offset": "0x4ee960",
         "name": "Api::OneMe::Packets::Chat::ChatMedia::Parameters",
         "fields": [
           {
@@ -2807,7 +2807,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4bdfa0",
+        "offset": "0x4eee20",
         "name": "Api::OneMe::Packets::Chat::ChatMedia::Response",
         "fields": [
           {
@@ -2892,7 +2892,7 @@
     {
       "opcode": 52,
       "request": {
-        "offset": "0x4ccb60",
+        "offset": "0x4fdd50",
         "name": "Api::OneMe::Packets::Chat::ChatDelete::Parameters",
         "fields": [
           {
@@ -2953,7 +2953,7 @@
     {
       "opcode": 53,
       "request": {
-        "offset": "0x4aa6b0",
+        "offset": "0x4daf30",
         "name": "Api::OneMe::Packets::Chat::ChatList::Parameters",
         "fields": [
           {
@@ -2975,7 +2975,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4aa8c0",
+        "offset": "0x4db140",
         "name": "Api::OneMe::Packets::Chat::ChatList::Response",
         "fields": [
           {
@@ -3015,7 +3015,7 @@
     {
       "opcode": 54,
       "request": {
-        "offset": "0x4cc860",
+        "offset": "0x4fda50",
         "name": "Api::OneMe::Packets::Chat::ChatClear::Parameters",
         "fields": [
           {
@@ -3076,7 +3076,7 @@
     {
       "opcode": 55,
       "request": {
-        "offset": "0x3406c0",
+        "offset": "0x3666a0",
         "name": "Api::OneMe::Packets::Chat::ChatUpdate::Parameters",
         "fields": [
           {
@@ -3263,7 +3263,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x45abe0",
+        "offset": "0x48c170",
         "name": "Api::OneMe::Packets::Chat::ChatUpdate::Response",
         "fields": [
           {
@@ -3288,7 +3288,7 @@
     {
       "opcode": 56,
       "request": {
-        "offset": "0x4a38b0",
+        "offset": "0x4d4060",
         "name": "Api::OneMe::Packets::Chat::CheckLink::Parameters",
         "fields": [
           {
@@ -3325,7 +3325,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4a3b30",
+        "offset": "0x4d42e0",
         "name": "Api::OneMe::Packets::Chat::CheckLink::Response",
         "fields": [
           {
@@ -3350,7 +3350,7 @@
     {
       "opcode": 57,
       "request": {
-        "offset": "0x5f2410",
+        "offset": "0x627270",
         "name": "Api::OneMe::Packets::Chat::Join::Parameters",
         "fields": [
           {
@@ -3387,7 +3387,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5f2610",
+        "offset": "0x627470",
         "name": "Api::OneMe::Packets::Chat::Join::Response",
         "fields": [
           {
@@ -3412,7 +3412,7 @@
     {
       "opcode": 58,
       "request": {
-        "offset": "0xd4f00",
+        "offset": "0xefbf0",
         "name": "Api::OneMe::Packets::Chat::ChatLeave::Parameters",
         "fields": [
           {
@@ -3434,7 +3434,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4cd0d0",
+        "offset": "0x4fe2c0",
         "name": "Api::OneMe::Packets::Chat::ChatLeave::Response",
         "fields": [
           {
@@ -3459,7 +3459,7 @@
     {
       "opcode": 59,
       "request": {
-        "offset": "0x434ab0",
+        "offset": "0x466040",
         "name": "Api::OneMe::Packets::Chat::ChatMembers::Parameters",
         "fields": [
           {
@@ -3541,7 +3541,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436580",
+        "offset": "0x467b10",
         "name": "Api::OneMe::Packets::Chat::ChatMembers::Response",
         "fields": [
           {
@@ -3581,7 +3581,7 @@
     {
       "opcode": 60,
       "request": {
-        "offset": "0x753770",
+        "offset": "0x790150",
         "name": "Api::OneMe::Packets::Search::Public::Parameters",
         "fields": [
           {
@@ -3648,7 +3648,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x753ba0",
+        "offset": "0x790580",
         "name": "Api::OneMe::Packets::Search::Public::Response",
         "fields": [
           {
@@ -3718,7 +3718,7 @@
     {
       "opcode": 61,
       "request": {
-        "offset": "0x4cced0",
+        "offset": "0x4fe0c0",
         "name": "Api::OneMe::Packets::Chat::PersonalConfig::Parameters",
         "fields": [
           {
@@ -3755,7 +3755,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4cd270",
+        "offset": "0x4fe460",
         "name": "Api::OneMe::Packets::Chat::PersonalConfig::Response",
         "fields": [
           {
@@ -3780,7 +3780,7 @@
     {
       "opcode": 62,
       "request": {
-        "offset": "0x14a510",
+        "offset": "0x1673c0",
         "name": "Api::OneMe::Packets::LiveStream::LiveStreamInfo::Parameters",
         "fields": [
           {
@@ -3802,7 +3802,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5fec70",
+        "offset": "0x633ad0",
         "name": "Api::OneMe::Packets::LiveStream::LiveStreamInfo::Response",
         "fields": [
           {
@@ -3827,7 +3827,7 @@
     {
       "opcode": 64,
       "request": {
-        "offset": "0x452dc0",
+        "offset": "0x484350",
         "name": "Api::OneMe::Packets::Messaging::Send::Parameters",
         "fields": [
           {
@@ -3924,7 +3924,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x453050",
+        "offset": "0x4845e0",
         "name": "Api::OneMe::Packets::Messaging::Send::Response",
         "fields": [
           {
@@ -4024,7 +4024,7 @@
     {
       "opcode": 65,
       "request": {
-        "offset": "0x86b060",
+        "offset": "0x8c2a00",
         "name": "Api::OneMe::Packets::Typing::Send::Parameters",
         "fields": [
           {
@@ -4070,7 +4070,7 @@
     {
       "opcode": 66,
       "request": {
-        "offset": "0x615a30",
+        "offset": "0x64ac00",
         "name": "Api::OneMe::Packets::Messaging::Delete::Parameters",
         "fields": [
           {
@@ -4167,7 +4167,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x616210",
+        "offset": "0x64b3e0",
         "name": "Api::OneMe::Packets::Messaging::Delete::Response",
         "fields": [
           {
@@ -4237,7 +4237,7 @@
     {
       "opcode": 67,
       "request": {
-        "offset": "0x6099d0",
+        "offset": "0x63eb90",
         "name": "Api::OneMe::Packets::Messaging::Edit::Parameters",
         "fields": [
           {
@@ -4349,7 +4349,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x609fd0",
+        "offset": "0x63f190",
         "name": "Api::OneMe::Packets::Messaging::Edit::Response",
         "fields": [
           {
@@ -4374,7 +4374,7 @@
     {
       "opcode": 68,
       "request": {
-        "offset": "0x750840",
+        "offset": "0x78d220",
         "name": "Api::OneMe::Packets::Search::Chat::Parameters",
         "fields": [
           {
@@ -4426,7 +4426,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x74e630",
+        "offset": "0x78b010",
         "name": "Api::OneMe::Packets::Search::Chat::Response",
         "fields": [
           {
@@ -4511,7 +4511,7 @@
     {
       "opcode": 69,
       "request": {
-        "offset": "0x247200",
+        "offset": "0x266170",
         "name": "Api::OneMe::Packets::Calls::VideoChatEdit::Parameters",
         "fields": [
           {
@@ -4602,7 +4602,7 @@
     {
       "opcode": 71,
       "request": {
-        "offset": "0x46f690",
+        "offset": "0x4a0db0",
         "name": "Api::OneMe::Packets::Messaging::MsgGet::Parameters",
         "fields": [
           {
@@ -4654,7 +4654,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x46fb30",
+        "offset": "0x4a1250",
         "name": "Api::OneMe::Packets::Messaging::MsgGet::Response",
         "fields": [
           {
@@ -4679,7 +4679,7 @@
     {
       "opcode": 72,
       "request": {
-        "offset": "0xf84c0",
+        "offset": "0x16a3b0",
         "name": "Api::OneMe::Packets::Search::Message::Touch::Parameters",
         "fields": [
           {
@@ -4710,7 +4710,7 @@
     {
       "opcode": 73,
       "request": {
-        "offset": "0x621850",
+        "offset": "0x656a20",
         "name": "Api::OneMe::Packets::Search::Message::Parameters",
         "fields": [
           {
@@ -4777,7 +4777,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x621d40",
+        "offset": "0x656f10",
         "name": "Api::OneMe::Packets::Search::Message::Response",
         "fields": [
           {
@@ -4847,7 +4847,7 @@
     {
       "opcode": 74,
       "request": {
-        "offset": "0x626040",
+        "offset": "0x65b210",
         "name": "Api::OneMe::Packets::Chat::MsgGetStat::Parameters",
         "fields": [
           {
@@ -4884,7 +4884,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x626240",
+        "offset": "0x65b410",
         "name": "Api::OneMe::Packets::Chat::MsgGetStat::Response",
         "fields": [
           {
@@ -4909,7 +4909,7 @@
     {
       "opcode": 75,
       "request": {
-        "offset": "0x457ed0",
+        "offset": "0x489460",
         "name": "Api::OneMe::Packets::Chat::ChatSubscribe::Parameters",
         "fields": [
           {
@@ -4970,7 +4970,7 @@
     {
       "opcode": 76,
       "request": {
-        "offset": "0x435d40",
+        "offset": "0x4672d0",
         "name": "Api::OneMe::Packets::Calls::VideoChatStart::Parameters",
         "fields": [
           {
@@ -5052,7 +5052,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x437200",
+        "offset": "0x468790",
         "name": "Api::OneMe::Packets::Calls::VideoChatStart::Response",
         "fields": [
           {
@@ -5107,7 +5107,7 @@
     {
       "opcode": 77,
       "request": {
-        "offset": "0x23f9f0",
+        "offset": "0x25e960",
         "name": "Api::OneMe::Packets::Chat::ChatMembersUpdate::Parameters",
         "fields": [
           {
@@ -5249,7 +5249,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4dc9b0",
+        "offset": "0x50dba0",
         "name": "Api::OneMe::Packets::Chat::ChatMembersUpdate::Response",
         "fields": [
           {
@@ -5289,7 +5289,7 @@
     {
       "opcode": 78,
       "request": {
-        "offset": "0x24ac10",
+        "offset": "0x269b80",
         "name": "Api::OneMe::Packets::Calls::VideoChatStartActive::Parameters",
         "fields": [
           {
@@ -5371,7 +5371,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4374f0",
+        "offset": "0x468a80",
         "name": "Api::OneMe::Packets::Calls::VideoChatStartActive::Response",
         "fields": [
           {
@@ -5441,7 +5441,7 @@
     {
       "opcode": 79,
       "request": {
-        "offset": "0x4355e0",
+        "offset": "0x466b70",
         "name": "Api::OneMe::Packets::Calls::VideoChatHistory::Parameters",
         "fields": [
           {
@@ -5493,7 +5493,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436c20",
+        "offset": "0x4681b0",
         "name": "Api::OneMe::Packets::Calls::VideoChatHistory::Response",
         "fields": [
           {
@@ -5563,7 +5563,7 @@
     {
       "opcode": 80,
       "request": {
-        "offset": "0x3d57d0",
+        "offset": "0x3fdd50",
         "name": "Api::OneMe::Packets::Attachments::PhotoUpload::Parameters",
         "fields": [
           {
@@ -5600,7 +5600,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d6710",
+        "offset": "0x3fec90",
         "name": "Api::OneMe::Packets::Attachments::PhotoUpload::Response",
         "fields": [
           {
@@ -5625,7 +5625,7 @@
     {
       "opcode": 82,
       "request": {
-        "offset": "0x3d5e00",
+        "offset": "0x3fe380",
         "name": "Api::OneMe::Packets::Attachments::VideoUpload::Parameters",
         "fields": [
           {
@@ -5677,7 +5677,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d7020",
+        "offset": "0x3ff5a0",
         "name": "Api::OneMe::Packets::Attachments::VideoUpload::Response",
         "fields": [
           {
@@ -5717,7 +5717,7 @@
     {
       "opcode": 83,
       "request": {
-        "offset": "0x3d5a80",
+        "offset": "0x3fe000",
         "name": "Api::OneMe::Packets::Attachments::VideoPlay::Parameters",
         "fields": [
           {
@@ -5799,7 +5799,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d6a30",
+        "offset": "0x3fefb0",
         "name": "Api::OneMe::Packets::Attachments::VideoPlay::Response",
         "fields": [
           {
@@ -6004,7 +6004,7 @@
     {
       "opcode": 84,
       "request": {
-        "offset": "0x435160",
+        "offset": "0x4666f0",
         "name": "Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Parameters",
         "fields": [
           {
@@ -6026,7 +6026,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436960",
+        "offset": "0x467ef0",
         "name": "Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Response",
         "fields": [
           {
@@ -6051,7 +6051,7 @@
     {
       "opcode": 86,
       "request": {
-        "offset": "0x4635a0",
+        "offset": "0x494b30",
         "name": "Api::OneMe::Packets::Chat::ChatPinSetVisibility::Parameters",
         "fields": [
           {
@@ -6088,7 +6088,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4638d0",
+        "offset": "0x494e60",
         "name": "Api::OneMe::Packets::Chat::ChatPinSetVisibility::Response",
         "fields": [
           {
@@ -6113,7 +6113,7 @@
     {
       "opcode": 87,
       "request": {
-        "offset": "0x149490",
+        "offset": "0x166340",
         "name": "Api::OneMe::Packets::Attachments::FileUpload::Parameters",
         "fields": [
           {
@@ -6135,7 +6135,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d6540",
+        "offset": "0x3feac0",
         "name": "Api::OneMe::Packets::Attachments::FileUpload::Response",
         "fields": [
           {
@@ -6160,7 +6160,7 @@
     {
       "opcode": 88,
       "request": {
-        "offset": "0x3d5480",
+        "offset": "0x3fda00",
         "name": "Api::OneMe::Packets::Attachments::FileDownload::Parameters",
         "fields": [
           {
@@ -6212,7 +6212,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d6310",
+        "offset": "0x3fe890",
         "name": "Api::OneMe::Packets::Attachments::FileDownload::Response",
         "fields": [
           {
@@ -6252,7 +6252,7 @@
     {
       "opcode": 89,
       "request": {
-        "offset": "0x5f5cf0",
+        "offset": "0x62ab50",
         "name": "Api::OneMe::Packets::LinkInfo::Parameters",
         "fields": [
           {
@@ -6274,7 +6274,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x2886c0",
+        "offset": "0x2a7f70",
         "name": "Api::OneMe::Packets::LinkInfo::Response",
         "fields": [
           {
@@ -6374,7 +6374,7 @@
     {
       "opcode": 91,
       "request": {
-        "offset": "0x4e41a0",
+        "offset": "0x515190",
         "name": "Api::OneMe::Packets::Comments::GetCommentsUpdates::Parameters",
         "fields": [
           {
@@ -6411,7 +6411,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4e43c0",
+        "offset": "0x5153b0",
         "name": "Api::OneMe::Packets::Comments::GetCommentsUpdates::Response",
         "fields": [
           {
@@ -6436,7 +6436,7 @@
     {
       "opcode": 94,
       "request": {
-        "offset": "0x615e60",
+        "offset": "0x64b030",
         "name": "Api::OneMe::Packets::Messaging::DeleteUserMessages::Parameters",
         "fields": [
           {
@@ -6518,7 +6518,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x7b3cf0",
+        "offset": "0x7f06e0",
         "name": "Api::OneMe::Packets::SessionsInfo::Response",
         "fields": [
           {
@@ -6549,7 +6549,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x7b3b20",
+        "offset": "0x7f0510",
         "name": "Api::OneMe::Packets::SessionsClose::Response",
         "fields": [
           {
@@ -6574,7 +6574,7 @@
     {
       "opcode": 101,
       "request": {
-        "offset": "0x898be0",
+        "offset": "0x8f5d90",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginRestorePassword::Parameters",
         "fields": [
           {
@@ -6626,7 +6626,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x89ae50",
+        "offset": "0x8f8000",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginRestorePassword::Response",
         "fields": [
           {
@@ -6666,7 +6666,7 @@
     {
       "opcode": 104,
       "request": {
-        "offset": "0x326d20",
+        "offset": "0x34cd00",
         "name": "Api::OneMe::Packets::Auth::OneMe::Details2FA::Parameters",
         "fields": [
           {
@@ -6688,7 +6688,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x328600",
+        "offset": "0x34e5e0",
         "name": "Api::OneMe::Packets::Auth::OneMe::Details2FA::Response",
         "fields": [
           {
@@ -6713,7 +6713,7 @@
     {
       "opcode": 105,
       "request": {
-        "offset": "0x596bc0",
+        "offset": "0x5cc1f0",
         "name": "Api::OneMe::Packets::ExternalCallback::Parameters",
         "fields": [
           {
@@ -6735,7 +6735,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x596df0",
+        "offset": "0x5cc420",
         "name": "Api::OneMe::Packets::ExternalCallback::Response",
         "fields": [
           {
@@ -6775,7 +6775,7 @@
     {
       "opcode": 106,
       "request": {
-        "offset": "0x14e850",
+        "offset": "0x16b700",
         "name": "Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Parameters",
         "fields": [
           {
@@ -6797,7 +6797,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x882640",
+        "offset": "0x8df7f0",
         "name": "Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Response",
         "fields": [
           {
@@ -6852,7 +6852,7 @@
     {
       "opcode": 107,
       "request": {
-        "offset": "0x3276b0",
+        "offset": "0x34d690",
         "name": "Api::OneMe::Packets::Auth::OneMe::ValidatePassword::Parameters",
         "fields": [
           {
@@ -6898,7 +6898,7 @@
     {
       "opcode": 108,
       "request": {
-        "offset": "0x3273c0",
+        "offset": "0x34d3a0",
         "name": "Api::OneMe::Packets::Auth::OneMe::ValidateHint::Parameters",
         "fields": [
           {
@@ -6944,7 +6944,7 @@
     {
       "opcode": 109,
       "request": {
-        "offset": "0x3279b0",
+        "offset": "0x34d990",
         "name": "Api::OneMe::Packets::Auth::OneMe::VerifyEmail::Parameters",
         "fields": [
           {
@@ -6981,7 +6981,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x328860",
+        "offset": "0x34e840",
         "name": "Api::OneMe::Packets::Auth::OneMe::VerifyEmail::Response",
         "fields": [
           {
@@ -7036,7 +7036,7 @@
     {
       "opcode": 110,
       "request": {
-        "offset": "0x326700",
+        "offset": "0x34c6e0",
         "name": "Api::OneMe::Packets::Auth::OneMe::CheckEmail::Parameters",
         "fields": [
           {
@@ -7073,7 +7073,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x327f60",
+        "offset": "0x34df40",
         "name": "Api::OneMe::Packets::Auth::OneMe::CheckEmail::Response",
         "fields": [
           {
@@ -7113,7 +7113,7 @@
     {
       "opcode": 111,
       "request": {
-        "offset": "0x326fd0",
+        "offset": "0x34cfb0",
         "name": "Api::OneMe::Packets::Auth::OneMe::Set2FA::Parameters",
         "fields": [
           {
@@ -7204,7 +7204,7 @@
     {
       "opcode": 112,
       "request": {
-        "offset": "0x96430",
+        "offset": "0x1657c0",
         "name": "Api::OneMe::Packets::Auth::OneMe::CreateTrack::Parameters",
         "fields": [
           {
@@ -7226,7 +7226,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3283a0",
+        "offset": "0x34e380",
         "name": "Api::OneMe::Packets::Auth::OneMe::CreateTrack::Response",
         "fields": [
           {
@@ -7251,7 +7251,7 @@
     {
       "opcode": 113,
       "request": {
-        "offset": "0x3269f0",
+        "offset": "0x34c9d0",
         "name": "Api::OneMe::Packets::Auth::OneMe::CheckPassword::Parameters",
         "fields": [
           {
@@ -7288,7 +7288,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3281c0",
+        "offset": "0x34e1a0",
         "name": "Api::OneMe::Packets::Auth::OneMe::CheckPassword::Response",
         "fields": [
           {
@@ -7313,7 +7313,7 @@
     {
       "opcode": 115,
       "request": {
-        "offset": "0x8985d0",
+        "offset": "0x8f5780",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginCheckPassword::Parameters",
         "fields": [
           {
@@ -7350,7 +7350,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x89aa60",
+        "offset": "0x8f7c10",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginCheckPassword::Response",
         "fields": [
           {
@@ -7390,7 +7390,7 @@
     {
       "opcode": 116,
       "request": {
-        "offset": "0x898890",
+        "offset": "0x8f5a40",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginProfileDelete::Parameters",
         "fields": [
           {
@@ -7427,7 +7427,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x89ac50",
+        "offset": "0x8f7e00",
         "name": "Api::OneMe::Packets::Auth::OneMe::LoginProfileDelete::Response",
         "fields": [
           {
@@ -7452,7 +7452,7 @@
     {
       "opcode": 118,
       "request": {
-        "offset": "0x41e0f0",
+        "offset": "0x44ecc0",
         "name": "Api::OneMe::Packets::Messaging::SendCallback::Parameters",
         "fields": [
           {
@@ -7519,7 +7519,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x41e510",
+        "offset": "0x44f0e0",
         "name": "Api::OneMe::Packets::Messaging::SendCallback::Response",
         "fields": [
           {
@@ -7589,7 +7589,7 @@
     {
       "opcode": 119,
       "request": {
-        "offset": "0x415d30",
+        "offset": "0x4444b0",
         "name": "Api::OneMe::Packets::Bot::Suspend::Parameters",
         "fields": [
           {
@@ -7633,9 +7633,56 @@
       }
     },
     {
+      "opcode": 144,
+      "request": {
+        "offset": "0x1631f0",
+        "name": "Api::OneMe::Packets::Bot::ChatCommands::Parameters",
+        "fields": [
+          {
+            "name": "chatId",
+            "type": {
+              "full": "int64_t",
+              "name": "int64_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      },
+      "response": {
+        "offset": "0x444a50",
+        "name": "Api::OneMe::Packets::Bot::ChatCommands::Response",
+        "fields": [
+          {
+            "name": "commands",
+            "type": {
+              "full": "std::vector<Api::OneMe::Types::Bot::BotCommand>",
+              "name": "Api::OneMe::Types::Bot::BotCommand",
+              "optional": false,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 145,
       "request": {
-        "offset": "0x415b50",
+        "offset": "0x444200",
         "name": "Api::OneMe::Packets::Bot::BotInfo::Parameters",
         "fields": [
           {
@@ -7657,7 +7704,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x416020",
+        "offset": "0x4447a0",
         "name": "Api::OneMe::Packets::Bot::BotInfo::Response",
         "fields": [
           {
@@ -7712,7 +7759,7 @@
     {
       "opcode": 158,
       "request": {
-        "offset": "0x146000",
+        "offset": "0x162d10",
         "name": "Api::OneMe::Packets::Calls::CallsToken::Parameters",
         "fields": [
           {
@@ -7734,7 +7781,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436330",
+        "offset": "0x4678c0",
         "name": "Api::OneMe::Packets::Calls::CallsToken::Response",
         "fields": [
           {
@@ -7759,7 +7806,7 @@
     {
       "opcode": 160,
       "request": {
-        "offset": "0x882040",
+        "offset": "0x8df1f0",
         "name": "Api::OneMe::Packets::WebApp::WebAppInitData::Parameters",
         "fields": [
           {
@@ -7811,7 +7858,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x882350",
+        "offset": "0x8df500",
         "name": "Api::OneMe::Packets::WebApp::WebAppInitData::Response",
         "fields": [
           {
@@ -7851,7 +7898,7 @@
     {
       "opcode": 161,
       "request": {
-        "offset": "0x4ffb60",
+        "offset": "0x534b20",
         "name": "Api::OneMe::Packets::Complain::Parameters",
         "fields": [
           {
@@ -7972,7 +8019,7 @@
     {
       "opcode": 162,
       "request": {
-        "offset": "0x488d0",
+        "offset": "0x164c50",
         "name": "Api::OneMe::Packets::ComplainReasonsGet::Parameters",
         "fields": [
           {
@@ -7994,7 +8041,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x503de0",
+        "offset": "0x538f30",
         "name": "Api::OneMe::Packets::ComplainReasonsGet::Response",
         "fields": [
           {
@@ -8034,7 +8081,7 @@
     {
       "opcode": 163,
       "request": {
-        "offset": "0xb0af0",
+        "offset": "0xcb7e0",
         "name": "Api::OneMe::Packets::Calls::History::Get::Parameters",
         "fields": [
           {
@@ -8056,7 +8103,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x426480",
+        "offset": "0x4573c0",
         "name": "Api::OneMe::Packets::Calls::History::Get::Response",
         "fields": [
           {
@@ -8111,7 +8158,7 @@
     {
       "opcode": 164,
       "request": {
-        "offset": "0xb0950",
+        "offset": "0xcb640",
         "name": "Api::OneMe::Packets::Calls::History::Clear::Parameters",
         "fields": [
           {
@@ -8142,7 +8189,7 @@
     {
       "opcode": 166,
       "request": {
-        "offset": "0x435930",
+        "offset": "0x466ec0",
         "name": "Api::OneMe::Packets::Calls::VideoChatJoin::Parameters",
         "fields": [
           {
@@ -8194,7 +8241,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x436f90",
+        "offset": "0x468520",
         "name": "Api::OneMe::Packets::Calls::VideoChatJoin::Response",
         "fields": [
           {
@@ -8234,7 +8281,7 @@
     {
       "opcode": 178,
       "request": {
-        "offset": "0x78ee20",
+        "offset": "0x7cb800",
         "name": "Api::OneMe::Packets::Reactions::MsgReact::Parameters",
         "fields": [
           {
@@ -8301,7 +8348,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x78f6a0",
+        "offset": "0x7cc080",
         "name": "Api::OneMe::Packets::Reactions::MsgReact::Response",
         "fields": [
           {
@@ -8326,7 +8373,7 @@
     {
       "opcode": 179,
       "request": {
-        "offset": "0x78e4b0",
+        "offset": "0x7cae90",
         "name": "Api::OneMe::Packets::Reactions::CancelReaction::Parameters",
         "fields": [
           {
@@ -8378,7 +8425,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x78f0d0",
+        "offset": "0x7cbab0",
         "name": "Api::OneMe::Packets::Reactions::CancelReaction::Response",
         "fields": [
           {
@@ -8403,7 +8450,7 @@
     {
       "opcode": 180,
       "request": {
-        "offset": "0x46f390",
+        "offset": "0x4a0ab0",
         "name": "Api::OneMe::Packets::Reactions::GetReactions::Parameters",
         "fields": [
           {
@@ -8455,7 +8502,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x46f940",
+        "offset": "0x4a1060",
         "name": "Api::OneMe::Packets::Reactions::GetReactions::Response",
         "fields": [
           {
@@ -8480,7 +8527,7 @@
     {
       "opcode": 181,
       "request": {
-        "offset": "0x78e8b0",
+        "offset": "0x7cb290",
         "name": "Api::OneMe::Packets::Reactions::GetDetailedReactions::Parameters",
         "fields": [
           {
@@ -8577,7 +8624,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x78f400",
+        "offset": "0x7cbde0",
         "name": "Api::OneMe::Packets::Reactions::GetDetailedReactions::Response",
         "fields": [
           {
@@ -8647,7 +8694,7 @@
     {
       "opcode": 198,
       "request": {
-        "offset": "0x4fb650",
+        "offset": "0x530540",
         "name": "Api::OneMe::Packets::Chat::CommonChatList::Parameters",
         "fields": [
           {
@@ -8699,7 +8746,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4fb970",
+        "offset": "0x530860",
         "name": "Api::OneMe::Packets::Chat::CommonChatList::Response",
         "fields": [
           {
@@ -8754,7 +8801,7 @@
     {
       "opcode": 199,
       "request": {
-        "offset": "0x6abc80",
+        "offset": "0x6e2260",
         "name": "Api::OneMe::Packets::ProfileDelete::Parameters",
         "fields": [
           {
@@ -8791,7 +8838,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x6ac3e0",
+        "offset": "0x6e29c0",
         "name": "Api::OneMe::Packets::ProfileDelete::Response",
         "fields": [
           {
@@ -8822,7 +8869,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x6ac0c0",
+        "offset": "0x6e26a0",
         "name": "Api::OneMe::Packets::GetDeleteTamUserTime::Response",
         "fields": [
           {
@@ -8847,7 +8894,7 @@
     {
       "opcode": 202,
       "request": {
-        "offset": "0x4c4140",
+        "offset": "0x4f5290",
         "name": "Api::OneMe::Packets::TranscribeMedia::Parameters",
         "fields": [
           {
@@ -8899,7 +8946,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x4c4430",
+        "offset": "0x4f5580",
         "name": "Api::OneMe::Packets::TranscribeMedia::Response",
         "fields": [
           {
@@ -8939,7 +8986,7 @@
     {
       "opcode": 203,
       "request": {
-        "offset": "0x14b530",
+        "offset": "0x1683e0",
         "name": "Api::OneMe::Packets::Attachments::PhotoUrlRefresh::Parameters",
         "fields": [
           {
@@ -8961,7 +9008,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3f11c0",
+        "offset": "0x419cf0",
         "name": "Api::OneMe::Packets::Attachments::PhotoUrlRefresh::Response",
         "fields": [
           {
@@ -8986,7 +9033,7 @@
     {
       "opcode": 208,
       "request": {
-        "offset": "0x8041c0",
+        "offset": "0x847a30",
         "name": "Api::OneMe::Packets::Stories::StoriesList::Parameters",
         "fields": [
           {
@@ -9023,7 +9070,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x805710",
+        "offset": "0x848f80",
         "name": "Api::OneMe::Packets::Stories::StoriesList::Response",
         "fields": [
           {
@@ -9063,7 +9110,7 @@
     {
       "opcode": 209,
       "request": {
-        "offset": "0x126230",
+        "offset": "0x142e20",
         "name": "Api::OneMe::Packets::Stories::StoriesListByOwnerId::Parameters",
         "fields": [
           {
@@ -9085,7 +9132,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x805930",
+        "offset": "0x8491a0",
         "name": "Api::OneMe::Packets::Stories::StoriesListByOwnerId::Response",
         "fields": [
           {
@@ -9110,7 +9157,7 @@
     {
       "opcode": 210,
       "request": {
-        "offset": "0x14c9e0",
+        "offset": "0x169890",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Parameters",
         "fields": [
           {
@@ -9132,7 +9179,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x804e40",
+        "offset": "0x8486b0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Response",
         "fields": [
           {
@@ -9172,7 +9219,7 @@
     {
       "opcode": 211,
       "request": {
-        "offset": "0x125fa0",
+        "offset": "0x142b90",
         "name": "Api::OneMe::Packets::Stories::StoriesGetStats::Parameters",
         "fields": [
           {
@@ -9194,7 +9241,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x8054b0",
+        "offset": "0x848d20",
         "name": "Api::OneMe::Packets::Stories::StoriesGetStats::Response",
         "fields": [
           {
@@ -9217,101 +9264,9 @@
       }
     },
     {
-      "opcode": 212,
-      "request": {
-        "offset": "0x803de0",
-        "name": "Api::OneMe::Packets::Stories::StoriesGetDetailedStats::Parameters",
-        "fields": [
-          {
-            "name": "storyId",
-            "type": {
-              "full": "int64_t",
-              "name": "int64_t",
-              "optional": false,
-              "array": false,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          },
-          {
-            "name": "filter",
-            "type": {
-              "full": "std::optional<char>",
-              "name": "char",
-              "optional": true,
-              "array": false,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          },
-          {
-            "name": "marker",
-            "type": {
-              "full": "std::optional<int64_t>",
-              "name": "int64_t",
-              "optional": true,
-              "array": false,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          }
-        ],
-        "warn": null
-      },
-      "response": {
-        "offset": "0x805290",
-        "name": "Api::OneMe::Packets::Stories::StoriesGetDetailedStats::Response",
-        "fields": [
-          {
-            "name": "storyDetailedStats",
-            "type": {
-              "full": "std::vector<Api::OneMe::Types::StoryDetailedStats>",
-              "name": "Api::OneMe::Types::StoryDetailedStats",
-              "optional": false,
-              "array": true,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          },
-          {
-            "name": "marker",
-            "type": {
-              "full": "std::optional<int64_t>",
-              "name": "int64_t",
-              "optional": true,
-              "array": false,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
       "opcode": 213,
       "request": {
-        "offset": "0x8047f0",
+        "offset": "0x848060",
         "name": "Api::OneMe::Packets::Stories::StoriesReact::Parameters",
         "fields": [
           {
@@ -9363,7 +9318,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x805c20",
+        "offset": "0x849490",
         "name": "Api::OneMe::Packets::Stories::StoriesReact::Response",
         "fields": [
           {
@@ -9388,7 +9343,7 @@
     {
       "opcode": 214,
       "request": {
-        "offset": "0x804520",
+        "offset": "0x847d90",
         "name": "Api::OneMe::Packets::Stories::StoriesMark::Parameters",
         "fields": [
           {
@@ -9425,7 +9380,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x805ab0",
+        "offset": "0x849320",
         "name": "Api::OneMe::Packets::Stories::StoriesMark::Response",
         "fields": [
           {
@@ -9450,7 +9405,7 @@
     {
       "opcode": 217,
       "request": {
-        "offset": "0x8037d0",
+        "offset": "0x847040",
         "name": "Api::OneMe::Packets::Stories::StoriesEdit::Parameters",
         "fields": [
           {
@@ -9487,7 +9442,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x804c00",
+        "offset": "0x848470",
         "name": "Api::OneMe::Packets::Stories::StoriesEdit::Response",
         "fields": [
           {
@@ -9512,7 +9467,7 @@
     {
       "opcode": 218,
       "request": {
-        "offset": "0x125920",
+        "offset": "0x142510",
         "name": "Api::OneMe::Packets::Stories::StoriesDelete::Parameters",
         "fields": [
           {
@@ -9534,7 +9489,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x804a60",
+        "offset": "0x8482d0",
         "name": "Api::OneMe::Packets::Stories::StoriesDelete::Response",
         "fields": [
           {
@@ -9559,7 +9514,7 @@
     {
       "opcode": 220,
       "request": {
-        "offset": "0x803b20",
+        "offset": "0x847390",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByStoryId::Parameters",
         "fields": [
           {
@@ -9596,7 +9551,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x805070",
+        "offset": "0x8488e0",
         "name": "Api::OneMe::Packets::Stories::StoriesGetByStoryId::Response",
         "fields": [
           {
@@ -9621,7 +9576,7 @@
     {
       "opcode": 256,
       "request": {
-        "offset": "0x7197d0",
+        "offset": "0x756250",
         "name": "Api::OneMe::Packets::OrgInfo::Parameters",
         "fields": [
           {
@@ -9643,7 +9598,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x719c50",
+        "offset": "0x7566d0",
         "name": "Api::OneMe::Packets::OrgInfo::Response",
         "fields": [
           {
@@ -9668,7 +9623,7 @@
     {
       "opcode": 257,
       "request": {
-        "offset": "0x780650",
+        "offset": "0x7bd030",
         "name": "Api::OneMe::Packets::Reactions::SetChatReactions::Parameters",
         "fields": [
           {
@@ -9765,7 +9720,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x780b90",
+        "offset": "0x7bd570",
         "name": "Api::OneMe::Packets::Reactions::SetChatReactions::Response",
         "fields": [
           {
@@ -9790,7 +9745,7 @@
     {
       "opcode": 258,
       "request": {
-        "offset": "0x47ac0",
+        "offset": "0x60240",
         "name": "Api::OneMe::Packets::Reactions::GetChatReactions::Parameters",
         "fields": [
           {
@@ -9812,7 +9767,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x7809f0",
+        "offset": "0x7bd3d0",
         "name": "Api::OneMe::Packets::Reactions::GetChatReactions::Response",
         "fields": [
           {
@@ -9837,7 +9792,7 @@
     {
       "opcode": 259,
       "request": {
-        "offset": "0x3b8450",
+        "offset": "0x3e09b0",
         "name": "Api::OneMe::Packets::Assets::Remove::Parameters",
         "fields": [
           {
@@ -9874,7 +9829,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b9260",
+        "offset": "0x3e17c0",
         "name": "Api::OneMe::Packets::Assets::Remove::Response",
         "fields": [
           {
@@ -9914,7 +9869,7 @@
     {
       "opcode": 261,
       "request": {
-        "offset": "0x3b8130",
+        "offset": "0x3e0690",
         "name": "Api::OneMe::Packets::Assets::ListModify::Parameters",
         "fields": [
           {
@@ -9966,7 +9921,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3b9030",
+        "offset": "0x3e1590",
         "name": "Api::OneMe::Packets::Assets::ListModify::Response",
         "fields": [
           {
@@ -10006,7 +9961,7 @@
     {
       "opcode": 272,
       "request": {
-        "offset": "0xe8d60",
+        "offset": "0x1664d0",
         "name": "Api::OneMe::Packets::Folders::Get::Parameters",
         "fields": [
           {
@@ -10028,7 +9983,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5bc8c0",
+        "offset": "0x5f1740",
         "name": "Api::OneMe::Packets::Folders::Get::Response",
         "fields": [
           {
@@ -10098,7 +10053,7 @@
     {
       "opcode": 274,
       "request": {
-        "offset": "0x5bc1f0",
+        "offset": "0x5f1070",
         "name": "Api::OneMe::Packets::Folders::Update::Parameters",
         "fields": [
           {
@@ -10210,7 +10165,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5bce90",
+        "offset": "0x5f1d10",
         "name": "Api::OneMe::Packets::Folders::Update::Response",
         "fields": [
           {
@@ -10265,7 +10220,7 @@
     {
       "opcode": 275,
       "request": {
-        "offset": "0x5bbeb0",
+        "offset": "0x5f0d30",
         "name": "Api::OneMe::Packets::Folders::Reorder::Parameters",
         "fields": [
           {
@@ -10287,7 +10242,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5bcbd0",
+        "offset": "0x5f1a50",
         "name": "Api::OneMe::Packets::Folders::Reorder::Response",
         "fields": [
           {
@@ -10327,7 +10282,7 @@
     {
       "opcode": 276,
       "request": {
-        "offset": "0x5bbc20",
+        "offset": "0x5f0aa0",
         "name": "Api::OneMe::Packets::Folders::Delete::Parameters",
         "fields": [
           {
@@ -10349,7 +10304,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x5bc620",
+        "offset": "0x5f14a0",
         "name": "Api::OneMe::Packets::Folders::Delete::Response",
         "fields": [
           {
@@ -10395,7 +10350,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x89a660",
+        "offset": "0x8f7810",
         "name": "Api::OneMe::Packets::Auth::OneMe::CreateQr::Response",
         "fields": [
           {
@@ -10465,7 +10420,7 @@
     {
       "opcode": 289,
       "request": {
-        "offset": "0x8979e0",
+        "offset": "0x8f4b90",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthCheck::Parameters",
         "fields": [
           {
@@ -10487,7 +10442,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x899970",
+        "offset": "0x8f6b20",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthCheck::Response",
         "fields": [
           {
@@ -10512,7 +10467,7 @@
     {
       "opcode": 291,
       "request": {
-        "offset": "0x897800",
+        "offset": "0x8f49b0",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthByTrack::Parameters",
         "fields": [
           {
@@ -10534,7 +10489,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x899710",
+        "offset": "0x8f68c0",
         "name": "Api::OneMe::Packets::Auth::OneMe::AuthByTrack::Response",
         "fields": [
           {
@@ -10589,7 +10544,7 @@
     {
       "opcode": 300,
       "request": {
-        "offset": "0x8532c0",
+        "offset": "0x8aa450",
         "name": "Api::OneMe::Packets::Suggest::ChatSuggest::Parameters",
         "fields": [
           {
@@ -10641,7 +10596,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x8535d0",
+        "offset": "0x8aa760",
         "name": "Api::OneMe::Packets::Suggest::ChatSuggest::Response",
         "fields": [
           {
@@ -10666,7 +10621,7 @@
     {
       "opcode": 301,
       "request": {
-        "offset": "0x3d5150",
+        "offset": "0x3fd6d0",
         "name": "Api::OneMe::Packets::Attachments::AudioPlay::Parameters",
         "fields": [
           {
@@ -10733,7 +10688,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x3d6040",
+        "offset": "0x3fe5c0",
         "name": "Api::OneMe::Packets::Attachments::AudioPlay::Response",
         "fields": [
           {
@@ -10788,7 +10743,7 @@
     {
       "opcode": 302,
       "request": {
-        "offset": "0xe50d0",
+        "offset": "0xc4d70",
         "name": "Api::OneMe::Packets::Banners::BannersGet::Parameters",
         "fields": [
           {
@@ -10810,7 +10765,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x40dbd0",
+        "offset": "0x43bf90",
         "name": "Api::OneMe::Packets::Banners::BannersGet::Payload",
         "fields": [
           {
@@ -10865,7 +10820,7 @@
     {
       "opcode": 304,
       "request": {
-        "offset": "0x6900f0",
+        "offset": "0x6c66d0",
         "name": "Api::OneMe::Packets::Polls::SendVote::Parameters",
         "fields": [
           {
@@ -10932,7 +10887,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x690e20",
+        "offset": "0x6c7400",
         "name": "Api::OneMe::Packets::Polls::SendVote::Response",
         "fields": [
           {
@@ -10957,7 +10912,7 @@
     {
       "opcode": 305,
       "request": {
-        "offset": "0x690500",
+        "offset": "0x6c6ae0",
         "name": "Api::OneMe::Packets::Polls::VotersListByAnswer::Parameters",
         "fields": [
           {
@@ -11054,7 +11009,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x691080",
+        "offset": "0x6c7660",
         "name": "Api::OneMe::Packets::Polls::VotersListByAnswer::Response",
         "fields": [
           {
@@ -11109,7 +11064,7 @@
     {
       "opcode": 306,
       "request": {
-        "offset": "0x68fe00",
+        "offset": "0x6c63e0",
         "name": "Api::OneMe::Packets::Polls::GetPollUpdates::Parameters",
         "fields": [
           {
@@ -11146,7 +11101,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x690c90",
+        "offset": "0x6c7270",
         "name": "Api::OneMe::Packets::Polls::GetPollUpdates::Response",
         "fields": [
           {
@@ -11190,9 +11145,9 @@
       "kind": "special_packet",
       "name": "Api::OneMe::Packets::Ping",
       "base_kind": "BaseEvent",
-      "offset": "0x63f330",
+      "offset": "0x674970",
       "request": {
-        "offset": "0x1de3c0",
+        "offset": "0x1fbe00",
         "name": "Api::OneMe::Packets::Ping::Payload",
         "fields": [
           {
@@ -11225,7 +11180,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x1553c0",
+        "offset": "0x118840",
         "name": "Api::OneMe::Packets::Events::LogoutData::Response",
         "fields": [],
         "warn": "no data found"
@@ -11240,7 +11195,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638380",
+        "offset": "0x66d9c0",
         "name": "Api::OneMe::Packets::Events::NotificationCallAcceptedData::Response",
         "fields": [
           {
@@ -11271,7 +11226,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638450",
+        "offset": "0x66da90",
         "name": "Api::OneMe::Packets::Events::NotificationCallFinishData::Response",
         "fields": [
           {
@@ -11296,7 +11251,7 @@
     {
       "opcode": 128,
       "request": {
-        "offset": "0x636e30",
+        "offset": "0x66c470",
         "name": "Api::OneMe::Packets::Events::NotificationMessageData::Parameters",
         "fields": [
           {
@@ -11333,7 +11288,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637260",
+        "offset": "0x66c8a0",
         "name": "Api::OneMe::Packets::Events::NotificationMessageData::Payload",
         "fields": [
           {
@@ -11454,7 +11409,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637c60",
+        "offset": "0x66d2a0",
         "name": "Api::OneMe::Packets::Events::TypingData::Payload",
         "fields": [
           {
@@ -11515,7 +11470,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638890",
+        "offset": "0x66ded0",
         "name": "Api::OneMe::Packets::Events::NotificationMarkData::Response",
         "fields": [
           {
@@ -11606,7 +11561,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x6385f0",
+        "offset": "0x66dc30",
         "name": "Api::OneMe::Packets::Events::NotificationContactData::Response",
         "fields": [
           {
@@ -11637,7 +11592,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637ac0",
+        "offset": "0x66d100",
         "name": "Api::OneMe::Packets::Events::PresenceNotificationMessageData::Payload",
         "fields": [
           {
@@ -11698,7 +11653,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x636f50",
+        "offset": "0x66c590",
         "name": "Api::OneMe::Packets::Events::ConfigChangeData::Payload",
         "fields": [
           {
@@ -11729,7 +11684,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638520",
+        "offset": "0x66db60",
         "name": "Api::OneMe::Packets::Events::NotificationChatData::Response",
         "fields": [
           {
@@ -11752,6 +11707,82 @@
       }
     },
     {
+      "opcode": 136,
+      "request": {
+        "offset": null,
+        "name": "Api::OneMe::Packets::Events::NoParameters",
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "offset": "0x66d800",
+        "name": "Api::OneMe::Packets::Events::NotificationAttachData::Response",
+        "fields": [
+          {
+            "name": "videoId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "audioId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "fileId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "error",
+            "type": {
+              "full": "std::optional<std::string>",
+              "name": "std::string",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 137,
       "request": {
         "offset": null,
@@ -11760,7 +11791,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x23dc80",
+        "offset": "0x25cbf0",
         "name": "Api::OneMe::Types::IncomingCall",
         "fields": [
           {
@@ -11896,7 +11927,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637fe0",
+        "offset": "0x66d620",
         "name": "Api::OneMe::Packets::Events::MessagesDeleteRangeData::Response",
         "fields": [
           {
@@ -11972,7 +12003,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637de0",
+        "offset": "0x66d420",
         "name": "Api::OneMe::Packets::Events::MessagesDeleteData::Response",
         "fields": [
           {
@@ -12048,7 +12079,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x2159d0",
+        "offset": "0x234770",
         "name": "Api::OneMe::Types::Assets::UpdateContent",
         "fields": [
           {
@@ -12184,7 +12215,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637550",
+        "offset": "0x66cb90",
         "name": "Api::OneMe::Packets::Events::NotificationMessageDelayedData::Payload",
         "fields": [
           {
@@ -12290,7 +12321,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638b90",
+        "offset": "0x66e1d0",
         "name": "Api::OneMe::Packets::Events::ReactionsChangedData::Response",
         "fields": [
           {
@@ -12381,7 +12412,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x638dc0",
+        "offset": "0x66e400",
         "name": "Api::OneMe::Packets::Events::YouReactedData::Response",
         "fields": [
           {
@@ -12449,37 +12480,6 @@
       }
     },
     {
-      "opcode": 159,
-      "request": {
-        "offset": null,
-        "name": "Api::OneMe::Packets::Events::NoParameters",
-        "fields": [],
-        "warn": null
-      },
-      "response": {
-        "offset": "0x638ac0",
-        "name": "Api::OneMe::Packets::Events::NotificationProfiletData::Response",
-        "fields": [
-          {
-            "name": "profile",
-            "type": {
-              "full": "Api::OneMe::Types::Profile",
-              "name": "Api::OneMe::Types::Profile",
-              "optional": false,
-              "array": false,
-              "map": false,
-              "map_key": null,
-              "map_value": null,
-              "polymorphic": false,
-              "polymorphic_base": null
-            },
-            "required": true
-          }
-        ],
-        "warn": null
-      }
-    },
-    {
       "opcode": 165,
       "request": {
         "offset": null,
@@ -12488,7 +12488,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637020",
+        "offset": "0x66c660",
         "name": "Api::OneMe::Packets::Events::NotificationCallsHistoryData::Payload",
         "fields": [
           {
@@ -12579,7 +12579,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x6377c0",
+        "offset": "0x66ce00",
         "name": "Api::OneMe::Packets::Events::NotificationStoriesUpdateData::Payload",
         "fields": [
           {
@@ -12602,6 +12602,82 @@
       }
     },
     {
+      "opcode": 277,
+      "request": {
+        "offset": null,
+        "name": "Api::OneMe::Packets::Events::NoParameters",
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "offset": "0x66dd00",
+        "name": "Api::OneMe::Packets::Events::NotificationFoldersData::Response",
+        "fields": [
+          {
+            "name": "folderSync",
+            "type": {
+              "full": "int64_t",
+              "name": "int64_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "folders",
+            "type": {
+              "full": "std::optional<std::vector<Api::OneMe::Types::ChatFolder>>",
+              "name": "Api::OneMe::Types::ChatFolder",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "foldersOrder",
+            "type": {
+              "full": "std::optional<std::vector<std::string>>",
+              "name": "std::string",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "allFilterExcludeFolders",
+            "type": {
+              "full": "std::optional<std::vector<std::string>>",
+              "name": "std::string",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 293,
       "request": {
         "offset": null,
@@ -12610,7 +12686,7 @@
         "warn": null
       },
       "response": {
-        "offset": "0x637890",
+        "offset": "0x66ced0",
         "name": "Api::OneMe::Packets::Events::NotificationTranscriptionData::Payload",
         "fields": [
           {
@@ -12696,7 +12772,7 @@
   "models": [
     {
       "name": "Api::OneMe::Packets::Attachments::FileUpload::FileUploadInfo",
-      "offset": "0x9c9ca0",
+      "offset": "0xa27eb0",
       "fields": [
         {
           "name": "fileId",
@@ -12748,7 +12824,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Attachments::PhotoUrlRefresh::PhotosUpdate",
-      "offset": "0x3f0f50",
+      "offset": "0x419a80",
       "fields": [
         {
           "name": "chatId",
@@ -12800,7 +12876,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Attachments::VideoUpload::VideoUploadInfo",
-      "offset": "0x9ccf50",
+      "offset": "0xa2b1b0",
       "fields": [
         {
           "name": "url",
@@ -12852,7 +12928,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Auth::OneMe::AuthCheck::Response::Status",
-      "offset": "0x9cca00",
+      "offset": "0xa2ac60",
       "fields": [
         {
           "name": "loginAvailable",
@@ -12889,7 +12965,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Auth::OneMe::Details2FA::Response::Password",
-      "offset": "0x327ae0",
+      "offset": "0x34dac0",
       "fields": [
         {
           "name": "enabled",
@@ -12941,7 +13017,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Auth::OneMe::PasswordChallenge",
-      "offset": "0x9ca800",
+      "offset": "0xa28a10",
       "fields": [
         {
           "name": "hint",
@@ -13008,7 +13084,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Auth::OneMe::PasswordChallenge::Config",
-      "offset": "0x9c9640",
+      "offset": "0xa27850",
       "fields": [
         {
           "name": "passMinLen",
@@ -13060,7 +13136,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Comments::GetCommentsUpdates::Response::CommentInfoUpdate",
-      "offset": "0x9c92b0",
+      "offset": "0xa274c0",
       "fields": [
         {
           "name": "postId",
@@ -13097,7 +13173,7 @@
     },
     {
       "name": "Api::OneMe::Packets::ComplainReasonsGet::ComplainsReason",
-      "offset": "0x9c93f0",
+      "offset": "0xa27600",
       "fields": [
         {
           "name": "typeId",
@@ -13134,7 +13210,7 @@
     },
     {
       "name": "Api::OneMe::Packets::ComplainReasonsGet::ComplainsTypeReasonList",
-      "offset": "0x9c9510",
+      "offset": "0xa27720",
       "fields": [
         {
           "name": "reasonId",
@@ -13171,7 +13247,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Log::LogEvent",
-      "offset": "0x2ea880",
+      "offset": "0x30ef20",
       "fields": [
         {
           "name": "time",
@@ -13283,7 +13359,7 @@
     },
     {
       "name": "Api::OneMe::Packets::Polls::GetPollUpdates::Parameters::ChatPollUpdate",
-      "offset": "0x68f820",
+      "offset": "0x6c5e00",
       "fields": [
         {
           "name": "messageId",
@@ -13320,7 +13396,7 @@
     },
     {
       "name": "Api::OneMe::Packets::UserAgent",
-      "offset": "0x7a3760",
+      "offset": "0x7e0150",
       "fields": [
         {
           "name": "deviceType",
@@ -13477,7 +13553,7 @@
     },
     {
       "name": "Api::OneMe::Types::AdminParticipant",
-      "offset": "0x9c7ee0",
+      "offset": "0xa260f0",
       "fields": [
         {
           "name": "id",
@@ -13544,7 +13620,7 @@
     },
     {
       "name": "Api::OneMe::Types::AnimojiSet",
-      "offset": "0x20b340",
+      "offset": "0x22a0e0",
       "fields": [
         {
           "name": "id",
@@ -13641,7 +13717,7 @@
     },
     {
       "name": "Api::OneMe::Types::Assets::RecentEmojiItem",
-      "offset": "0x9cbb50",
+      "offset": "0xa29db0",
       "fields": [
         {
           "name": "id",
@@ -13693,7 +13769,7 @@
     },
     {
       "name": "Api::OneMe::Types::Assets::RecentItem",
-      "offset": "0x9cbf00",
+      "offset": "0xa2a160",
       "fields": [
         {
           "name": "type",
@@ -13760,7 +13836,7 @@
     },
     {
       "name": "Api::OneMe::Types::Assets::Section",
-      "offset": "0x20b600",
+      "offset": "0x22a3a0",
       "fields": [
         {
           "name": "id",
@@ -13947,7 +14023,7 @@
     },
     {
       "name": "Api::OneMe::Types::AvatarInfo",
-      "offset": "0x9c82e0",
+      "offset": "0xa264f0",
       "fields": [
         {
           "name": "id",
@@ -13999,7 +14075,7 @@
     },
     {
       "name": "Api::OneMe::Types::Banner",
-      "offset": "0x21fe90",
+      "offset": "0x23ec30",
       "fields": [
         {
           "name": "id",
@@ -14156,7 +14232,7 @@
     },
     {
       "name": "Api::OneMe::Types::Bot::BotCommand",
-      "offset": "0x9c8920",
+      "offset": "0xa26b30",
       "fields": [
         {
           "name": "botId",
@@ -14208,7 +14284,7 @@
     },
     {
       "name": "Api::OneMe::Types::Bot::StartMessage",
-      "offset": "0x96c780",
+      "offset": "0x9c9fb0",
       "fields": [
         {
           "name": "media",
@@ -14245,7 +14321,7 @@
     },
     {
       "name": "Api::OneMe::Types::Bot::Text",
-      "offset": "0x4164e0",
+      "offset": "0x444e20",
       "fields": [
         {
           "name": "text",
@@ -14282,7 +14358,7 @@
     },
     {
       "name": "Api::OneMe::Types::CallChatMembersLoadConfig",
-      "offset": "0x2e3450",
+      "offset": "0x307230",
       "fields": [
         {
           "name": "min-in-call",
@@ -14319,7 +14395,7 @@
     },
     {
       "name": "Api::OneMe::Types::CallHistory",
-      "offset": "0x9c8cc0",
+      "offset": "0xa26ed0",
       "fields": [
         {
           "name": "chatId",
@@ -14386,7 +14462,7 @@
     },
     {
       "name": "Api::OneMe::Types::CallHistoryItem",
-      "offset": "0x23bce0",
+      "offset": "0x25ac00",
       "fields": [
         {
           "name": "historyId",
@@ -14573,7 +14649,7 @@
     },
     {
       "name": "Api::OneMe::Types::CallRateParams",
-      "offset": "0x9c8ed0",
+      "offset": "0xa270e0",
       "fields": [
         {
           "name": "limit",
@@ -14640,7 +14716,7 @@
     },
     {
       "name": "Api::OneMe::Types::Chat",
-      "offset": "0x23c1b0",
+      "offset": "0x25b0d0",
       "fields": [
         {
           "name": "id",
@@ -15382,7 +15458,7 @@
     },
     {
       "name": "Api::OneMe::Types::ChatFolder",
-      "offset": "0x27b4b0",
+      "offset": "0x29ad60",
       "fields": [
         {
           "name": "id",
@@ -15584,7 +15660,7 @@
     },
     {
       "name": "Api::OneMe::Types::ChatMember",
-      "offset": "0x9c9080",
+      "offset": "0xa27290",
       "fields": [
         {
           "name": "contact",
@@ -15666,7 +15742,7 @@
     },
     {
       "name": "Api::OneMe::Types::ChatReactionsSettings",
-      "offset": "0x2560d0",
+      "offset": "0x2750c0",
       "fields": [
         {
           "name": "chatId",
@@ -15763,7 +15839,7 @@
     },
     {
       "name": "Api::OneMe::Types::ChatResult",
-      "offset": "0x2d5f20",
+      "offset": "0x2f9cf0",
       "fields": [
         {
           "name": "chatId",
@@ -15860,7 +15936,7 @@
     },
     {
       "name": "Api::OneMe::Types::ChatSettings",
-      "offset": "0x250520",
+      "offset": "0x26f510",
       "fields": [
         {
           "name": "dontDisturbUntil",
@@ -15972,7 +16048,7 @@
     },
     {
       "name": "Api::OneMe::Types::CommentsCounterTtl",
-      "offset": "0x96a200",
+      "offset": "0x9c7be0",
       "fields": [
         {
           "name": "channel",
@@ -16003,13 +16079,28 @@
             "polymorphic_base": null
           },
           "required": true
+        },
+        {
+          "name": "participantsCount",
+          "type": {
+            "full": "std::optional<int64_t>",
+            "name": "int64_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
         }
       ],
       "warn": null
     },
     {
       "name": "Api::OneMe::Types::CommentsInfo",
-      "offset": "0x4e3d50",
+      "offset": "0x514c30",
       "fields": [
         {
           "name": "totalCount",
@@ -16031,7 +16122,7 @@
     },
     {
       "name": "Api::OneMe::Types::Configuration",
-      "offset": "0x2912c0",
+      "offset": "0x2b0b80",
       "fields": [
         {
           "name": "hash",
@@ -16113,7 +16204,7 @@
     },
     {
       "name": "Api::OneMe::Types::Contact",
-      "offset": "0x23d440",
+      "offset": "0x25c360",
       "fields": [
         {
           "name": "id",
@@ -16296,6 +16387,21 @@
           "required": true
         },
         {
+          "name": "flags",
+          "type": {
+            "full": "std::optional<int32_t>",
+            "name": "int32_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
           "name": "link",
           "type": {
             "full": "std::optional<std::string>",
@@ -16420,7 +16526,7 @@
     },
     {
       "name": "Api::OneMe::Types::ContactName",
-      "offset": "0x9c97a0",
+      "offset": "0xa279b0",
       "fields": [
         {
           "name": "firstName",
@@ -16472,7 +16578,7 @@
     },
     {
       "name": "Api::OneMe::Types::ContactResult",
-      "offset": "0x287f40",
+      "offset": "0x2a77f0",
       "fields": [
         {
           "name": "contact",
@@ -16569,7 +16675,7 @@
     },
     {
       "name": "Api::OneMe::Types::Creation2FAConfig",
-      "offset": "0x9c9930",
+      "offset": "0xa27b40",
       "fields": [
         {
           "name": "enabled",
@@ -16636,7 +16742,7 @@
     },
     {
       "name": "Api::OneMe::Types::Crop",
-      "offset": "0x9c9af0",
+      "offset": "0xa27d00",
       "fields": [
         {
           "name": "x1",
@@ -16703,7 +16809,7 @@
     },
     {
       "name": "Api::OneMe::Types::DelayedTamAttributes",
-      "offset": "0x2beba0",
+      "offset": "0x2e2ca0",
       "fields": [
         {
           "name": "timeToFire",
@@ -16740,7 +16846,7 @@
     },
     {
       "name": "Api::OneMe::Types::FolderWidget",
-      "offset": "0x27bbd0",
+      "offset": "0x29b480",
       "fields": [
         {
           "name": "id",
@@ -16852,7 +16958,7 @@
     },
     {
       "name": "Api::OneMe::Types::LiveStream",
-      "offset": "0x9c9f50",
+      "offset": "0xa28160",
       "fields": [
         {
           "name": "chatId",
@@ -16904,13 +17010,13 @@
     },
     {
       "name": "Api::OneMe::Types::MapFilterSubjects",
-      "offset": "0x27beb0",
+      "offset": "0x29b760",
       "fields": [],
       "warn": "no data found"
     },
     {
       "name": "Api::OneMe::Types::MapSubject",
-      "offset": "0x183920",
+      "offset": "0xee840",
       "fields": [
         {
           "name": "organizationIds",
@@ -16932,7 +17038,7 @@
     },
     {
       "name": "Api::OneMe::Types::MenuButton",
-      "offset": "0xda6b0",
+      "offset": "0x52260",
       "fields": [
         {
           "name": "text",
@@ -16954,7 +17060,7 @@
     },
     {
       "name": "Api::OneMe::Types::Message",
-      "offset": "0x23ea50",
+      "offset": "0x25d9c0",
       "fields": [
         {
           "name": "id",
@@ -17276,7 +17382,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageElement",
-      "offset": "0x223db0",
+      "offset": "0x242b50",
       "fields": [
         {
           "name": "entityId",
@@ -17373,7 +17479,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageElement::AttributesMap",
-      "offset": "0x2b34e0",
+      "offset": "0x2d6e10",
       "fields": [
         {
           "name": "url",
@@ -17425,7 +17531,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageLink",
-      "offset": "0x23f200",
+      "offset": "0x25e170",
       "fields": [
         {
           "name": "type",
@@ -17522,7 +17628,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessagePreview",
-      "offset": "0x9ca0d0",
+      "offset": "0xa282e0",
       "fields": [
         {
           "name": "text",
@@ -17559,7 +17665,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageReaction",
-      "offset": "0x78df40",
+      "offset": "0x7ca920",
       "fields": [
         {
           "name": "reactionType",
@@ -17596,7 +17702,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageReactionCounter",
-      "offset": "0x9ca1e0",
+      "offset": "0xa283f0",
       "fields": [
         {
           "name": "reaction",
@@ -17633,7 +17739,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageReactionEntry",
-      "offset": "0x9ca310",
+      "offset": "0xa28520",
       "fields": [
         {
           "name": "userId",
@@ -17670,7 +17776,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageReactionInfo",
-      "offset": "0x78e1f0",
+      "offset": "0x7cabd0",
       "fields": [
         {
           "name": "counters",
@@ -17722,7 +17828,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageResult",
-      "offset": "0x9ca420",
+      "offset": "0xa28630",
       "fields": [
         {
           "name": "message",
@@ -17759,7 +17865,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageStats",
-      "offset": "0x2aeb60",
+      "offset": "0x2d2490",
       "fields": [
         {
           "name": "views",
@@ -17796,7 +17902,7 @@
     },
     {
       "name": "Api::OneMe::Types::OpusSupport",
-      "offset": "0x96b960",
+      "offset": "0x9c93b0",
       "fields": [
         {
           "name": "windows",
@@ -17848,7 +17954,7 @@
     },
     {
       "name": "Api::OneMe::Types::Organization",
-      "offset": "0x2c6080",
+      "offset": "0x2e9e50",
       "fields": [
         {
           "name": "id",
@@ -17975,7 +18081,7 @@
     },
     {
       "name": "Api::OneMe::Types::OutgoingMessage",
-      "offset": "0x2becb0",
+      "offset": "0x2e2db0",
       "fields": [
         {
           "name": "cid",
@@ -18147,7 +18253,7 @@
     },
     {
       "name": "Api::OneMe::Types::OutgoingMessage::OutgoingMessageLink",
-      "offset": "0x2bf300",
+      "offset": "0x2e3400",
       "fields": [
         {
           "name": "type",
@@ -18214,7 +18320,7 @@
     },
     {
       "name": "Api::OneMe::Types::PeerStories",
-      "offset": "0x9caba0",
+      "offset": "0xa28db0",
       "fields": [
         {
           "name": "owner",
@@ -18251,7 +18357,7 @@
     },
     {
       "name": "Api::OneMe::Types::PlatformEnabled",
-      "offset": "0x9cb0a0",
+      "offset": "0xa29300",
       "fields": [
         {
           "name": "windows",
@@ -18303,7 +18409,7 @@
     },
     {
       "name": "Api::OneMe::Types::Poll",
-      "offset": "0x29ece0",
+      "offset": "0x2c14d0",
       "fields": [
         {
           "name": "pollId",
@@ -18445,7 +18551,7 @@
     },
     {
       "name": "Api::OneMe::Types::PollAnswer",
-      "offset": "0x2c8840",
+      "offset": "0x2ec610",
       "fields": [
         {
           "name": "text",
@@ -18482,7 +18588,7 @@
     },
     {
       "name": "Api::OneMe::Types::PollAnswerStats",
-      "offset": "0x9cb200",
+      "offset": "0xa29460",
       "fields": [
         {
           "name": "userId",
@@ -18519,7 +18625,7 @@
     },
     {
       "name": "Api::OneMe::Types::PollState",
-      "offset": "0x690a20",
+      "offset": "0x6c7000",
       "fields": [
         {
           "name": "total",
@@ -18571,7 +18677,7 @@
     },
     {
       "name": "Api::OneMe::Types::PollStateResults",
-      "offset": "0x9cb320",
+      "offset": "0xa29580",
       "fields": [
         {
           "name": "answerId",
@@ -18653,7 +18759,7 @@
     },
     {
       "name": "Api::OneMe::Types::PollTtl",
-      "offset": "0x9cb550",
+      "offset": "0xa297b0",
       "fields": [
         {
           "name": "chat",
@@ -18705,7 +18811,7 @@
     },
     {
       "name": "Api::OneMe::Types::Presence",
-      "offset": "0x24f1e0",
+      "offset": "0x26e1b0",
       "fields": [
         {
           "name": "on",
@@ -18757,7 +18863,7 @@
     },
     {
       "name": "Api::OneMe::Types::PresetAvatarsInfo",
-      "offset": "0x9cb6b0",
+      "offset": "0xa29910",
       "fields": [
         {
           "name": "name",
@@ -18794,7 +18900,7 @@
     },
     {
       "name": "Api::OneMe::Types::Profile",
-      "offset": "0x291e20",
+      "offset": "0x2b16e0",
       "fields": [
         {
           "name": "contact",
@@ -18831,7 +18937,7 @@
     },
     {
       "name": "Api::OneMe::Types::PublicResult",
-      "offset": "0x9cb9d0",
+      "offset": "0xa29c30",
       "fields": [
         {
           "name": "chat",
@@ -18883,7 +18989,7 @@
     },
     {
       "name": "Api::OneMe::Types::RejectedParticipant",
-      "offset": "0x9cc0d0",
+      "offset": "0xa2a330",
       "fields": [
         {
           "name": "id",
@@ -18920,7 +19026,7 @@
     },
     {
       "name": "Api::OneMe::Types::ServerSettings",
-      "offset": "0x269e50",
+      "offset": "0x2893c0",
       "fields": [
         {
           "name": "reactions-menu",
@@ -20108,6 +20214,21 @@
           "required": true
         },
         {
+          "name": "polls-v2",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
           "name": "y-map",
           "type": {
             "full": "std::optional<Api::OneMe::Types::YMapConfig>",
@@ -20213,6 +20334,21 @@
           "required": true
         },
         {
+          "name": "spell-check-lin",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
           "name": "bot-command-list",
           "type": {
             "full": "std::optional<bool>",
@@ -20244,6 +20380,21 @@
         },
         {
           "name": "desktop-clipboard-html-enabled",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "video-speed",
           "type": {
             "full": "std::optional<bool>",
             "name": "bool",
@@ -20424,6 +20575,36 @@
         },
         {
           "name": "calls-sdk-dns-opt",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "fullscreen-subtitle",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "show-warning-links",
           "type": {
             "full": "std::optional<bool>",
             "name": "bool",
@@ -20769,6 +20950,21 @@
         },
         {
           "name": "callDereverberationEnabled",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "callInboundNisqaEnabled",
           "type": {
             "full": "std::optional<bool>",
             "name": "bool",
@@ -21308,6 +21504,36 @@
           "required": true
         },
         {
+          "name": "calls-credentials-store-enabled",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "rooms-miniapp-qr-code",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
           "name": "enable-audio-messages-transcription",
           "type": {
             "full": "std::optional<bool>",
@@ -21429,6 +21655,21 @@
         },
         {
           "name": "stories-profile",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "stories-feed-polling",
           "type": {
             "full": "std::optional<bool>",
             "name": "bool",
@@ -21621,13 +21862,73 @@
             "polymorphic_base": null
           },
           "required": true
+        },
+        {
+          "name": "multiaccount",
+          "type": {
+            "full": "std::optional<int32_t>",
+            "name": "int32_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "channel-subscriptions-recs-limit",
+          "type": {
+            "full": "std::optional<int64_t>",
+            "name": "int64_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "additional-links",
+          "type": {
+            "full": "std::optional<bool>",
+            "name": "bool",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "additional-links-limit",
+          "type": {
+            "full": "std::optional<int64_t>",
+            "name": "int64_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
         }
       ],
       "warn": null
     },
     {
       "name": "Api::OneMe::Types::Session",
-      "offset": "0x2e6360",
+      "offset": "0x30a3b0",
       "fields": [
         {
           "name": "time",
@@ -21709,7 +22010,7 @@
     },
     {
       "name": "Api::OneMe::Types::ShowWebappSearchCase",
-      "offset": "0x1801a0",
+      "offset": "0x9c9dd0",
       "fields": [
         {
           "name": "items",
@@ -21731,7 +22032,7 @@
     },
     {
       "name": "Api::OneMe::Types::ShowWebappSearchCaseItem",
-      "offset": "0x9cc890",
+      "offset": "0xa2aaf0",
       "fields": [
         {
           "name": "id",
@@ -21783,7 +22084,7 @@
     },
     {
       "name": "Api::OneMe::Types::StickerSet",
-      "offset": "0x21b330",
+      "offset": "0x23a0d0",
       "fields": [
         {
           "name": "id",
@@ -21925,7 +22226,7 @@
     },
     {
       "name": "Api::OneMe::Types::StoriesConfig",
-      "offset": "0x2e3be0",
+      "offset": "0x307a50",
       "fields": [
         {
           "name": "photo-duration",
@@ -21971,13 +22272,28 @@
             "polymorphic_base": null
           },
           "required": true
+        },
+        {
+          "name": "list-page-size",
+          "type": {
+            "full": "std::optional<int64_t>",
+            "name": "int64_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
         }
       ],
       "warn": null
     },
     {
       "name": "Api::OneMe::Types::StoriesPreview",
-      "offset": "0x638fa0",
+      "offset": "0x66e5e0",
       "fields": [
         {
           "name": "owner",
@@ -22058,45 +22374,8 @@
       "warn": null
     },
     {
-      "name": "Api::OneMe::Types::StoryDetailedStats",
-      "offset": "0x9ccb10",
-      "fields": [
-        {
-          "name": "userId",
-          "type": {
-            "full": "int64_t",
-            "name": "int64_t",
-            "optional": false,
-            "array": false,
-            "map": false,
-            "map_key": null,
-            "map_value": null,
-            "polymorphic": false,
-            "polymorphic_base": null
-          },
-          "required": true
-        },
-        {
-          "name": "reaction",
-          "type": {
-            "full": "std::optional<Api::OneMe::Types::StoryReaction>",
-            "name": "Api::OneMe::Types::StoryReaction",
-            "optional": true,
-            "array": false,
-            "map": false,
-            "map_key": null,
-            "map_value": null,
-            "polymorphic": false,
-            "polymorphic_base": null
-          },
-          "required": true
-        }
-      ],
-      "warn": null
-    },
-    {
       "name": "Api::OneMe::Types::StoryItem",
-      "offset": "0x31bc70",
+      "offset": "0x2c22a0",
       "fields": [
         {
           "name": "id",
@@ -22146,9 +22425,9 @@
         {
           "name": "settings",
           "type": {
-            "full": "std::optional<int32_t>",
+            "full": "int32_t",
             "name": "int32_t",
-            "optional": true,
+            "optional": false,
             "array": false,
             "map": false,
             "map_key": null,
@@ -22232,13 +22511,58 @@
             "polymorphic_base": null
           },
           "required": true
+        },
+        {
+          "name": "viewsCount",
+          "type": {
+            "full": "std::optional<int32_t>",
+            "name": "int32_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "reactionsCount",
+          "type": {
+            "full": "std::optional<int32_t>",
+            "name": "int32_t",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
+        },
+        {
+          "name": "version",
+          "type": {
+            "full": "std::optional<char>",
+            "name": "char",
+            "optional": true,
+            "array": false,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": true
         }
       ],
       "warn": null
     },
     {
       "name": "Api::OneMe::Types::StoryOwner",
-      "offset": "0x31c1c0",
+      "offset": "0x2c28d0",
       "fields": [
         {
           "name": "ownerId",
@@ -22275,7 +22599,7 @@
     },
     {
       "name": "Api::OneMe::Types::StoryReaction",
-      "offset": "0x805cd0",
+      "offset": "0x849540",
       "fields": [
         {
           "name": "reactionType",
@@ -22312,7 +22636,7 @@
     },
     {
       "name": "Api::OneMe::Types::StoryStat",
-      "offset": "0x9ccc30",
+      "offset": "0xa2ae90",
       "fields": [
         {
           "name": "storyId",
@@ -22364,7 +22688,7 @@
     },
     {
       "name": "Api::OneMe::Types::UserSettings",
-      "offset": "0x26db30",
+      "offset": "0x28d280",
       "fields": [
         {
           "name": "SHOW_READ_MARK",
@@ -22716,7 +23040,7 @@
     },
     {
       "name": "Api::OneMe::Types::VideoConference",
-      "offset": "0x23fda0",
+      "offset": "0x25ed10",
       "fields": [
         {
           "name": "owner",
@@ -22873,7 +23197,7 @@
     },
     {
       "name": "Api::OneMe::Types::VideoConversation",
-      "offset": "0x2401e0",
+      "offset": "0x25f150",
       "fields": [
         {
           "name": "conversationId",
@@ -22970,7 +23294,7 @@
     },
     {
       "name": "Api::OneMe::Types::VideoMessageConfig",
-      "offset": "0x9ccda0",
+      "offset": "0xa2b000",
       "fields": [
         {
           "name": "duration",
@@ -23037,7 +23361,7 @@
     },
     {
       "name": "Api::OneMe::Types::WebAppEntry",
-      "offset": "0x9cd100",
+      "offset": "0xa2b360",
       "fields": [
         {
           "name": "icon",
@@ -23104,7 +23428,7 @@
     },
     {
       "name": "Api::OneMe::Types::YMapConfig",
-      "offset": "0x2e3d40",
+      "offset": "0x307c00",
       "fields": [
         {
           "name": "tile",
@@ -23156,7 +23480,7 @@
     },
     {
       "name": "Api::OneMe::Types::BaseAttachment",
-      "offset": "0x9c87f0",
+      "offset": "0xa26a00",
       "fields": [
         {
           "name": "_type",
@@ -23193,7 +23517,7 @@
     },
     {
       "name": "Api::OneMe::Types::Button",
-      "offset": "0x29e310",
+      "offset": "0x2c0ae0",
       "fields": [
         {
           "name": "type",
@@ -23290,7 +23614,7 @@
     },
     {
       "name": "Api::OneMe::Types::Icon",
-      "offset": "0xa77290",
+      "offset": "0xad7800",
       "fields": [
         {
           "name": "url",
@@ -23342,7 +23666,7 @@
     },
     {
       "name": "Api::OneMe::Types::Keyboard",
-      "offset": "0xa77590",
+      "offset": "0xad7b00",
       "fields": [
         {
           "name": "buttons",
@@ -23364,7 +23688,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::ChatMeta",
-      "offset": "0x2ea6a0",
+      "offset": "0x30ed40",
       "fields": [
         {
           "name": "conversationType",
@@ -23401,7 +23725,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::Counters",
-      "offset": "0x30bba0",
+      "offset": "0x331230",
       "fields": [
         {
           "name": "LOCAL_SEARCH",
@@ -23423,7 +23747,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::Item",
-      "offset": "0x30bea0",
+      "offset": "0x331530",
       "fields": [
         {
           "name": "itemMeta",
@@ -23445,7 +23769,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::ItemMeta",
-      "offset": "0x2ea7b0",
+      "offset": "0x30ee50",
       "fields": [
         {
           "name": "chatMeta",
@@ -23467,7 +23791,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::Items",
-      "offset": "0x30bf70",
+      "offset": "0x331600",
       "fields": [
         {
           "name": "items",
@@ -23489,7 +23813,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::SearchEventParams::Sections",
-      "offset": "0x30c220",
+      "offset": "0x3318b0",
       "fields": [
         {
           "name": "LOCAL_SEARCH",
@@ -23511,7 +23835,7 @@
     },
     {
       "name": "Api::OneMe::Types::Outgoing::BaseAttachment",
-      "offset": "0x2b8100",
+      "offset": "0x2dbaf0",
       "fields": [
         {
           "name": "_type",
@@ -23548,7 +23872,7 @@
     },
     {
       "name": "Api::OneMe::Types::PhotoAttachment",
-      "offset": "0x9cace0",
+      "offset": "0xa28ef0",
       "fields": [
         {
           "name": "photoId",
@@ -23699,13 +24023,28 @@
             "polymorphic_base": null
           },
           "required": true
+        },
+        {
+          "name": "thumbhash",
+          "type": {
+            "full": "std::optional<std::vector<std::byte>>",
+            "name": "std::byte",
+            "optional": true,
+            "array": true,
+            "map": false,
+            "map_key": null,
+            "map_value": null,
+            "polymorphic": false,
+            "polymorphic_base": null
+          },
+          "required": false
         }
       ],
       "warn": null
     },
     {
       "name": "Api::OneMe::Types::ReplyButton",
-      "offset": "0xa77c90",
+      "offset": "0xad8200",
       "fields": [
         {
           "name": "type",
@@ -23772,7 +24111,7 @@
     },
     {
       "name": "Api::OneMe::Types::TextObject",
-      "offset": "0xa78a40",
+      "offset": "0xad91a0",
       "fields": [
         {
           "name": "text",
@@ -23809,7 +24148,7 @@
     },
     {
       "name": "Api::OneMe::Types::VideoCollage",
-      "offset": "0xa79160",
+      "offset": "0xad98c0",
       "fields": [
         {
           "name": "url",
@@ -23891,7 +24230,7 @@
     },
     {
       "name": "Api::OneMe::Types::WidgetContent",
-      "offset": "0xa79630",
+      "offset": "0xad9d90",
       "fields": [
         {
           "name": "type",
@@ -23960,7 +24299,7 @@
   "polymorphic_models": [
     {
       "name": "Api::OneMe::Types::BaseAttachment",
-      "offset": "0x9c87f0",
+      "offset": "0xa26a00",
       "variants": [
         {
           "name": "Api::OneMe::Types::BaseAttachment",
@@ -26228,6 +26567,71 @@
           ]
         },
         {
+          "name": "Api::OneMe::Types::Outgoing::StoryAttachment",
+          "fields": [
+            {
+              "name": "_type",
+              "type": {
+                "full": "std::string",
+                "name": "std::string",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": {
+                "full": "std::optional<bool>",
+                "name": "bool",
+                "optional": true,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "owner",
+              "type": {
+                "full": "Api::OneMe::Types::StoryOwner",
+                "name": "Api::OneMe::Types::StoryOwner",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "storyId",
+              "type": {
+                "full": "int64_t",
+                "name": "int64_t",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            }
+          ]
+        },
+        {
           "name": "Api::OneMe::Types::Outgoing::VideoAttachment",
           "fields": [
             {
@@ -26504,6 +26908,21 @@
                 "polymorphic_base": null
               },
               "required": true
+            },
+            {
+              "name": "thumbhash",
+              "type": {
+                "full": "std::optional<std::vector<std::byte>>",
+                "name": "std::byte",
+                "optional": true,
+                "array": true,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": false
             }
           ]
         },
@@ -27173,6 +27592,101 @@
           ]
         },
         {
+          "name": "Api::OneMe::Types::StoryAttachment",
+          "fields": [
+            {
+              "name": "_type",
+              "type": {
+                "full": "std::string",
+                "name": "std::string",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": {
+                "full": "std::optional<bool>",
+                "name": "bool",
+                "optional": true,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "owner",
+              "type": {
+                "full": "Api::OneMe::Types::StoryOwner",
+                "name": "Api::OneMe::Types::StoryOwner",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "storyId",
+              "type": {
+                "full": "int64_t",
+                "name": "int64_t",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "previewUrl",
+              "type": {
+                "full": "std::optional<std::string>",
+                "name": "std::string",
+                "optional": true,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "expirationTime",
+              "type": {
+                "full": "std::optional<int64_t>",
+                "name": "int64_t",
+                "optional": true,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            }
+          ]
+        },
+        {
           "name": "Api::OneMe::Types::UnsupportedAttachment",
           "fields": [
             {
@@ -27551,7 +28065,7 @@
     },
     {
       "name": "Api::OneMe::Types::Log::EventParams",
-      "offset": "0x7cda0",
+      "offset": "0x7b8a0",
       "variants": [
         {
           "name": "Api::OneMe::Types::Log::EventParams",
@@ -27976,7 +28490,7 @@
     },
     {
       "name": "Api::OneMe::Types::Outgoing::BaseAttachment",
-      "offset": "0x2b8100",
+      "offset": "0x2dbaf0",
       "variants": [
         {
           "name": "Api::OneMe::Types::Outgoing::BaseAttachment",
@@ -28644,6 +29158,71 @@
           ]
         },
         {
+          "name": "Api::OneMe::Types::Outgoing::StoryAttachment",
+          "fields": [
+            {
+              "name": "_type",
+              "type": {
+                "full": "std::string",
+                "name": "std::string",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "deleted",
+              "type": {
+                "full": "std::optional<bool>",
+                "name": "bool",
+                "optional": true,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "owner",
+              "type": {
+                "full": "Api::OneMe::Types::StoryOwner",
+                "name": "Api::OneMe::Types::StoryOwner",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            },
+            {
+              "name": "storyId",
+              "type": {
+                "full": "int64_t",
+                "name": "int64_t",
+                "optional": false,
+                "array": false,
+                "map": false,
+                "map_key": null,
+                "map_value": null,
+                "polymorphic": false,
+                "polymorphic_base": null
+              },
+              "required": true
+            }
+          ]
+        },
+        {
           "name": "Api::OneMe::Types::Outgoing::VideoAttachment",
           "fields": [
             {
@@ -28873,6 +29452,7 @@
     "MANAGEABLE",
     "MEMBER",
     "MEMBERS_CAN_SEE_PRIVATE_LINK",
+    "MENU",
     "MESSAGE",
     "MESSAGES",
     "MESSAGE_CLICKABLE_ELEMENT_ACTIONS",
@@ -28902,7 +29482,6 @@
     "OUT_OF_CALL",
     "O_DASH",
     "O_HLS",
-    "P4GF",
     "PERF",
     "PERMISSION",
     "PHONE_NUMBER_PRIVACY",
@@ -28960,10 +29539,16 @@
     "STICKER",
     "STICKERS_SUGGEST",
     "STICKER_SET",
+    "STORY",
+    "STORY_NAV",
+    "STORY_OPEN",
+    "STORY_PREVIEW_OPEN",
+    "STORY_REPLY",
     "STRIKETHROUGH",
     "STRONG",
     "SYSTEM",
     "TEXT",
+    "TEXT_SIZE",
     "THEME",
     "THREAT",
     "TRY_DELETE_PROFILE",
@@ -28973,6 +29558,7 @@
     "UNSAFE_FILES",
     "UPDATE",
     "UPDATED",
+    "UPLOAD",
     "UPLOAD_MAX_RETRY_COUNT",
     "USER",
     "USERS_FREEZES",
