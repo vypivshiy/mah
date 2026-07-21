@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
-"""Extract embedded JSON config blob from config.dll."""
+"""Extract embedded JSON config blob from config.dll.
+
+Robust against client updates: не привязан к именам полей.
+Сканирует бинарник, ищет все сбалансированные `{...}` подстроки,
+парсит как JSON, возвращает самый большой dict.
+"""
 
 import json
 import sys
 
 
-def extract_json_blob(data: bytes) -> str:
-    # WARNING
-    # работает на эвристике что это поле идёт первым. Если изменять конфиг - не будет работать скрипт
-    marker = b'"is_local_history_enabled"'
-    pos = data.find(marker)
-    if pos == -1:
-        raise ValueError("marker not found in DLL")
+# Минимальное число ключей, чтобы считать найденный dict конфигом.
+# Защита от случайных мелких JSON-ов в бинарнике.
+MIN_KEYS = 20
 
-    # scan back to opening {
-    start = data.rfind(b'{', 0, pos)
-    if start == -1:
-        raise ValueError("opening { not found")
 
-    # scan forward to matching }, tracking nested braces and strings
+def _try_extract_balanced(data: bytes, start: int) -> str | None:
+    """Сканирует вперёд от `start` (указывает на `{`) до парной `}`.
+    Учитывает вложенные скобки и строки. Возвращает декодированную подстроку
+    или None, если баланс нарушен / UTF-8 невалидный."""
     depth = 0
     i = start
     in_string = False
-    while i < len(data):
+    n = len(data)
+    while i < n:
         b = data[i]
         if in_string:
             if b == ord('\\'):
@@ -38,10 +39,60 @@ def extract_json_blob(data: bytes) -> str:
             elif b == ord('}'):
                 depth -= 1
                 if depth == 0:
-                    return data[start:i + 1].decode('utf-8')
+                    try:
+                        return data[start:i + 1].decode('utf-8')
+                    except UnicodeDecodeError:
+                        return None
+        i += 1
+    return None
+
+
+def extract_json_blob(data: bytes, min_keys: int = MIN_KEYS) -> str:
+    """Найти самый большой валидный JSON-объект в бинарных данных.
+
+    Алгоритм:
+      1. Для каждого байта `{` в data пытаемся_extract_balanced
+      2. Если подстрока парсится как dict с >= min_keys ключами — кандидат
+      3. Скипаем вперёд за пределы найденного blob'а (не падаем на вложенные)
+      4. Возвращаем кандидата с максимальным числом ключей
+    """
+    candidates = []  # (num_keys, offset, raw_text)
+    n = len(data)
+    i = 0
+    while i < n:
+        if data[i] != ord('{'):
+            i += 1
+            continue
+        blob = _try_extract_balanced(data, i)
+        if blob is None:
+            i += 1
+            continue
+        try:
+            obj = json.loads(blob)
+        except (ValueError, UnicodeDecodeError):
+            i += 1
+            continue
+        if isinstance(obj, dict) and len(obj) >= min_keys:
+            candidates.append((len(obj), i, blob))
+            i += len(blob)  # не пересканируем внутри найденного объекта
+            continue
         i += 1
 
-    raise ValueError("matching } not found")
+    if not candidates:
+        raise ValueError(
+            f"no JSON config blob with >= {min_keys} keys found in DLL"
+        )
+
+    candidates.sort(key=lambda c: -c[0])
+    num_keys, offset, blob = candidates[0]
+    if len(candidates) > 1:
+        summary = ", ".join(f"{c[0]}@0x{c[1]:x}" for c in candidates)
+        print(
+            f"warning: multiple JSON candidates found ({summary}); "
+            f"picked largest ({num_keys} keys @0x{offset:x})",
+            file=sys.stderr,
+        )
+    return blob
 
 
 def main():
