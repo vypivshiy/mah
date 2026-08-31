@@ -22,8 +22,8 @@ _EMPTY_NAMES = frozenset(("EmptyResponse", "EmptyParameters", "NoParameters"))
 
 COMMON_PACKET_RE = re.compile(
     r"CommonPacket\s*<\s*(\d+)\s*,"
-    r"\s*struct\s+(Api::OneMe::Packets::[\w:]+)"
-    r"\s*,\s*struct\s+(Api::OneMe::Packets::[\w:]+)"
+    r"\s*(?:struct|class)\s+(Api::OneMe::Packets::[\w:]+)"
+    r"\s*,\s*(?:struct|class)\s+(Api::OneMe::Packets::[\w:]+)"
     r"\s*,"
 )
 

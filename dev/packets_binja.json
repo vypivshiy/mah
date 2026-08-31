@@ -2002,6 +2002,113 @@
       }
     },
     {
+      "opcode": 37,
+      "request": {
+        "offset": "0x4c6d50",
+        "name": "Api::OneMe::Packets::Search::Contact::Parameters",
+        "fields": [
+          {
+            "name": "query",
+            "type": {
+              "full": "std::string",
+              "name": "std::string",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "count",
+            "type": {
+              "full": "int32_t",
+              "name": "int32_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "type": {
+              "full": "int32_t",
+              "name": "int32_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      },
+      "response": {
+        "offset": "0x4c6f80",
+        "name": "Api::OneMe::Packets::Search::Contact::Response",
+        "fields": [
+          {
+            "name": "result",
+            "type": {
+              "full": "std::optional<std::vector<Api::OneMe::Types::ContactResult>>",
+              "name": "Api::OneMe::Types::ContactResult",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": {
+              "full": "int32_t",
+              "name": "int32_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "ucpQId",
+            "type": {
+              "full": "std::optional<std::string>",
+              "name": "std::string",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 39,
       "request": {
         "offset": "0xa83ca0",
@@ -5926,6 +6033,53 @@
               "full": "std::optional<int64_t>",
               "name": "int64_t",
               "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
+      "opcode": 84,
+      "request": {
+        "offset": "0x126b960",
+        "name": "Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Parameters",
+        "fields": [
+          {
+            "name": "conversationId",
+            "type": {
+              "full": "std::string",
+              "name": "std::string",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      },
+      "response": {
+        "offset": "0x1279d30",
+        "name": "Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Response",
+        "fields": [
+          {
+            "name": "joinLink",
+            "type": {
+              "full": "std::string",
+              "name": "std::string",
+              "optional": false,
               "array": false,
               "map": false,
               "map_key": null,
@@ -11720,6 +11874,82 @@
       }
     },
     {
+      "opcode": 136,
+      "request": {
+        "offset": null,
+        "name": "Api::OneMe::Packets::Events::NoParameters",
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "offset": "0xc414f0",
+        "name": "Api::OneMe::Packets::Events::NotificationAttachData::Response",
+        "fields": [
+          {
+            "name": "videoId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "audioId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "fileId",
+            "type": {
+              "full": "std::optional<int64_t>",
+              "name": "int64_t",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "error",
+            "type": {
+              "full": "std::optional<std::string>",
+              "name": "std::string",
+              "optional": true,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 137,
       "request": {
         "offset": null,
@@ -12570,6 +12800,82 @@
       }
     },
     {
+      "opcode": 277,
+      "request": {
+        "offset": null,
+        "name": "Api::OneMe::Packets::Events::NoParameters",
+        "fields": [],
+        "warn": null
+      },
+      "response": {
+        "offset": "0xc419b0",
+        "name": "Api::OneMe::Packets::Events::NotificationFoldersData::Response",
+        "fields": [
+          {
+            "name": "folderSync",
+            "type": {
+              "full": "int64_t",
+              "name": "int64_t",
+              "optional": false,
+              "array": false,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "folders",
+            "type": {
+              "full": "std::optional<std::vector<Api::OneMe::Types::ChatFolder>>",
+              "name": "Api::OneMe::Types::ChatFolder",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "foldersOrder",
+            "type": {
+              "full": "std::optional<std::vector<std::string>>",
+              "name": "std::string",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          },
+          {
+            "name": "allFilterExcludeFolders",
+            "type": {
+              "full": "std::optional<std::vector<std::string>>",
+              "name": "std::string",
+              "optional": true,
+              "array": true,
+              "map": false,
+              "map_key": null,
+              "map_value": null,
+              "polymorphic": false,
+              "polymorphic_base": null
+            },
+            "required": true
+          }
+        ],
+        "warn": null
+      }
+    },
+    {
       "opcode": 293,
       "request": {
         "offset": null,
@@ -13117,7 +13423,7 @@
     },
     {
       "name": "Api::OneMe::Packets::ComplainReasonsGet::ComplainsTypeReasonList",
-      "offset": "0x1e16a0",
+      "offset": "0x1e2210",
       "fields": [
         {
           "name": "reasonId",
@@ -17386,7 +17692,7 @@
     },
     {
       "name": "Api::OneMe::Types::MessageElement::AttributesMap",
-      "offset": "0x1af9a0",
+      "offset": "0x33bd00",
       "fields": [
         {
           "name": "url",

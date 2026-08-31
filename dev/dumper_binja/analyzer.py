@@ -75,9 +75,17 @@ def _iter_strings(bv):
     """Yield (value: str, address: int) for all strings in the binary."""
     for s in bv.get_strings():
         try:
-            raw = bv.read(s.start, s.length)
+            read_len = max(s.length, 1024)
+            raw = bv.read(s.start, read_len)
+            if raw:
+                null_pos = raw.find(b"\x00")
+                if null_pos != -1:
+                    raw = raw[:null_pos]
         except Exception:
-            continue
+            try:
+                raw = bv.read(s.start, s.length)
+            except Exception:
+                continue
         try:
             val = raw.decode("ascii", errors="ignore")
         except Exception:
