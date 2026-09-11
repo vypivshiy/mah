@@ -30,6 +30,7 @@
 ```
 .
 ├── dev/                  дамперы, кодогенератор, документация протокола
+│   ├── dumper_rust/      автономный дампер на Rust (~300 мс, $0 лицензий, RTTI/iced-x86)
 │   ├── dumper/           дампер для IDA Pro 7.1+ (hex-rays)
 │   ├── dumper_binja/     дампер для Binary Ninja 5.2+ (IL-based, точнее по типам полей)
 │   ├── generate_go.py    PoC-example кодогенератор SDK для Go из ida-dump
@@ -52,6 +53,7 @@ TCP/TLS, фиксированный **10-байтный заголовок** (bi
 
 | Компонент | Что нужно |
 | --- | --- |
+| Дампер (Rust) | Rust toolchain (`cargo build --release`), без внешних дизассемблеров |
 | Дампер (IDA) | IDA Pro 7.1+ с декомпилятором hex-rays (free не подойдёт) |
 | Дампер (Binja) | Binary Ninja 5.2+, версия Personal или выше |
 | Дамп config | Python 3.8+ |

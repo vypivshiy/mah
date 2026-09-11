@@ -22,3 +22,7 @@ wheels/
 # binary ninja database
 *.bndb
 *.i64
+# SLOP documents
+.scratch/*
+# Rust target
+target/
