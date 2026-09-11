@@ -1,4 +1,4 @@
-use dumper_rust::dumper::{Dumper, DumperFormat, DumperOptions};
+use dumper_rust::dumper::{Dumper, DumperOptions};
 use dumper_rust::pe::PeImage;
 use dumper_rust::rtti::RttiEngine;
 use dumper_rust::scanner::ProtocolScanner;
@@ -22,7 +22,6 @@ fn test_dumper_full_pipeline_structural_invariants() {
             version: String::new(),
             build: 0,
         },
-        format: DumperFormat::Binja,
     };
 
     let start_time = Instant::now();
@@ -44,35 +43,30 @@ fn test_dumper_full_pipeline_structural_invariants() {
         );
     }
 
-    // 1. Dynamic version invariant in Binja format (inside options, root omitted)
-    let opts = result.options.as_ref().expect("Options must be present in Binja mode");
-    assert!(!opts.version.is_empty(), "App version must be dynamically detected");
-    assert!(opts.build > 0, "Build number must be positive");
-    assert!(result.app_version.is_none(), "Root app_version must be omitted in Binja mode");
-    assert!(result.build_number.is_none(), "Root build_number must be omitted in Binja mode");
+    // 1. Dynamic version invariant in canonical Binja format
+    assert!(!result.options.version.is_empty(), "App version must be dynamically detected");
+    assert!(result.options.build > 0, "Build number must be positive");
 
     // 2. Packets invariants (exactly 128 packets)
     assert_eq!(result.packets.len(), 128, "Must discover exactly 128 packets");
     let mut packet_opcodes = HashSet::new();
     for p in &result.packets {
-        let opcode = p.get("opcode").and_then(|v| v.as_u64()).expect("Packet must have opcode");
+        let opcode = p.opcode;
         assert!(opcode > 0, "Opcode must be positive");
         assert!(
             packet_opcodes.insert(opcode),
             "Duplicate packet opcode: {}",
             opcode
         );
-        let req_name = p.pointer("/request/name").and_then(|v| v.as_str()).expect("Req name missing");
-        let resp_name = p.pointer("/response/name").and_then(|v| v.as_str()).expect("Resp name missing");
-        assert!(!req_name.is_empty());
-        assert!(!resp_name.is_empty());
+        assert!(!p.request.name.is_empty());
+        assert!(!p.response.name.is_empty());
     }
 
     // 3. Events invariants (exactly 24 events)
     assert_eq!(result.events.len(), 24, "Must discover exactly 24 events");
     let mut event_opcodes = HashSet::new();
     for e in &result.events {
-        let opcode = e.get("opcode").and_then(|v| v.as_u64()).expect("Event must have opcode");
+        let opcode = e.opcode;
         assert!(opcode > 0, "Event opcode must be positive");
         assert!(
             event_opcodes.insert(opcode),
@@ -81,17 +75,15 @@ fn test_dumper_full_pipeline_structural_invariants() {
         );
     }
     assert!(
-        result.events.iter().any(|e| e.get("kind").and_then(|v| v.as_str()) == Some("special_packet")),
+        result.events.iter().any(|e| e.kind.as_deref() == Some("special_packet")),
         "Must contain special factory packet (e.g. Ping)"
     );
 
     // 4. Polymorphic models invariants: 4 roots present
-    assert!(result.polymorphic_models.is_array());
-    let poly_arr = result.polymorphic_models.as_array().unwrap();
-    assert_eq!(poly_arr.len(), 4, "Must discover exactly 4 polymorphic roots");
-    let poly_root_names: HashSet<&str> = poly_arr
+    assert_eq!(result.polymorphic_models.len(), 4, "Must discover exactly 4 polymorphic roots");
+    let poly_root_names: HashSet<&str> = result.polymorphic_models
         .iter()
-        .filter_map(|pm| pm.get("name").and_then(|v| v.as_str()))
+        .map(|pm| pm.name.as_str())
         .collect();
     assert!(poly_root_names.contains("Api::OneMe::Types::BaseAttachment"));
     assert!(poly_root_names.contains("Api::OneMe::Types::Log::EventParams"));
@@ -99,59 +91,42 @@ fn test_dumper_full_pipeline_structural_invariants() {
     assert!(poly_root_names.contains("Api::OneMe::Types::Outgoing::BaseAttachment"));
 
     // 5. Models invariants (BFS discovery) & Transitive discovery of VideoCollage
-    assert!(result.models.is_array());
-    let models_arr = result.models.as_array().unwrap();
-    assert!(!models_arr.is_empty());
+    assert!(!result.models.is_empty());
 
-    let video_collage = models_arr
+    let video_collage = result.models
         .iter()
-        .find(|m| m.get("name").and_then(|v| v.as_str()) == Some("Api::OneMe::Types::VideoCollage"))
+        .find(|m| m.name == "Api::OneMe::Types::VideoCollage")
         .expect("VideoCollage must be transitively discovered in models");
-    let vc_fields = video_collage
-        .get("fields")
-        .and_then(|v| v.as_array())
-        .expect("VideoCollage must have fields");
-    let vc_field_names: Vec<&str> = vc_fields
+    let vc_field_names: Vec<&str> = video_collage.fields
         .iter()
-        .filter_map(|f| f.get("name").and_then(|v| v.as_str()))
+        .map(|f| f.name.as_str())
         .collect();
     assert_eq!(vc_field_names, vec!["url", "frequency", "height", "width", "count"]);
 
     // 6. Cleanliness invariants: no blacklisted false fields & no raw MSVC primitives
     let blacklisted = ["PUBLIC", "POLL", "BlacklistConverter"];
-    let check_fields_cleanliness = |fields: &[serde_json::Value]| {
+    let check_fields_cleanliness = |fields: &[dumper_rust::extractor::ExtractedField]| {
         for f in fields {
-            let name = f.get("name").and_then(|v| v.as_str()).unwrap_or("");
             for bad in &blacklisted {
-                assert_ne!(&name, bad, "Blacklisted field name '{}' leaked into output", bad);
+                assert_ne!(&f.name.as_str(), bad, "Blacklisted field name '{}' leaked into output", bad);
             }
-            if let Some(t) = f.get("type") {
-                let full = t.get("full").and_then(|v| v.as_str()).unwrap_or("");
-                assert!(!full.contains("__int64"), "Raw __int64 in type: {}", full);
-                assert!(!full.contains("signed char"), "Raw signed char in type: {}", full);
-                assert!(!full.contains("basic_string"), "Raw basic_string in type: {}", full);
+            let full = &f.field_type.full;
+            assert!(!full.contains("__int64"), "Raw __int64 in type: {}", full);
+            assert!(!full.contains("signed char"), "Raw signed char in type: {}", full);
+            assert!(!full.contains("basic_string"), "Raw basic_string in type: {}", full);
 
-                let is_opt = t.get("optional").and_then(|v| v.as_bool()).unwrap_or(false);
-                let is_req = f.get("required").and_then(|v| v.as_bool()).unwrap_or(false);
-                if is_opt {
-                    assert!(!is_req, "Field '{}' with optional type cannot be required: true", name);
-                }
+            if f.field_type.optional {
+                assert!(!f.required, "Field '{}' with optional type cannot be required: true", f.name);
             }
         }
     };
 
-    for m in models_arr {
-        if let Some(fields) = m.get("fields").and_then(|v| v.as_array()) {
-            check_fields_cleanliness(fields);
-        }
+    for m in &result.models {
+        check_fields_cleanliness(&m.fields);
     }
-    for pm in poly_arr {
-        if let Some(variants) = pm.get("variants").and_then(|v| v.as_array()) {
-            for v in variants {
-                if let Some(fields) = v.get("fields").and_then(|v| v.as_array()) {
-                    check_fields_cleanliness(fields);
-                }
-            }
+    for pm in &result.polymorphic_models {
+        for v in &pm.variants {
+            check_fields_cleanliness(&v.fields);
         }
     }
 
@@ -159,22 +134,6 @@ fn test_dumper_full_pipeline_structural_invariants() {
     let json_str = serde_json::to_string_pretty(&result).expect("Failed to serialize to JSON");
     assert!(json_str.starts_with('{'));
     assert!(json_str.ends_with('}'));
-
-    // 8. Also test Ida format output
-    let ida_opts = DumperOptions {
-        version: dumper_rust::dumper::AppVersion {
-            version: String::new(),
-            build: 0,
-        },
-        format: DumperFormat::Ida,
-    };
-    let ida_result = Dumper::dump(&pe, &rtti, &scanner, &ida_opts).expect("Failed to execute ida dump");
-    assert!(ida_result.options.is_none(), "Options must be omitted in Ida mode");
-    assert!(!ida_result.app_version.as_deref().unwrap_or("").is_empty());
-    assert!(ida_result.build_number.unwrap_or(0) > 0);
-    assert!(ida_result.models.is_object());
-    assert!(ida_result.polymorphic_models.is_object());
-    assert_eq!(ida_result.image_base.as_deref(), Some("0x180000000"));
 }
 
 #[test]

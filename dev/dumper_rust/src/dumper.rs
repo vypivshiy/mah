@@ -7,14 +7,6 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashSet};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, clap::ValueEnum, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum DumperFormat {
-    #[default]
-    Binja,
-    Ida,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppVersion {
     #[serde(rename = "app_version")]
@@ -28,7 +20,6 @@ pub type OptionsInfo = AppVersion;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DumperOptions {
     pub version: AppVersion,
-    pub format: DumperFormat,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -88,20 +79,11 @@ pub struct PolymorphicModelEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DumpResult {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub image_base: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub options: Option<OptionsInfo>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub app_version: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub build_number: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rpc_ver: Option<u32>,
-    pub packets: Vec<serde_json::Value>,
-    pub events: Vec<serde_json::Value>,
-    pub models: serde_json::Value,
-    pub polymorphic_models: serde_json::Value,
+    pub options: OptionsInfo,
+    pub packets: Vec<PacketEntry>,
+    pub events: Vec<EventEntry>,
+    pub models: Vec<ModelEntry>,
+    pub polymorphic_models: Vec<PolymorphicModelEntry>,
     pub string_enums: Vec<String>,
     pub error: serde_json::Value,
 }
@@ -380,134 +362,18 @@ impl Dumper {
             "title": "std::string",
         });
 
-        // Format according to requested schema (Binja vs Ida)
-        match options.format {
-            DumperFormat::Binja => {
-                let packets_val = serde_json::to_value(&packets)?;
-                let events_val = serde_json::to_value(&events)?;
-                let models_val = serde_json::to_value(&models_list)?;
-                let poly_val = serde_json::to_value(&polymorphic_models)?;
-
-                Ok(DumpResult {
-                    image_base: None,
-                    options: Some(OptionsInfo {
-                        version: app_ver.clone(),
-                        build: build_num,
-                    }),
-                    app_version: None,
-                    build_number: None,
-                    rpc_ver: None,
-                    packets: match packets_val {
-                        serde_json::Value::Array(arr) => arr,
-                        _ => vec![],
-                    },
-                    events: match events_val {
-                        serde_json::Value::Array(arr) => arr,
-                        _ => vec![],
-                    },
-                    models: models_val,
-                    polymorphic_models: poly_val,
-                    string_enums: scanner.string_enums.clone(),
-                    error: default_error_payload,
-                })
-            }
-            DumperFormat::Ida => {
-                // Simplify fields to string type
-                let simplify_fields = |fields: &[ExtractedField]| -> serde_json::Value {
-                    let items: Vec<serde_json::Value> = fields
-                        .iter()
-                        .map(|f| {
-                            serde_json::json!({
-                                "name": f.name,
-                                "type": f.field_type.full,
-                                "required": f.required
-                            })
-                        })
-                        .collect();
-                    serde_json::Value::Array(items)
-                };
-
-                let simplify_type_entry = |entry: &TypeDescriptorEntry| -> serde_json::Value {
-                    serde_json::json!({
-                        "full_name": entry.name,
-                        "kind": entry.name.rsplit("::").next().unwrap_or(&entry.name),
-                        "offset": entry.offset,
-                        "fields": simplify_fields(&entry.fields),
-                        "warn": entry.warn
-                    })
-                };
-
-                let mut ida_packets = Vec::new();
-                for p in &packets {
-                    ida_packets.push(serde_json::json!({
-                        "opcode": p.opcode,
-                        "request": simplify_type_entry(&p.request),
-                        "response": simplify_type_entry(&p.response)
-                    }));
-                }
-
-                let mut ida_events = Vec::new();
-                for e in &events {
-                    let mut obj = serde_json::Map::new();
-                    obj.insert("opcode".to_string(), serde_json::json!(e.opcode));
-                    if let Some(r) = &e.request {
-                        obj.insert("request".to_string(), simplify_type_entry(r));
-                    }
-                    if let Some(r) = &e.response {
-                        obj.insert("response".to_string(), simplify_type_entry(r));
-                    }
-                    ida_events.push(serde_json::Value::Object(obj));
-                }
-
-                let mut ida_models = serde_json::Map::new();
-                for m in &models_list {
-                    ida_models.insert(
-                        m.name.clone(),
-                        serde_json::json!({
-                            "full_name": m.name,
-                            "offset": m.offset,
-                            "fields": simplify_fields(&m.fields),
-                            "warn": m.warn
-                        }),
-                    );
-                }
-
-                let mut ida_poly = serde_json::Map::new();
-                for pm in &polymorphic_models {
-                    let mut variants_map = serde_json::Map::new();
-                    for v in &pm.variants {
-                        variants_map.insert(
-                            v.name.clone(),
-                            serde_json::json!({
-                                "offset": pm.offset,
-                                "fields": simplify_fields(&v.fields),
-                                "warn": null
-                            }),
-                        );
-                    }
-                    ida_poly.insert(
-                        pm.name.clone(),
-                        serde_json::json!({
-                            "variants": serde_json::Value::Object(variants_map)
-                        }),
-                    );
-                }
-
-                Ok(DumpResult {
-                    image_base: Some(format!("0x{:x}", pe.image_base)),
-                    options: None,
-                    app_version: Some(app_ver),
-                    build_number: Some(build_num),
-                    rpc_ver: Some(11),
-                    packets: ida_packets,
-                    events: ida_events,
-                    models: serde_json::Value::Object(ida_models),
-                    polymorphic_models: serde_json::Value::Object(ida_poly),
-                    string_enums: scanner.string_enums.clone(),
-                    error: default_error_payload,
-                })
-            }
-        }
+        Ok(DumpResult {
+            options: OptionsInfo {
+                version: app_ver,
+                build: build_num,
+            },
+            packets,
+            events,
+            models: models_list,
+            polymorphic_models,
+            string_enums: scanner.string_enums.clone(),
+            error: default_error_payload,
+        })
     }
 }
 

@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use clap::Parser;
-use dumper_rust::dumper::{Dumper, DumperFormat, DumperOptions};
+use dumper_rust::dumper::{Dumper, DumperOptions};
 use dumper_rust::pe::PeImage;
 use dumper_rust::rtti::RttiEngine;
 use dumper_rust::scanner::ProtocolScanner;
@@ -24,10 +24,6 @@ struct Args {
     #[arg(short, long, default_value = "dev/packets_rust.json")]
     output: PathBuf,
 
-    /// Output schema format: binja (rich decomposed types) or ida (simple types for python/go codegen)
-    #[arg(short, long, value_enum, default_value_t = DumperFormat::Binja)]
-    format: DumperFormat,
-
     /// Manual app_version override (auto-detected from binary if omitted)
     #[arg(long, default_value = "")]
     app_version: String,
@@ -42,7 +38,6 @@ fn main() -> Result<()> {
 
     println!("=== Autonomous Rust Protocol Dumper ===");
     println!("Target binary: {:?}", args.input);
-    println!("Target format: {:?}", args.format);
 
     let t_total = Instant::now();
 
@@ -73,7 +68,6 @@ fn main() -> Result<()> {
             version: args.app_version,
             build: args.build_number,
         },
-        format: args.format,
     };
 
     let t_dump = Instant::now();
@@ -88,12 +82,7 @@ fn main() -> Result<()> {
         .with_context(|| format!("Failed to write dump JSON to {:?}", args.output))?;
 
     println!("Output written to: {:?}", args.output);
-    let (v_str, b_num) = if let Some(ref opt) = result.options {
-        (opt.version.as_str(), opt.build)
-    } else {
-        (result.app_version.as_deref().unwrap_or("unknown"), result.build_number.unwrap_or(0))
-    };
-    println!("Version: {} (build {})", v_str, b_num);
+    println!("Version: {} (build {})", result.options.version, result.options.build);
     println!("Done! Total elapsed time: {:.2?}", t_total.elapsed());
 
     Ok(())
