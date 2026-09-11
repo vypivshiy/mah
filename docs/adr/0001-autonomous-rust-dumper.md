@@ -11,3 +11,4 @@ The project previously relied on IDA Pro Hex-Rays scripts and Binary Ninja IL an
 1. **Autonomous Tooling**: Build and maintain `dumper_rust` in Rust using `goblin` (PE headers), `msvc-demangler` + custom RTTI traversal (inheritance and vtables), and `iced-x86` (disassembly), running complete extraction in under 400 ms.
 2. **Schema Invariants**: Combine IDA's precision in structural boundaries (rejecting dispatchers/converters) with Binja's clean decomposed type signatures (`int32_t`, `int64_t`, `char`, clean template arguments).
 3. **Conservative Optionality**: In generated models, treat fields as `required: false` by default unless explicitly asserted by runtime flags, matching real-world protocol resilience.
+4. **Single Canonical Dump Format**: Standardize exclusively on the rich decomposed type schema for downstream client SDK codegen, eliminating legacy IDA Pro schema formatting from `dumper_rust`.
