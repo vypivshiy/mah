@@ -221,34 +221,49 @@ pub fn clean_demangled_rtti_name(s: &str) -> String {
             break;
         }
     }
-    // Normalize basic_string
+    // Normalize basic_string (both with and without leading class qualifier)
     let clean_str = clean.replace(
         "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >",
         "std::string",
     );
-    clean_str.replace(
+    let clean_str = clean_str.replace(
+        "std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >",
+        "std::string",
+    );
+    let clean_str = clean_str.replace(
         "class std::basic_string_view<char,struct std::char_traits<char> >",
+        "std::string_view",
+    );
+    clean_str.replace(
+        "std::basic_string_view<char,struct std::char_traits<char> >",
         "std::string_view",
     )
 }
 
 pub fn extract_smember_type(demangled: &str, mangled: &str) -> Option<String> {
-    if demangled.contains("SerializableMember<") {
-        if let Some(start) = demangled.find("SerializableMember<") {
+    if let Some(start) = demangled.find("SerializableMember<") {
+        // Skip ISerializableMember
+        if start == 0 || !demangled[..start].ends_with('I') {
             let inner = &demangled[start + "SerializableMember<".len()..];
-            let first_arg = extract_first_template_argument(inner)?;
-            return Some(clean_demangled_rtti_name(&first_arg));
+            if let Some(first_arg) = extract_first_template_argument(inner) {
+                let cleaned = clean_demangled_rtti_name(&first_arg);
+                if !cleaned.contains("SerializedType") && !cleaned.contains("ISerializableMember") {
+                    return Some(cleaned);
+                }
+            }
         }
     }
-    if mangled.contains("?$SerializableMember@") {
-        // Fallback to parsing from mangled
-        if let Some(pos) = mangled.find("?$SerializableMember@") {
+    if let Some(pos) = mangled.find("?$SerializableMember@") {
+        // Skip ?$ISerializableMember@
+        if pos == 0 || !mangled[..pos].ends_with('I') {
             let inner = &mangled[pos + "?$SerializableMember@".len()..];
             // Format as RTTI TypeDescriptor symbol
             let r0_symbol = format!("??_R0{}@8", inner);
             if let Ok(dem) = msvc_demangler::demangle(&r0_symbol, msvc_demangler::DemangleFlags::COMPLETE) {
                 let cleaned = clean_demangled_rtti_name(&dem);
-                return Some(cleaned);
+                if !cleaned.contains("SerializedType") && !cleaned.contains("ISerializableMember") {
+                    return Some(cleaned);
+                }
             }
         }
     }

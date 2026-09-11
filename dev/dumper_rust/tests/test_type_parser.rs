@@ -41,3 +41,49 @@ fn test_decompose_polymorphic() {
     assert!(d.optional);
     assert!(!d.array);
 }
+
+#[test]
+fn test_canonical_primitive_type_normalization() {
+    // std::optional<int> -> int32_t, std::optional<int32_t>
+    let d1 = decompose_type("std::optional<int>");
+    assert_eq!(d1.name.as_deref(), Some("int32_t"));
+    assert_eq!(d1.full, "std::optional<int32_t>");
+    assert!(d1.optional);
+
+    // signed char -> char
+    let d2 = decompose_type("signed char");
+    assert_eq!(d2.name.as_deref(), Some("char"));
+    assert_eq!(d2.full, "char");
+    assert!(!d2.optional);
+
+    // std::vector<__int64> -> int64_t, std::vector<int64_t>
+    let d3 = decompose_type("std::vector<__int64>");
+    assert_eq!(d3.name.as_deref(), Some("int64_t"));
+    assert_eq!(d3.full, "std::vector<int64_t>");
+    assert!(d3.array);
+
+    // short -> int16_t
+    let d4 = decompose_type("short");
+    assert_eq!(d4.name.as_deref(), Some("int16_t"));
+    assert_eq!(d4.full, "int16_t");
+
+    // unsigned int -> uint32_t
+    let d5 = decompose_type("unsigned int");
+    assert_eq!(d5.name.as_deref(), Some("uint32_t"));
+    assert_eq!(d5.full, "uint32_t");
+
+    // unsigned __int64 -> uint64_t
+    let d6 = decompose_type("unsigned __int64");
+    assert_eq!(d6.name.as_deref(), Some("uint64_t"));
+    assert_eq!(d6.full, "uint64_t");
+
+    // unsigned short -> uint16_t
+    let d7 = decompose_type("unsigned short");
+    assert_eq!(d7.name.as_deref(), Some("uint16_t"));
+    assert_eq!(d7.full, "uint16_t");
+
+    // unsigned char -> uint8_t
+    let d8 = decompose_type("unsigned char");
+    assert_eq!(d8.name.as_deref(), Some("uint8_t"));
+    assert_eq!(d8.full, "uint8_t");
+}

@@ -18,6 +18,88 @@ pub struct VtableXrefIndex {
     pub vtable_to_funcs: HashMap<u32, Vec<u32>>,
 }
 
+pub fn is_dispatch_function(pe: &PeImage, func_rva: u32) -> bool {
+    let func = match pe.find_function(func_rva) {
+        Some(f) => f,
+        None => return false,
+    };
+    if func.len() > 15000 {
+        return true;
+    }
+    let check_len = (func.len() as usize).min(120);
+    let slice = match pe.slice_at_rva(func.begin_address, check_len) {
+        Some(s) => s,
+        None => return false,
+    };
+    let mut decoder = Decoder::with_ip(64, slice, pe.image_base + func_rva as u64, DecoderOptions::NONE);
+    let mut count = 0;
+    let mut saw_large_eax = false;
+    while decoder.can_decode() && count < 25 {
+        let mut insn = Instruction::default();
+        decoder.decode_out(&mut insn);
+        count += 1;
+
+        if insn.mnemonic() == Mnemonic::Mov && insn.op0_register() == Register::EAX {
+            if insn.op1_kind() == OpKind::Immediate32 && insn.immediate32() > 0x1000 {
+                saw_large_eax = true;
+            }
+        }
+        if insn.mnemonic() == Mnemonic::Sub && insn.op0_register() == Register::RSP {
+            if insn.op1_kind() == OpKind::Register && insn.op1_register() == Register::RAX && saw_large_eax {
+                return true;
+            }
+            if (insn.op1_kind() == OpKind::Immediate32 || insn.op1_kind() == OpKind::Immediate16)
+                && insn.immediate32() > 0x1000
+            {
+                return true;
+            }
+        }
+        if insn.mnemonic() == Mnemonic::Lea && insn.op0_register() == Register::RBP && insn.memory_base() == Register::RSP {
+            if (insn.memory_displacement64() as i64).unsigned_abs() > 0x1000 {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+pub fn contains_serializable_member_refs(pe: &PeImage, rtti: &RttiEngine, func_rva: u32) -> bool {
+    let func = match pe.find_function(func_rva) {
+        Some(f) => f,
+        None => return false,
+    };
+    let slice = match pe.slice_at_rva(func.begin_address, func.len() as usize) {
+        Some(s) => s,
+        None => return false,
+    };
+    let mut decoder = Decoder::with_ip(64, slice, pe.image_base + func_rva as u64, DecoderOptions::NONE);
+    while decoder.can_decode() {
+        let mut insn = Instruction::default();
+        decoder.decode_out(&mut insn);
+
+        if insn.mnemonic() == Mnemonic::Lea && insn.op1_kind() == OpKind::Memory && insn.memory_base() == Register::RIP {
+            let target_va = insn.memory_displacement64();
+            if target_va >= pe.image_base {
+                let target_rva = (target_va - pe.image_base) as u32;
+                if let Some(inner_t) = rtti.smember_vtables.get(&target_rva) {
+                    if !inner_t.contains("SerializedType") && !inner_t.contains("ISerializableMember") {
+                        return true;
+                    }
+                }
+            }
+        } else if insn.mnemonic() == Mnemonic::Call {
+            let target_va = insn.near_branch64();
+            if target_va >= pe.image_base {
+                let target_rva = (target_va - pe.image_base) as u32;
+                if target_rva == 0x35477 {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
 impl VtableXrefIndex {
     pub fn build(pe: &PeImage, rtti: &RttiEngine) -> Self {
         let mut vtable_to_funcs: HashMap<u32, Vec<u32>> = HashMap::new();
@@ -67,24 +149,21 @@ impl VtableXrefIndex {
         if funcs.is_empty() {
             return None;
         }
-        if funcs.len() == 1 {
-            let func_rva = funcs[0];
-            let fields = extractor.extract_from_func(func_rva).unwrap_or_default();
-            return Some((func_rva, fields));
-        }
 
-        let small_funcs: Vec<u32> = funcs
+        // Filter out functions with dispatch characteristics and verify member registration references
+        let qualified_funcs: Vec<u32> = funcs
             .iter()
             .copied()
             .filter(|&f| {
-                extractor
-                    .pe
-                    .find_function(f)
-                    .map(|func| (func.end_address - func.begin_address) <= 15000)
-                    .unwrap_or(true)
+                !is_dispatch_function(extractor.pe, f)
+                    && contains_serializable_member_refs(extractor.pe, extractor.rtti, f)
             })
             .collect();
-        let eval_funcs = if !small_funcs.is_empty() { &small_funcs } else { funcs };
+        let eval_funcs = if !qualified_funcs.is_empty() {
+            &qualified_funcs
+        } else {
+            funcs
+        };
 
         let mut best_func = eval_funcs[0];
         let mut best_fields = Vec::new();
@@ -95,15 +174,18 @@ impl VtableXrefIndex {
                 if fields.is_empty() {
                     continue;
                 }
-                let unique_count = fields.iter().map(|f| &f.name).collect::<std::collections::HashSet<_>>().len();
-                let has_duplicates = unique_count < fields.len();
-                if !has_duplicates && unique_count > best_unique_count {
+                let unique_count = fields.len();
+                if unique_count > best_unique_count {
                     best_unique_count = unique_count;
                     best_fields = fields;
                     best_func = func_rva;
-                } else if best_unique_count == 0 && unique_count > 0 {
-                    best_fields = fields;
-                    best_func = func_rva;
+                } else if unique_count == best_unique_count && unique_count > 0 {
+                    let curr_len = extractor.pe.find_function(func_rva).map(|f| f.len()).unwrap_or(u32::MAX);
+                    let best_len = extractor.pe.find_function(best_func).map(|f| f.len()).unwrap_or(u32::MAX);
+                    if curr_len < best_len {
+                        best_fields = fields;
+                        best_func = func_rva;
+                    }
                 }
             }
         }
@@ -115,6 +197,15 @@ impl VtableXrefIndex {
 pub struct FieldExtractor<'a> {
     pub pe: &'a PeImage<'a>,
     pub rtti: &'a RttiEngine,
+}
+
+#[derive(Debug)]
+struct PendingField {
+    name: String,
+    insn_idx: usize,
+    type_name: Option<String>,
+    type_insn_idx: Option<usize>,
+    required: Option<bool>,
 }
 
 impl<'a> FieldExtractor<'a> {
@@ -145,13 +236,32 @@ impl<'a> FieldExtractor<'a> {
         let mut helper_cache: HashMap<u32, Option<String>> = HashMap::new();
 
         let mut fields: Vec<ExtractedField> = Vec::new();
-        let mut pending_name: Option<String> = None;
-        let mut pending_type: Option<String> = None;
-        let mut pending_flag: Option<bool> = None;
+        let mut pending_field: Option<PendingField> = None;
+        let mut pending_r9_required: Option<bool> = None;
+        let mut insn_idx: usize = 0;
+
+        let commit_field = |pf: PendingField, fields: &mut Vec<ExtractedField>| {
+            if let Some(raw_t) = pf.type_name {
+                let field_t = decompose_type(&raw_t);
+                let req = if field_t.optional {
+                    false
+                } else {
+                    pf.required.unwrap_or(false)
+                };
+                if !fields.iter().any(|f| f.name == pf.name) {
+                    fields.push(ExtractedField {
+                        name: pf.name,
+                        field_type: field_t,
+                        required: req,
+                    });
+                }
+            }
+        };
 
         while decoder.can_decode() {
             let mut insn = Instruction::default();
             decoder.decode_out(&mut insn);
+            insn_idx += 1;
 
             match insn.mnemonic() {
                 Mnemonic::Lea => {
@@ -161,33 +271,37 @@ impl<'a> FieldExtractor<'a> {
                         if target_va >= self.pe.image_base {
                             let target_rva = (target_va - self.pe.image_base) as u32;
 
-                            // 1. Is target_rva a Vtable? (Check FIRST to prevent pointer addresses that look like ASCII from being treated as strings)
+                            // 1. Is target_rva a SerializableMember Vtable?
                             if let Some(inner_t) = self.rtti.smember_vtables.get(&target_rva) {
                                 if !inner_t.contains("SerializedType") && !inner_t.contains("ISerializableMember") {
-                                    pending_type = Some(inner_t.clone());
                                     reg_state.insert(dest_reg, RegVal::MemberVtable(inner_t.clone()));
+                                    if let Some(ref mut pf) = pending_field {
+                                        if insn_idx.saturating_sub(pf.insn_idx) <= 35 {
+                                            pf.type_name = Some(inner_t.clone());
+                                            pf.type_insn_idx = Some(insn_idx);
+                                        }
+                                    }
+                                    continue;
                                 }
-                                continue;
                             }
                             if self.rtti.vtable_to_type.contains_key(&target_rva) {
+                                reg_state.remove(&dest_reg);
                                 continue;
                             }
 
                             // 2. Is target_rva a string literal for field name?
                             if let Some(s) = self.pe.read_cstring(target_rva) {
                                 if is_valid_field_name(s) {
-                                    if let Some(name) = pending_name.take() {
-                                        let raw_t = pending_type.take().unwrap_or_else(|| "unknown".to_string());
-                                        fields.push(ExtractedField {
-                                            name,
-                                            field_type: decompose_type(&raw_t),
-                                            required: pending_flag.take().unwrap_or(true),
-                                        });
+                                    if let Some(pf) = pending_field.take() {
+                                        commit_field(pf, &mut fields);
                                     }
-                                    pending_name = Some(s.to_string());
-                                    pending_type = None;
-                                    pending_flag = None;
-
+                                    pending_field = Some(PendingField {
+                                        name: s.to_string(),
+                                        insn_idx,
+                                        type_name: None,
+                                        type_insn_idx: None,
+                                        required: None,
+                                    });
                                     reg_state.insert(dest_reg, RegVal::StringLiteral);
                                     continue;
                                 }
@@ -197,20 +311,26 @@ impl<'a> FieldExtractor<'a> {
                     reg_state.remove(&dest_reg);
                 }
                 Mnemonic::Mov => {
-                    // Check if setting required / optional flag
-                    if insn.op0_kind() == OpKind::Memory {
+                    if insn.op0_kind() == OpKind::Memory && insn.memory_base() != Register::RIP && insn.memory_base() != Register::None {
                         if insn.op1_kind() == OpKind::Immediate32 || insn.op1_kind() == OpKind::Immediate8 {
                             let imm = insn.immediate32();
-                            if imm == 1 {
-                                pending_flag = Some(true);
-                            } else if imm == 2 {
-                                pending_flag = Some(false);
+                            if imm == 1 || imm == 2 {
+                                if let Some(ref mut pf) = pending_field {
+                                    if pf.type_name.is_some() && insn_idx.saturating_sub(pf.type_insn_idx.unwrap_or(0)) <= 10 {
+                                        pf.required = Some(imm == 1);
+                                    }
+                                }
                             }
                         } else if insn.op1_kind() == OpKind::Register {
-                            let src_reg = insn.op1_register().full_register();
-                            if let Some(RegVal::MemberVtable(t)) = reg_state.get(&src_reg) {
-                                if pending_type.is_none() {
-                                    pending_type = Some(t.clone());
+                            if insn.op1_register().is_gpr64() {
+                                let src_reg = insn.op1_register().full_register();
+                                if let Some(RegVal::MemberVtable(t)) = reg_state.get(&src_reg) {
+                                    if let Some(ref mut pf) = pending_field {
+                                        if insn_idx.saturating_sub(pf.insn_idx) <= 35 {
+                                            pf.type_name = Some(t.clone());
+                                            pf.type_insn_idx = Some(insn_idx);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -225,10 +345,10 @@ impl<'a> FieldExtractor<'a> {
                             }
                         } else if insn.op1_kind() == OpKind::Immediate32 || insn.op1_kind() == OpKind::Immediate8 {
                             let imm = insn.immediate32();
-                            if imm == 1 {
-                                pending_flag = Some(true);
-                            } else if imm == 2 {
-                                pending_flag = Some(false);
+                            if dest_reg == Register::R9 {
+                                if imm == 1 || imm == 2 {
+                                    pending_r9_required = Some(imm == 1);
+                                }
                             }
                             reg_state.insert(dest_reg, RegVal::Imm);
                         } else {
@@ -236,16 +356,35 @@ impl<'a> FieldExtractor<'a> {
                         }
                     }
                 }
+                Mnemonic::Xor | Mnemonic::Sub => {
+                    if insn.op0_kind() == OpKind::Register {
+                        let dest_reg = insn.op0_register().full_register();
+                        if insn.op1_kind() == OpKind::Register && dest_reg == insn.op1_register().full_register() {
+                            reg_state.insert(dest_reg, RegVal::Imm);
+                        } else {
+                            reg_state.remove(&dest_reg);
+                        }
+                    }
+                }
                 Mnemonic::Call => {
-                    if pending_type.is_none() {
-                        let target_va = insn.near_branch64();
-                        if target_va >= self.pe.image_base {
-                            let target_rva = (target_va - self.pe.image_base) as u32;
-                            if let Some(t) = self.infer_helper_type(target_rva, &mut helper_cache, 0) {
-                                pending_type = Some(t);
+                    if let Some(ref mut pf) = pending_field {
+                        if let Some(req) = pending_r9_required.take() {
+                            pf.required = Some(req);
+                        }
+                        if pf.type_name.is_none() && insn_idx.saturating_sub(pf.insn_idx) <= 35 {
+                            let target_va = insn.near_branch64();
+                            if target_va >= self.pe.image_base {
+                                let target_rva = (target_va - self.pe.image_base) as u32;
+                                if target_rva != 0x35477 {
+                                    if let Some(t) = self.infer_helper_type(target_rva, &mut helper_cache, 0) {
+                                        pf.type_name = Some(t);
+                                        pf.type_insn_idx = Some(insn_idx);
+                                    }
+                                }
                             }
                         }
                     }
+                    pending_r9_required = None;
                     // MSVC x64 ABI volatile registers are invalidated across function calls
                     for v_reg in &[
                         Register::RAX,
@@ -263,13 +402,8 @@ impl<'a> FieldExtractor<'a> {
             }
         }
 
-        if let Some(name) = pending_name {
-            let raw_t = pending_type.unwrap_or_else(|| "unknown".to_string());
-            fields.push(ExtractedField {
-                name,
-                field_type: decompose_type(&raw_t),
-                required: pending_flag.unwrap_or(true),
-            });
+        if let Some(pf) = pending_field {
+            commit_field(pf, &mut fields);
         }
 
         Ok(fields)
@@ -281,14 +415,14 @@ impl<'a> FieldExtractor<'a> {
         cache: &mut HashMap<u32, Option<String>>,
         depth: usize,
     ) -> Option<String> {
-        if depth > 5 {
+        if depth > 4 {
             return None;
         }
         if let Some(cached) = cache.get(&target_rva) {
             return cached.clone();
         }
 
-        let slice = self.pe.slice_at_rva(target_rva, 128)?;
+        let slice = self.pe.slice_at_rva(target_rva, 256)?;
         let mut decoder = Decoder::with_ip(
             64,
             slice,
@@ -299,7 +433,7 @@ impl<'a> FieldExtractor<'a> {
         let mut insn_count = 0;
         let mut last_type = None;
 
-        while decoder.can_decode() && insn_count < 40 {
+        while decoder.can_decode() && insn_count < 50 {
             let mut insn = Instruction::default();
             decoder.decode_out(&mut insn);
             insn_count += 1;
@@ -314,6 +448,7 @@ impl<'a> FieldExtractor<'a> {
                     if let Some(inner_t) = self.rtti.smember_vtables.get(&rva) {
                         if !inner_t.contains("SerializedType") && !inner_t.contains("ISerializableMember") {
                             last_type = Some(inner_t.clone());
+                            break;
                         }
                     }
                 }
@@ -323,24 +458,30 @@ impl<'a> FieldExtractor<'a> {
                     if jmp_va >= self.pe.image_base {
                         let jmp_rva = (jmp_va - self.pe.image_base) as u32;
                         if let Some(t) = self.infer_helper_type(jmp_rva, cache, depth + 1) {
-                            cache.insert(target_rva, Some(t.clone()));
-                            return Some(t);
+                            last_type = Some(t);
+                            break;
                         }
                     }
                 }
                 break;
+            } else if insn.mnemonic() == Mnemonic::Call {
+                if insn.op0_kind() == OpKind::NearBranch64 {
+                    let call_va = insn.near_branch64();
+                    if call_va >= self.pe.image_base {
+                        let call_rva = (call_va - self.pe.image_base) as u32;
+                        if let Some(t) = self.infer_helper_type(call_rva, cache, depth + 1) {
+                            last_type = Some(t);
+                            break;
+                        }
+                    }
+                }
             } else if insn.mnemonic() == Mnemonic::Ret {
                 break;
             }
         }
 
-        if last_type.is_some() {
-            cache.insert(target_rva, last_type.clone());
-            return last_type;
-        }
-
-        cache.insert(target_rva, None);
-        None
+        cache.insert(target_rva, last_type.clone());
+        last_type
     }
 }
 

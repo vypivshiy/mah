@@ -17,6 +17,13 @@ pub struct RuntimeFunction {
     pub unwind_info_address: u32,
 }
 
+impl RuntimeFunction {
+    #[inline]
+    pub fn len(&self) -> u32 {
+        self.end_address.saturating_sub(self.begin_address)
+    }
+}
+
 pub struct PeImage<'a> {
     pub raw: &'a [u8],
     pub image_base: u64,

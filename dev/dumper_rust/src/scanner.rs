@@ -46,15 +46,11 @@ impl ProtocolScanner {
     }
 }
 
-pub fn scan_common_packets(pe: &PeImage) -> Result<Vec<PacketDescriptor>> {
-    let re = Regex::new(
-        r"Api::OneMe::Packets::CommonPacket<(\d+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)",
-    )?;
-
+fn scan_descriptors(pe: &PeImage, regex: &Regex) -> Result<Vec<PacketDescriptor>> {
     let mut map: BTreeMap<u32, PacketDescriptor> = BTreeMap::new();
 
     if let Some(rdata) = pe.section_data(".rdata") {
-        for cap in re.captures_iter(rdata) {
+        for cap in regex.captures_iter(rdata) {
             let opcode_str = std::str::from_utf8(&cap[1])?;
             let opcode: u32 = match opcode_str.parse() {
                 Ok(op) => op,
@@ -89,47 +85,18 @@ pub fn scan_common_packets(pe: &PeImage) -> Result<Vec<PacketDescriptor>> {
     Ok(map.into_values().collect())
 }
 
+pub fn scan_common_packets(pe: &PeImage) -> Result<Vec<PacketDescriptor>> {
+    let re = Regex::new(
+        r"Api::OneMe::Packets::CommonPacket<(\d+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)",
+    )?;
+    scan_descriptors(pe, &re)
+}
+
 pub fn scan_common_events(pe: &PeImage) -> Result<Vec<PacketDescriptor>> {
     let re = Regex::new(
         r"CommonEvent<(\d+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)\s*,\s*(?:struct\s+|class\s+)?([^,>]+)>",
     )?;
-
-    let mut map: BTreeMap<u32, PacketDescriptor> = BTreeMap::new();
-
-    if let Some(rdata) = pe.section_data(".rdata") {
-        for cap in re.captures_iter(rdata) {
-            let opcode_str = std::str::from_utf8(&cap[1])?;
-            let opcode: u32 = match opcode_str.parse() {
-                Ok(op) => op,
-                Err(_) => continue,
-            };
-            if map.contains_key(&opcode) {
-                continue;
-            }
-
-            let req = clean_type_name(std::str::from_utf8(&cap[2])?);
-            let resp = clean_type_name(std::str::from_utf8(&cap[3])?);
-
-            let req_kind = req.rsplit("::").next().unwrap_or("").to_string();
-            let resp_kind = resp.rsplit("::").next().unwrap_or("").to_string();
-
-            map.insert(
-                opcode,
-                PacketDescriptor {
-                    opcode,
-                    request_full_name: req,
-                    request_kind: req_kind,
-                    response_full_name: resp,
-                    response_kind: resp_kind,
-                    is_special: false,
-                    special_name: None,
-                    base_kind: None,
-                },
-            );
-        }
-    }
-
-    Ok(map.into_values().collect())
+    scan_descriptors(pe, &re)
 }
 
 pub fn scan_special_packets(_pe: &PeImage, rtti: &RttiEngine) -> Vec<PacketDescriptor> {

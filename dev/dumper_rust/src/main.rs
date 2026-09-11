@@ -69,8 +69,10 @@ fn main() -> Result<()> {
     );
 
     let options = DumperOptions {
-        app_version: args.app_version,
-        build_number: args.build_number,
+        version: dumper_rust::dumper::AppVersion {
+            version: args.app_version,
+            build: args.build_number,
+        },
         format: args.format,
     };
 
@@ -86,7 +88,12 @@ fn main() -> Result<()> {
         .with_context(|| format!("Failed to write dump JSON to {:?}", args.output))?;
 
     println!("Output written to: {:?}", args.output);
-    println!("Version: {} (build {})", result.app_version, result.build_number);
+    let (v_str, b_num) = if let Some(ref opt) = result.options {
+        (opt.version.as_str(), opt.build)
+    } else {
+        (result.app_version.as_deref().unwrap_or("unknown"), result.build_number.unwrap_or(0))
+    };
+    println!("Version: {} (build {})", v_str, b_num);
     println!("Done! Total elapsed time: {:.2?}", t_total.elapsed());
 
     Ok(())

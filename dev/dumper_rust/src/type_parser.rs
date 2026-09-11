@@ -91,13 +91,27 @@ pub fn extract_inner_template(s: &str, prefix: &str) -> Option<String> {
     None
 }
 
+pub fn normalize_primitive(s: &str) -> &str {
+    match s {
+        "int" => "int32_t",
+        "__int64" | "long long" => "int64_t",
+        "short" => "int16_t",
+        "signed char" => "char",
+        "unsigned int" => "uint32_t",
+        "unsigned __int64" | "unsigned long long" => "uint64_t",
+        "unsigned short" => "uint16_t",
+        "unsigned char" => "uint8_t",
+        other => other,
+    }
+}
+
 pub fn normalize_type(raw: &str) -> String {
     let s = strip_qualifiers(raw);
     if s.is_empty() {
         return String::new();
     }
     if !s.contains('<') {
-        return s.to_string();
+        return normalize_primitive(s).to_string();
     }
 
     if s.starts_with("std::basic_string<") {

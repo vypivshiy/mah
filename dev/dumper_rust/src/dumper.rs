@@ -15,17 +15,20 @@ pub enum DumperFormat {
     Ida,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DumperOptions {
-    pub app_version: String,
-    pub build_number: u32,
-    pub format: DumperFormat,
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AppVersion {
+    #[serde(rename = "app_version")]
+    pub version: String,
+    #[serde(rename = "build_number")]
+    pub build: u32,
 }
 
+pub type OptionsInfo = AppVersion;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct OptionsInfo {
-    pub app_version: String,
-    pub build_number: u32,
+pub struct DumperOptions {
+    pub version: AppVersion,
+    pub format: DumperFormat,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -89,8 +92,10 @@ pub struct DumpResult {
     pub image_base: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<OptionsInfo>,
-    pub app_version: String,
-    pub build_number: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub app_version: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build_number: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rpc_ver: Option<u32>,
     pub packets: Vec<serde_json::Value>,
@@ -110,10 +115,10 @@ impl Dumper {
         scanner: &ProtocolScanner,
         options: &DumperOptions,
     ) -> Result<DumpResult> {
-        let (app_ver, build_num) = if !options.app_version.is_empty() && options.build_number > 0 {
-            (options.app_version.clone(), options.build_number)
-        } else if let Some((v, b)) = detect_version_from_bytes(pe.raw) {
-            (v, b)
+        let (app_ver, build_num) = if !options.version.version.is_empty() && options.version.build > 0 {
+            (options.version.version.clone(), options.version.build)
+        } else if let Some(av) = detect_version_from_bytes(pe.raw) {
+            (av.version, av.build)
         } else {
             ("unknown".to_string(), 0)
         };
@@ -386,12 +391,12 @@ impl Dumper {
                 Ok(DumpResult {
                     image_base: None,
                     options: Some(OptionsInfo {
-                        app_version: app_ver.clone(),
-                        build_number: build_num,
+                        version: app_ver.clone(),
+                        build: build_num,
                     }),
-                    app_version: app_ver,
-                    build_number: build_num,
-                    rpc_ver: Some(11),
+                    app_version: None,
+                    build_number: None,
+                    rpc_ver: None,
                     packets: match packets_val {
                         serde_json::Value::Array(arr) => arr,
                         _ => vec![],
@@ -491,8 +496,8 @@ impl Dumper {
                 Ok(DumpResult {
                     image_base: Some(format!("0x{:x}", pe.image_base)),
                     options: None,
-                    app_version: app_ver,
-                    build_number: build_num,
+                    app_version: Some(app_ver),
+                    build_number: Some(build_num),
                     rpc_ver: Some(11),
                     packets: ida_packets,
                     events: ida_events,
@@ -506,7 +511,7 @@ impl Dumper {
     }
 }
 
-pub fn detect_version_from_bytes(bytes: &[u8]) -> Option<(String, u32)> {
+pub fn detect_version_from_bytes(bytes: &[u8]) -> Option<AppVersion> {
     let re = regex::bytes::Regex::new(r"\d+\.\d+\.\d+[\.:]\d+").ok()?;
     for m in re.find_iter(bytes) {
         if let Ok(s) = std::str::from_utf8(m.as_bytes()) {
@@ -514,7 +519,7 @@ pub fn detect_version_from_bytes(bytes: &[u8]) -> Option<(String, u32)> {
             if parts.len() >= 4 {
                 let ver = parts[..3].join(".");
                 if let Ok(build) = parts[3].parse::<u32>() {
-                    return Some((ver, build));
+                    return Some(AppVersion { version: ver, build });
                 }
             }
         }

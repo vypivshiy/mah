@@ -15,32 +15,28 @@
 
 ## Что это
 
-Реверс-инжиниринг протокола desktop-клиента MAX: дампер структур пакетов из `core.dll`, документация формата пакетов/транспорта и генератор SDK. Полный пайплайн:
+Реверс-инжиниринг протокола desktop-клиента MAX: дампер структур пакетов из `core.dll`, документация формата пакетов/транспорта. Полный пайплайн:
 
 ```
-+-------------+   +-------------------------+   +--------------+   +---------+   +-----------+
-| core.dll    |-->| dumper (IDA / Binja)    |-->| packets.json |-->| codegen |-->| SDK (PoC) |
-+-------------+   +-------------------------+   +--------------+   +---------+   +-----------+
-                         структуры полей         c++ типы          go / python    go_max_tcp /
-                                                                                   python_max_tcp
++-------------+   +---------------------------------+   +------------------------------------+
+| core.dll    |-->| dumper (Rust / IDA / Binja)     |-->| packets.json / packets_rust.json   |
++-------------+   +---------------------------------+   +------------------------------------+
+                         структуры полей                              c++ типы / схемы
 ```
 
 ## Структура репозитория
 
 ```
 .
-├── dev/                  дамперы, кодогенератор, документация протокола
-│   ├── dumper_rust/      автономный дампер на Rust (~300 мс, $0 лицензий, RTTI/iced-x86)
-│   ├── dumper/           дампер для IDA Pro 7.1+ (hex-rays)
-│   ├── dumper_binja/     дампер для Binary Ninja 5.2+ (IL-based, точнее по типам полей)
-│   ├── generate_go.py    PoC-example кодогенератор SDK для Go из ida-dump
-│   ├── generate_py.py    PoC-example кодогенератор SDK для Python из ida-dump
-│   ├── config_extractor.py  извлечение config.json (api-версия, endpoint, user-agent)
-│   ├── packets.json       актуальный дамп (IDA)
-│   ├── packets_binja.json актуальный дамп (Binary ninja)
-│   └── README.md         документация протокола и дампа. теоретический способ генерации SDK
-├── go_max_tcp/           PoC-клиент на Go (сгенерированный)
-└── python_max_tcp/       PoC-клиент на Python (сгенерированный)
+└── dev/                  дамперы, конфигурация, документация протокола
+    ├── dumper_rust/      автономный дампер на Rust (~300 мс, $0 лицензий, RTTI/iced-x86)
+    ├── dumper/           дампер для IDA Pro 7.1+ (hex-rays)
+    ├── dumper_binja/     дампер для Binary Ninja 5.2+ (IL-based, точнее по типам полей)
+    ├── config_extractor.py  извлечение config.json (api-версия, endpoint, user-agent)
+    ├── packets.json       актуальный дамп (IDA)
+    ├── packets_binja.json актуальный дамп (Binary ninja)
+    ├── packets_rust.json  актуальный дамп (Rust)
+    └── README.md         документация протокола и дампа
 ```
 
 ## Протокол (TL;DR)
@@ -57,12 +53,7 @@ TCP/TLS, фиксированный **10-байтный заголовок** (bi
 | Дампер (IDA) | IDA Pro 7.1+ с декомпилятором hex-rays (free не подойдёт) |
 | Дампер (Binja) | Binary Ninja 5.2+, версия Personal или выше |
 | Дамп config | Python 3.8+ |
-| PoC Go | Go toolchain (`go mod`) |
-| PoC Python | `uv` (зависимости из `pyproject.toml`) |
 
 ## See also:
 
-- примеры PoC сгенерированных SDK моделей и клиентов
-  - [golang](go_max_tcp/README.md)
-  - [python](python_max_tcp/README.md)
 - DEVEL для разработчиков-исследователей [dev/README.md](dev/README.md)
