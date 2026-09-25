@@ -1,0 +1,2984 @@
+app_version: 26.30.0
+build_number: 78253
+
+Packets
+packet opcode=5
+  request Api::OneMe::Packets::Log::Parameters rva=0x5c2100
+  request field events: std::vector<Api::OneMe::Packets::Log::LogEvent>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=6
+  request Api::OneMe::Packets::SessionInit::Payload rva=0xfee920
+  request field userAgent: Api::OneMe::Packets::UserAgent
+  request field deviceId: std::string
+  request field clientSessionId: std::optional<int64_t>
+  response Api::OneMe::Packets::SessionInit::Response rva=0xfef270
+  response field app-update-type: std::optional<int32_t>
+  response field reg-country-code: std::optional<std::vector<std::string>>
+  response field lang: std::optional<bool>
+  response field callsSeed: std::optional<int64_t>
+  response field recovery-url: std::optional<std::string>
+packet opcode=16
+  request Api::OneMe::Packets::Profile::Parameters rva=0xd88930
+  request field firstName: std::optional<std::string>
+  request field lastName: std::optional<std::string>
+  request field crop: std::optional<Api::OneMe::Types::Crop>
+  request field photoToken: std::optional<std::string>
+  request field photoId: std::optional<int64_t>
+  request field link: std::optional<std::string>
+  request field description: std::optional<std::string>
+  request field avatarType: std::optional<std::string>
+  response Api::OneMe::Packets::Profile::Response rva=0xd892a0
+  response field profile: Api::OneMe::Types::Profile
+packet opcode=17
+  request Api::OneMe::Packets::Auth::OneMe::AuthRequest::Parameters rva=0x1206d30
+  request field phone: std::string
+  request field language: std::optional<std::string>
+  request field type: std::string
+  response Api::OneMe::Packets::Auth::OneMe::AuthRequest::Response rva=0x1208c70
+  response field token: std::string
+  response field codeLength: int64_t
+  response field altActionDuration: int64_t
+  response field requestMaxDuration: std::optional<int64_t>
+  response field requestCountLeft: std::optional<int32_t>
+packet opcode=18
+  request Api::OneMe::Packets::Auth::OneMe::Auth::Parameters rva=0x58a230
+  request field token: std::string
+  request field verifyCode: std::string
+  request field authTokenType: std::string
+  response Api::OneMe::Packets::Auth::OneMe::Auth::Response rva=0x58a890
+  response field tokenAttrs: std::unordered_map<std::string, Api::OneMe::Packets::Auth::OneMe::TokenAttributes>
+  response field presetAvatars: std::optional<std::vector<Api::OneMe::Types::PresetAvatarsInfo>>
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+  response field passwordChallenge: std::optional<Api::OneMe::Packets::Auth::OneMe::PasswordChallenge>
+packet opcode=19
+  request Api::OneMe::Packets::Auth::Login::Parameters rva=0x4f8190
+  request field token: std::string
+  request field chatCacheFingerprint: std::optional<std::vector<std::byte>>
+  request field chatsSync: int64_t
+  request field contactsSync: int64_t
+  request field presenceSync: int64_t
+  request field callsSync: int64_t
+  request field draftsSync: int64_t
+  request field bannersSync: std::optional<int64_t>
+  request field configHash: std::string
+  request field interactive: bool
+  request field lastLogin: int64_t
+  response Api::OneMe::Packets::Auth::Login::Response rva=0x4f8810
+  response field time: int64_t
+  response field profile: Api::OneMe::Types::Profile
+  response field chats: std::vector<Api::OneMe::Types::Chat>
+  response field contacts: std::vector<Api::OneMe::Types::Contact>
+  response field chatMarker: std::optional<int64_t>
+  response field presence: std::optional<std::unordered_map<int64_t, Api::OneMe::Types::Presence>>
+  response field token: std::optional<std::string>
+  response field config: Api::OneMe::Types::Configuration
+  response field messages: std::optional<std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Message>>>
+  response field updates: std::optional<int32_t>
+packet opcode=20
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=22
+  request Api::OneMe::Packets::Config::Parameters rva=0xa81130
+  request field subscribe: std::optional<bool>
+  request field pushOptions: std::optional<int64_t>
+  request field settings: std::optional<Api::OneMe::Types::Configuration>
+  request field reset: std::optional<bool>
+  request field syntheticDeviceId: std::optional<std::string>
+  response Api::OneMe::Packets::Config::Response rva=0xa81510
+  response field hash: std::optional<std::string>
+  response field user: std::optional<Api::OneMe::Types::UserSettings>
+  response field chats: std::optional<std::map<int64_t, Api::OneMe::Types::ChatSettings>>
+packet opcode=23
+  request Api::OneMe::Packets::Auth::OneMe::AuthConfirm::Parameters rva=0x1206830
+  request field token: std::string
+  request field tokenType: std::string
+  request field firstName: std::string
+  request field lastName: std::optional<std::string>
+  request field birthday: std::optional<int64_t>
+  request field photoId: std::optional<int64_t>
+  request field avatarType: std::optional<std::string>
+  response Api::OneMe::Packets::Auth::OneMe::AuthConfirm::Response rva=0x1208770
+  response field token: std::string
+  response field tokenType: std::string
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+packet opcode=25
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::Avatar::PresetAvatar::Response rva=0x879130
+  response field presetAvatars: std::optional<std::vector<Api::OneMe::Types::PresetAvatarsInfo>>
+packet opcode=26
+  request Api::OneMe::Packets::Assets::GetAsset::Common::Parameters rva=0x7eb050
+  request field assetType: std::optional<std::string>
+  request field sectionId: std::optional<std::string>
+  request field from: std::optional<int64_t>
+  request field count: std::optional<int32_t>
+  request field query: std::optional<std::string>
+  response Api::OneMe::Packets::Assets::GetAsset::StickerSet::Response rva=0x7ecbb0
+  response field stickerSets: std::vector<int64_t>
+  response field marker: int64_t
+packet opcode=27
+  request Api::OneMe::Packets::Assets::Update::Parameters rva=0x7ebc80
+  request field type: std::optional<std::string>
+  request field sync: std::optional<int64_t>
+  request field chatId: std::optional<int64_t>
+  request field userId: std::optional<int64_t>
+  response Api::OneMe::Packets::Assets::Update::Response rva=0x7ed1d0
+  response field sync: int64_t
+  response field sections: std::optional<std::vector<Api::OneMe::Types::Assets::Section>>
+  response field stickersUpdates: std::optional<std::unordered_map<int64_t, int64_t>>
+  response field stickerSetsUpdates: std::optional<std::unordered_map<int64_t, int64_t>>
+  response field stickersOrder: std::optional<std::vector<std::string>>
+  response field animojiUpdates: std::optional<std::unordered_map<int64_t, int64_t>>
+  response field animojiSetUpdates: std::optional<std::unordered_map<int64_t, int64_t>>
+packet opcode=28
+  request Api::OneMe::Packets::Assets::GetByIds::Common::Parameters rva=0x7eb3a0
+  request field type: std::string
+  request field ids: std::vector<int64_t>
+  response Api::OneMe::Packets::Assets::GetByIds::AnimojiSet::Response rva=0x7ec2d0
+  response field animojiSets: std::vector<Api::OneMe::Types::AnimojiSet>
+packet opcode=29
+  request Api::OneMe::Packets::Assets::Add::Parameters rva=0x7eadb0
+  request field type: std::string
+  request field id: int64_t
+  response Api::OneMe::Packets::Assets::Add::Response rva=0x7ebf10
+  response field success: std::optional<bool>
+  response field updateTime: std::optional<int64_t>
+packet opcode=32
+  request Api::OneMe::Packets::Contact::ContactInfo::Parameters rva=0x8d6900
+  request field contactIds: std::vector<int64_t>
+  request field contactType: std::string
+  request field chatId: std::optional<int64_t>
+  response Api::OneMe::Packets::Contact::ContactInfo::Response rva=0x8d7970
+  response field contacts: std::vector<Api::OneMe::Types::Contact>
+packet opcode=34
+  request Api::OneMe::Packets::Contact::ContactUpdate::Parameters rva=0xac2b30
+  request field contactId: int64_t
+  request field action: std::string
+  request field firstName: std::optional<std::string>
+  request field lastName: std::optional<std::string>
+  response Api::OneMe::Packets::Contact::ContactUpdate::Response rva=0xac31c0
+  response field contact: std::optional<Api::OneMe::Types::Contact>
+packet opcode=35
+  request Api::OneMe::Packets::Contact::Presence::Parameters rva=0xadd9e0
+  request field contactIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Contact::Presence::Response rva=0x12f5a40
+  response field presence: std::unordered_map<int64_t, Api::OneMe::Types::Presence>
+packet opcode=36
+  request Api::OneMe::Packets::Contact::ContactList::Parameters rva=0x68f200
+  request field status: std::string
+  request field from: std::optional<int32_t>
+  request field count: std::optional<int32_t>
+  response Api::OneMe::Packets::Contact::ContactList::Response rva=0x68f550
+  response field contacts: std::vector<Api::OneMe::Types::Contact>
+packet opcode=37
+  request Api::OneMe::Packets::Search::Contact::Parameters rva=0x4e4e80
+  request field query: std::string
+  request field count: int32_t
+  request field from: int32_t
+  response Api::OneMe::Packets::Search::Contact::Response rva=0x4e50b0
+  response field result: std::optional<std::vector<Api::OneMe::Types::ContactResult>>
+  response field total: int32_t
+  response field ucpQId: std::optional<std::string>
+packet opcode=39
+  request Api::OneMe::Packets::Contact::ContactPhotos::Parameters rva=0xad38b0
+  request field contactId: int64_t
+  request field count: std::optional<int32_t>
+  request field from: std::optional<int32_t>
+  response Api::OneMe::Packets::Contact::ContactPhotos::Response rva=0xad4130
+  response field ids: std::optional<std::vector<int64_t>>
+  response field urls: std::vector<std::string>
+  response field total: int32_t
+packet opcode=41
+  request Api::OneMe::Packets::Contact::ContactCreate::Parameters rva=0xac2860
+  request field phone: std::string
+  request field firstName: std::optional<std::string>
+  request field lastName: std::optional<std::string>
+  response Api::OneMe::Packets::Contact::ContactCreate::Response rva=0xac2fc0
+  response field contact: std::optional<Api::OneMe::Types::Contact>
+  response field new: std::optional<bool>
+packet opcode=43
+  request Api::OneMe::Packets::Contact::RemoveContactPhoto::Parameters rva=0xad3ac0
+  request field photoId: int64_t
+  response Api::OneMe::Packets::Contact::RemoveContactPhoto::Response rva=0xad4380
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+packet opcode=46
+  request Api::OneMe::Packets::Contact::ContactByPhone::Parameters rva=0xac2650
+  request field phone: std::string
+  response Api::OneMe::Packets::Contact::ContactByPhone::Response rva=0xac2dd0
+  response field contact: std::optional<Api::OneMe::Types::Contact>
+packet opcode=48
+  request Api::OneMe::Packets::Chat::ChatInfo::Parameters rva=0x96eca0
+  request field chatIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Chat::ChatInfo::Response rva=0x96ed50
+  response field chats: std::vector<Api::OneMe::Types::Chat>
+packet opcode=49
+  request Api::OneMe::Packets::Chat::ChatHistory::Parameters rva=0x93d880
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field from: int64_t
+  request field backward: int32_t
+  request field backwardTime: int64_t
+  request field forward: int32_t
+  request field forwardTime: int64_t
+  request field itemType: std::optional<std::string>
+  response Api::OneMe::Packets::Chat::ChatHistory::Response rva=0x93de10
+  response field messages: std::vector<Api::OneMe::Types::Message>
+packet opcode=50
+  request Api::OneMe::Packets::Chat::ChatMark::Parameters rva=0x922d00
+  request field chatId: int64_t
+  request field mark: std::optional<int64_t>
+  request field messageId: std::optional<int64_t>
+  request field type: std::optional<std::string>
+  response Api::OneMe::Packets::Chat::ChatMark::Response rva=0x922fb0
+  response field mark: std::optional<int64_t>
+  response field unread: std::optional<int32_t>
+packet opcode=51
+  request Api::OneMe::Packets::Chat::ChatMedia::Parameters rva=0x9c8760
+  request field chatId: int64_t
+  request field messageId: std::optional<int64_t>
+  request field attachTypes: std::optional<std::vector<std::string>>
+  request field fileAttachmentTypes: std::optional<std::vector<std::string>>
+  request field forward: std::optional<int32_t>
+  request field backward: std::optional<int32_t>
+  response Api::OneMe::Packets::Chat::ChatMedia::Response rva=0x9c8bb0
+  response field messages: std::vector<Api::OneMe::Types::Message>
+  response field pos: std::optional<int32_t>
+  response field total: int32_t
+  response field forward: std::optional<int64_t>
+  response field backward: std::optional<int64_t>
+packet opcode=52
+  request Api::OneMe::Packets::Chat::ChatDelete::Parameters rva=0x9e5710
+  request field chatId: int64_t
+  request field lastEventTime: std::optional<int64_t>
+  request field forAll: std::optional<bool>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=53
+  request Api::OneMe::Packets::Chat::ChatList::Parameters rva=0x9a5e60
+  request field marker: int64_t
+  response Api::OneMe::Packets::Chat::ChatList::Response rva=0x9a6050
+  response field chats: std::vector<Api::OneMe::Types::Chat>
+  response field marker: int64_t
+packet opcode=54
+  request Api::OneMe::Packets::Chat::ChatClear::Parameters rva=0x9e5470
+  request field chatId: int64_t
+  request field lastEventTime: int64_t
+  request field forAll: std::optional<bool>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=55
+  request Api::OneMe::Packets::Chat::ChatUpdate::Parameters rva=0x68ee20
+  request field chatId: std::optional<int64_t>
+  request field pinMessageId: std::optional<int64_t>
+  request field notifyPin: std::optional<bool>
+  request field access: std::optional<std::string>
+  request field theme: std::optional<std::string>
+  request field description: std::optional<std::string>
+  request field link: std::optional<std::string>
+  request field photoToken: std::optional<std::string>
+  request field revokePrivateLink: std::optional<bool>
+  request field removeLink: std::optional<bool>
+  request field changeOwnerId: std::optional<int64_t>
+  request field options: std::optional<std::map<std::string, bool>>
+  response Api::OneMe::Packets::Chat::ChatUpdate::Response rva=0x68f4a0
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+packet opcode=56
+  request Api::OneMe::Packets::Chat::CheckLink::Parameters rva=0x998080
+  request field link: std::string
+  request field linkType: std::string
+  response Api::OneMe::Packets::Chat::CheckLink::Response rva=0x9982d0
+  response field message: std::optional<std::string>
+packet opcode=57
+  request Api::OneMe::Packets::Chat::Join::Parameters rva=0x7253a0
+  request field link: std::optional<std::string>
+  request field chatAccessToken: std::optional<std::string>
+  response Api::OneMe::Packets::Chat::Join::Response rva=0xc0e860
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+packet opcode=58
+  request Api::OneMe::Packets::Chat::ChatLeave::Parameters rva=0x9e5940
+  request field chatId: int64_t
+  response Api::OneMe::Packets::Chat::ChatLeave::Response rva=0x9e5d10
+  response field message: std::optional<Api::OneMe::Types::Message>
+packet opcode=59
+  request Api::OneMe::Packets::Chat::ChatMembers::Parameters rva=0x434db0
+  request field chatId: int64_t
+  request field type: std::optional<std::string>
+  request field marker: std::optional<int64_t>
+  request field count: std::optional<int32_t>
+  request field query: std::optional<std::string>
+  response Api::OneMe::Packets::Chat::ChatMembers::Response rva=0x4354b0
+  response field members: std::optional<std::vector<Api::OneMe::Types::ChatMember>>
+  response field marker: std::optional<int32_t>
+packet opcode=60
+  request Api::OneMe::Packets::Search::Public::Parameters rva=0x5af980
+  request field query: std::string
+  request field count: int32_t
+  request field marker: int64_t
+  request field type: std::string
+  response Api::OneMe::Packets::Search::Public::Response rva=0x5b0150
+  response field result: std::optional<std::vector<Api::OneMe::Types::PublicResult>>
+  response field total: int32_t
+  response field marker: std::optional<int32_t>
+  response field ucpQId: std::optional<std::string>
+packet opcode=61
+  request Api::OneMe::Packets::Chat::PersonalConfig::Parameters rva=0x9e5b10
+  request field chatId: std::optional<int64_t>
+  request field hideNonContactBar: std::optional<bool>
+  response Api::OneMe::Packets::Chat::PersonalConfig::Response rva=0x9e5ec0
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+packet opcode=62
+  request Api::OneMe::Packets::LiveStream::LiveStreamInfo::Parameters rva=0x4eeca0
+  request field chatIds: std::vector<int64_t>
+  response Api::OneMe::Packets::LiveStream::LiveStreamInfo::Response rva=0x4eed60
+  response field liveStreams: std::optional<std::vector<Api::OneMe::Types::LiveStream>>
+packet opcode=64
+  request Api::OneMe::Packets::Messaging::Send::Parameters rva=0x90b4c0
+  request field chatId: std::optional<int64_t>
+  request field postId: std::optional<int64_t>
+  request field userId: std::optional<int64_t>
+  request field notify: std::optional<bool>
+  request field message: Api::OneMe::Types::OutgoingMessage
+  request field lastKnownDraftTime: std::optional<int64_t>
+  request field senderId: std::optional<int64_t>
+  request field type: std::optional<std::string>
+  response Api::OneMe::Packets::Messaging::Send::Response rva=0x90b7d0
+  response field chatId: int64_t
+  response field postId: std::optional<int64_t>
+  response field message: Api::OneMe::Types::Message
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+  response field unread: std::optional<int32_t>
+  response field mark: std::optional<int64_t>
+packet opcode=65
+  request Api::OneMe::Packets::Typing::Send::Parameters rva=0x119b160
+  request field chatId: int64_t
+  request field type: std::string
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=66
+  request Api::OneMe::Packets::Messaging::Delete::Parameters rva=0xc4d650
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageIds: std::vector<int64_t>
+  request field complaint: std::optional<std::string>
+  request field forMe: std::optional<bool>
+  request field itemType: std::optional<std::string>
+  response Api::OneMe::Packets::Messaging::Delete::Response rva=0xc4df50
+  response field chatId: int64_t
+  response field postId: std::optional<int64_t>
+  response field messageIds: std::vector<int64_t>
+  response field failedMessageIds: std::optional<std::vector<int64_t>>
+packet opcode=67
+  request Api::OneMe::Packets::Messaging::Edit::Parameters rva=0xc3a320
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageId: int64_t
+  request field text: std::optional<std::string>
+  request field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+  request field attachments: std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>>>
+  request field delayedAttributes: std::optional<Api::OneMe::Types::DelayedTamAttributes>
+  response Api::OneMe::Packets::Messaging::Edit::Response rva=0xc3ab90
+  response field message: Api::OneMe::Types::Message
+packet opcode=68
+  request Api::OneMe::Packets::Search::Chat::Parameters rva=0x59a380
+  request field query: std::string
+  request field count: int32_t
+  request field marker: std::string
+  response Api::OneMe::Packets::Search::Chat::Response rva=0x59a500
+  response field result: std::vector<Api::OneMe::Types::ChatResult>
+  response field total: std::optional<int32_t>
+  response field counters: std::optional<std::unordered_map<std::string, int32_t>>
+  response field marker: std::optional<std::string>
+  response field ucpQId: std::optional<std::string>
+packet opcode=69
+  request Api::OneMe::Packets::Calls::VideoChatEdit::Parameters rva=0x4564b0
+  request field conversationId: std::string
+  request field muteVideo: std::optional<char>
+  request field muteAudio: std::optional<char>
+  request field muteScreenSharing: std::optional<char>
+  request field onlyAdminCanRecord: std::optional<bool>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=71
+  request Api::OneMe::Packets::Messaging::MsgGet::Parameters rva=0x93dcc0
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Messaging::MsgGet::Response rva=0x93dfd0
+  response field messages: std::vector<Api::OneMe::Types::Message>
+packet opcode=72
+  request Api::OneMe::Packets::Search::Message::Touch::Parameters rva=0xc5df00
+  request field chatId: int64_t
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=73
+  request Api::OneMe::Packets::Search::Message::Parameters rva=0x5a7b10
+  request field chatId: int64_t
+  request field query: std::string
+  request field count: int32_t
+  request field marker: std::optional<int64_t>
+  response Api::OneMe::Packets::Search::Message::Response rva=0x5a7ce0
+  response field result: std::vector<Api::OneMe::Types::MessageResult>
+  response field marker: std::optional<int64_t>
+  response field total: std::optional<int32_t>
+  response field ucpQId: std::optional<std::string>
+packet opcode=74
+  request Api::OneMe::Packets::Chat::MsgGetStat::Parameters rva=0x540bc0
+  request field chatId: int64_t
+  request field messageIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Chat::MsgGetStat::Response rva=0x540cc0
+  response field stats: std::optional<std::map<int64_t, Api::OneMe::Types::MessageStats>>
+packet opcode=75
+  request Api::OneMe::Packets::Chat::ChatSubscribe::Parameters rva=0x916360
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field subscribe: bool
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=76
+  request Api::OneMe::Packets::Calls::VideoChatStart::Parameters rva=0x45eb40
+  request field userId: std::optional<int64_t>
+  request field chatId: std::optional<int64_t>
+  request field conversationId: std::string
+  request field type: std::optional<std::string>
+  request field withJoinLink: std::optional<bool>
+  response Api::OneMe::Packets::Calls::VideoChatStart::Response rva=0x45ed60
+  response field conversationId: std::optional<std::string>
+  response field peerId: std::optional<int64_t>
+  response field joinLink: std::optional<std::string>
+packet opcode=77
+  request Api::OneMe::Packets::Chat::ChatMembersUpdate::Parameters rva=0x434f90
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageId: std::optional<int64_t>
+  request field operation: std::string
+  request field userIds: std::optional<std::vector<int64_t>>
+  request field members: std::optional<std::vector<Api::OneMe::Types::AuthorId>>
+  request field type: std::optional<std::string>
+  request field showHistory: std::optional<bool>
+  request field permissions: std::optional<int32_t>
+  request field cleanMsgPeriod: std::optional<int32_t>
+  response Api::OneMe::Packets::Chat::ChatMembersUpdate::Response rva=0x4355b0
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+  response field deletedMessageIds: std::optional<std::vector<int64_t>>
+packet opcode=78
+  request Api::OneMe::Packets::Calls::VideoChatStartActive::Parameters rva=0x45aad0
+  request field conversationId: std::string
+  request field calleeIds: std::optional<std::vector<int64_t>>
+  request field chatId: std::optional<int64_t>
+  request field isVideo: bool
+  request field internalParams: std::string
+  response Api::OneMe::Packets::Calls::VideoChatStartActive::Response rva=0x45ae20
+  response field rejectedParticipants: std::optional<std::vector<Api::OneMe::Types::RejectedParticipant>>
+  response field conversationId: std::optional<std::string>
+  response field internalCallerParams: std::optional<std::string>
+  response field joinLink: std::optional<std::string>
+packet opcode=79
+  request Api::OneMe::Packets::Calls::VideoChatHistory::Parameters rva=0x8d6cd0
+  request field marker: int64_t
+  request field count: int32_t
+  request field forward: std::optional<bool>
+  response Api::OneMe::Packets::Calls::VideoChatHistory::Response rva=0x8d7d00
+  response field history: std::vector<Api::OneMe::Types::CallHistory>
+  response field forwardMarker: std::optional<int64_t>
+  response field backwardMarker: std::optional<int64_t>
+  response field hasMore: std::optional<bool>
+packet opcode=80
+  request Api::OneMe::Packets::Attachments::PhotoUpload::Parameters rva=0x81b1f0
+  request field count: int32_t
+  request field profile: std::optional<bool>
+  response Api::OneMe::Packets::Attachments::PhotoUpload::Response rva=0x81bfd0
+  response field url: std::string
+  response field urls: std::optional<std::vector<std::string>>
+packet opcode=82
+  request Api::OneMe::Packets::Attachments::VideoUpload::Parameters rva=0x68f360
+  request field count: int32_t
+  request field type: std::optional<char>
+  request field uploaderType: std::optional<char>
+  response Api::OneMe::Packets::Attachments::VideoUpload::Response rva=0x68f7a0
+  response field info: std::vector<Api::OneMe::Packets::Attachments::VideoUpload::VideoUploadInfo>
+  response field uploaderType: std::optional<char>
+packet opcode=83
+  request Api::OneMe::Packets::Attachments::VideoPlay::Parameters rva=0x81b4b0
+  request field videoId: int64_t
+  request field chatId: std::optional<int64_t>
+  request field postId: std::optional<int64_t>
+  request field messageId: std::optional<int64_t>
+  request field token: std::optional<std::string>
+  request field itemType: std::optional<std::string>
+  response Api::OneMe::Packets::Attachments::VideoPlay::Response rva=0x81c330
+  response field MP4_144: std::optional<std::string>
+  response field MP4_240: std::optional<std::string>
+  response field MP4_360: std::optional<std::string>
+  response field MP4_480: std::optional<std::string>
+  response field MP4_720: std::optional<std::string>
+  response field MP4_1080: std::optional<std::string>
+  response field DASH: std::optional<std::string>
+  response field O_DASH: std::optional<std::string>
+  response field HLS: std::optional<std::string>
+  response field O_HLS: std::optional<std::string>
+  response field EXTERNAL: std::optional<std::string>
+  response field live: std::optional<bool>
+  response field startTime: std::optional<int64_t>
+packet opcode=84
+  request Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Parameters rva=0x454d60
+  request field conversationId: std::string
+  response Api::OneMe::Packets::Calls::VideoChatCreateJoinLink::Response rva=0x454e20
+  response field joinLink: std::string
+packet opcode=86
+  request Api::OneMe::Packets::Chat::ChatPinSetVisibility::Parameters rva=0x927830
+  request field chatId: int64_t
+  request field show: bool
+  response Api::OneMe::Packets::Chat::ChatPinSetVisibility::Response rva=0x927b40
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+packet opcode=87
+  request Api::OneMe::Packets::Attachments::FileUpload::Parameters rva=0x81b040
+  request field count: int32_t
+  response Api::OneMe::Packets::Attachments::FileUpload::Response rva=0x81bd80
+  response field info: std::vector<Api::OneMe::Packets::Attachments::FileUpload::FileUploadInfo>
+packet opcode=88
+  request Api::OneMe::Packets::Attachments::FileDownload::Parameters rva=0x81ae40
+  request field fileId: int64_t
+  request field chatId: int64_t
+  request field messageId: int64_t
+  response Api::OneMe::Packets::Attachments::FileDownload::Response rva=0x81bb60
+  response field url: std::string
+  response field unsafe: std::optional<bool>
+packet opcode=89
+  request Api::OneMe::Packets::LinkInfo::Parameters rva=0x4e4fe0
+  request field link: std::string
+  response Api::OneMe::Packets::LinkInfo::Response rva=0x4e5510
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+  response field user: std::optional<Api::OneMe::Types::ContactResult>
+  response field message: std::optional<Api::OneMe::Types::Message>
+  response field post: std::optional<Api::OneMe::Types::Message>
+  response field startPayload: std::optional<std::string>
+  response field stickerSet: std::optional<Api::OneMe::Types::StickerSet>
+  response field videoConference: std::optional<Api::OneMe::Types::VideoConference>
+packet opcode=91
+  request Api::OneMe::Packets::Comments::GetCommentsUpdates::Parameters rva=0xa17fc0
+  request field chatId: int64_t
+  request field postIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Comments::GetCommentsUpdates::Response rva=0xa18340
+  response field commentsInfoUpdates: std::vector<Api::OneMe::Packets::Comments::GetCommentsUpdates::Response::CommentInfoUpdate>
+packet opcode=94
+  request Api::OneMe::Packets::Messaging::DeleteUserMessages::Parameters rva=0xc4db00
+  request field chatId: std::optional<int64_t>
+  request field userId: std::optional<int64_t>
+  request field postId: std::optional<int64_t>
+  request field ci: std::optional<Api::OneMe::Types::ChatId>
+  request field messageId: int64_t
+  request field authorId: std::optional<Api::OneMe::Types::AuthorId>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=96
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::SessionsInfo::Response rva=0x68f6e0
+  response field sessions: std::vector<Api::OneMe::Types::Session>
+packet opcode=97
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::SessionsClose::Response rva=0x68f610
+  response field token: std::string
+packet opcode=101
+  request Api::OneMe::Packets::Auth::OneMe::LoginRestorePassword::Parameters rva=0x1207620
+  request field password: std::string
+  request field trackId: std::string
+  request field hint: std::optional<std::string>
+  response Api::OneMe::Packets::Auth::OneMe::LoginRestorePassword::Response rva=0x12097c0
+  response field tokenAttrs: std::unordered_map<std::string, Api::OneMe::Packets::Auth::OneMe::TokenAttributes>
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+packet opcode=104
+  request Api::OneMe::Packets::Auth::OneMe::Details2FA::Parameters rva=0x66de90
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::Details2FA::Response rva=0x66fad0
+  response field password: Api::OneMe::Packets::Auth::OneMe::Details2FA::Response::Password
+packet opcode=105
+  request Api::OneMe::Packets::ExternalCallback::Parameters rva=0xb62620
+  request field url: std::string
+  response Api::OneMe::Packets::ExternalCallback::Response rva=0xb62840
+  response field botId: std::optional<int64_t>
+  response field startParam: std::optional<std::string>
+packet opcode=106
+  request Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Parameters rva=0x11cd0a0
+  request field botId: int64_t
+  response Api::OneMe::Packets::WebApp::WebAppRequestPhoneHash::Response rva=0x11cd5a0
+  response field phone: std::string
+  response field authDate: std::optional<int64_t>
+  response field hash: std::string
+packet opcode=107
+  request Api::OneMe::Packets::Auth::OneMe::ValidatePassword::Parameters rva=0x66e7c0
+  request field trackId: std::string
+  request field password: std::string
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=108
+  request Api::OneMe::Packets::Auth::OneMe::ValidateHint::Parameters rva=0x66e4f0
+  request field trackId: std::string
+  request field hint: std::string
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=109
+  request Api::OneMe::Packets::Auth::OneMe::VerifyEmail::Parameters rva=0x66ea90
+  request field email: std::optional<std::string>
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::VerifyEmail::Response rva=0x6702e0
+  response field codeLength: int32_t
+  response field blockingDuration: int32_t
+  response field trackId: std::string
+packet opcode=110
+  request Api::OneMe::Packets::Auth::OneMe::CheckEmail::Parameters rva=0x66d820
+  request field verifyCode: std::string
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::CheckEmail::Response rva=0x66f330
+  response field email: std::string
+  response field trackId: std::string
+packet opcode=111
+  request Api::OneMe::Packets::Auth::OneMe::Set2FA::Parameters rva=0x66e150
+  request field hint: std::optional<std::string>
+  request field password: std::optional<std::string>
+  request field remove2fa: std::optional<bool>
+  request field expectedCapabilities: std::vector<int16_t>
+  request field trackId: std::string
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=112
+  request Api::OneMe::Packets::Auth::OneMe::CreateTrack::Parameters rva=0x66dcf0
+  request field type: int16_t
+  response Api::OneMe::Packets::Auth::OneMe::CreateTrack::Response rva=0x66f730
+  response field trackId: std::string
+packet opcode=113
+  request Api::OneMe::Packets::Auth::OneMe::CheckPassword::Parameters rva=0x66daf0
+  request field password: std::string
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::CheckPassword::Response rva=0x66f560
+  response field trackId: std::string
+packet opcode=115
+  request Api::OneMe::Packets::Auth::OneMe::LoginCheckPassword::Parameters rva=0x1207050
+  request field password: std::string
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::LoginCheckPassword::Response rva=0x12093f0
+  response field tokenAttrs: std::unordered_map<std::string, Api::OneMe::Packets::Auth::OneMe::TokenAttributes>
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+packet opcode=116
+  request Api::OneMe::Packets::Auth::OneMe::LoginProfileDelete::Parameters rva=0x12072d0
+  request field trackId: std::string
+  request field delete: bool
+  response Api::OneMe::Packets::Auth::OneMe::LoginProfileDelete::Response rva=0x12095d0
+  response field timestamp: std::optional<int64_t>
+packet opcode=118
+  request Api::OneMe::Packets::Messaging::SendCallback::Parameters rva=0x8a5ed0
+  request field callbackId: std::string
+  request field type: std::optional<std::string>
+  request field payload: std::optional<std::string>
+  request field timestamp: std::optional<int64_t>
+  response Api::OneMe::Packets::Messaging::SendCallback::Response rva=0x8a62b0
+  response field success: bool
+  response field message: std::optional<Api::OneMe::Types::Message>
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+  response field chatAccessToken: std::optional<std::string>
+packet opcode=119
+  request Api::OneMe::Packets::Bot::Suspend::Parameters rva=0x8951a0
+  request field botId: int64_t
+  request field value: bool
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=144
+  request Api::OneMe::Packets::Bot::ChatCommands::Parameters rva=0x894fd0
+  request field chatId: int64_t
+  response Api::OneMe::Packets::Bot::ChatCommands::Response rva=0x8956e0
+  response field commands: std::vector<Api::OneMe::Types::Bot::BotCommand>
+packet opcode=145
+  request Api::OneMe::Packets::Bot::BotInfo::Parameters rva=0x894e50
+  request field botId: int64_t
+  response Api::OneMe::Packets::Bot::BotInfo::Response rva=0x895460
+  response field commands: std::vector<Api::OneMe::Types::Bot::BotCommand>
+  response field contact: Api::OneMe::Types::Contact
+  response field startMessage: std::optional<Api::OneMe::Types::Bot::StartMessage>
+packet opcode=158
+  request Api::OneMe::Packets::Calls::CallsToken::Parameters rva=0x8d6500
+  request field userId: int64_t
+  response Api::OneMe::Packets::Calls::CallsToken::Response rva=0x8d7640
+  response field token: std::string
+packet opcode=160
+  request Api::OneMe::Packets::WebApp::WebAppInitData::Parameters rva=0x11cce60
+  request field botId: int64_t
+  request field chatId: std::optional<int64_t>
+  request field startParam: std::string
+  response Api::OneMe::Packets::WebApp::WebAppInitData::Response rva=0x11cd2d0
+  response field url: std::optional<std::string>
+  response field query_id: std::optional<std::string>
+packet opcode=161
+  request Api::OneMe::Packets::Complain::Parameters rva=0xa56f90
+  request field typeId: std::optional<char>
+  request field reasonId: std::optional<char>
+  request field ids: std::vector<int64_t>
+  request field parentId: std::optional<int64_t>
+  request field postId: std::optional<int64_t>
+  request field type: std::optional<std::string>
+  request field reason: std::optional<std::string>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=162
+  request Api::OneMe::Packets::ComplainReasonsGet::Parameters rva=0x48d810
+  request field complainSync: int64_t
+  response Api::OneMe::Packets::ComplainReasonsGet::Response rva=0x48d8b0
+  response field complainSync: std::optional<int64_t>
+  response field complains: std::optional<std::vector<Api::OneMe::Packets::ComplainReasonsGet::ComplainsReason>>
+packet opcode=163
+  request Api::OneMe::Packets::Calls::History::Get::Parameters rva=0x8b9400
+  request field callHistorySync: int64_t
+  response Api::OneMe::Packets::Calls::History::Get::Response rva=0x8b9660
+  response field callHistoryItems: std::optional<std::vector<Api::OneMe::Types::CallHistoryItem>>
+  response field callHistorySync: int64_t
+  response field reset: std::optional<bool>
+packet opcode=164
+  request Api::OneMe::Packets::Calls::History::Clear::Parameters rva=0x8b9270
+  request field historyIds: std::vector<int64_t>
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=166
+  request Api::OneMe::Packets::Calls::VideoChatJoin::Parameters rva=0x457af0
+  request field joinLink: std::string
+  request field isVideo: bool
+  request field internalParams: std::string
+  response Api::OneMe::Packets::Calls::VideoChatJoin::Response rva=0x457c80
+  response field conversationId: std::string
+  response field internalParams: std::string
+packet opcode=178
+  request Api::OneMe::Packets::Reactions::MsgReact::Parameters rva=0xfc6320
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageId: int64_t
+  request field reaction: Api::OneMe::Types::MessageReaction
+  response Api::OneMe::Packets::Reactions::MsgReact::Response rva=0xfc6b40
+  response field reactionInfo: Api::OneMe::Types::MessageReactionInfo
+packet opcode=179
+  request Api::OneMe::Packets::Reactions::CancelReaction::Parameters rva=0xfc5a00
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageId: int64_t
+  response Api::OneMe::Packets::Reactions::CancelReaction::Response rva=0xfc65b0
+  response field reactionInfo: Api::OneMe::Types::MessageReactionInfo
+packet opcode=180
+  request Api::OneMe::Packets::Reactions::GetReactions::Parameters rva=0x725250
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Reactions::GetReactions::Response rva=0x726260
+  response field messagesReactions: std::map<int64_t, Api::OneMe::Types::MessageReactionInfo>
+packet opcode=181
+  request Api::OneMe::Packets::Reactions::GetDetailedReactions::Parameters rva=0xfc5db0
+  request field chatId: int64_t
+  request field postId: std::optional<int64_t>
+  request field messageId: int64_t
+  request field reaction: std::optional<std::string>
+  request field marker: std::optional<int64_t>
+  request field count: std::optional<int32_t>
+  response Api::OneMe::Packets::Reactions::GetDetailedReactions::Response rva=0xfc68c0
+  response field reactions: std::optional<std::vector<Api::OneMe::Types::MessageReactionEntry>>
+  response field reactionInfo: std::optional<Api::OneMe::Types::MessageReactionInfo>
+  response field yourReaction: std::optional<Api::OneMe::Types::MessageReactionEntry>
+  response field marker: std::optional<int64_t>
+packet opcode=198
+  request Api::OneMe::Packets::Chat::CommonChatList::Parameters rva=0xa503a0
+  request field userIds: std::vector<int64_t>
+  request field count: std::optional<int32_t>
+  request field marker: std::optional<int64_t>
+  response Api::OneMe::Packets::Chat::CommonChatList::Response rva=0xa50690
+  response field commonChats: std::vector<Api::OneMe::Types::Chat>
+  response field hasMore: std::optional<bool>
+  response field marker: std::optional<int64_t>
+packet opcode=199
+  request Api::OneMe::Packets::ProfileDelete::Parameters rva=0xd88cf0
+  request field delete: bool
+  request field type: std::optional<int16_t>
+  response Api::OneMe::Packets::ProfileDelete::Response rva=0xd89440
+  response field timestamp: std::optional<int64_t>
+packet opcode=200
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::GetDeleteTamUserTime::Response rva=0xd89120
+  response field timestamp: int64_t
+packet opcode=202
+  request Api::OneMe::Packets::TranscribeMedia::Parameters rva=0x9d44d0
+  request field chatId: int64_t
+  request field messageId: int64_t
+  request field mediaId: int64_t
+  response Api::OneMe::Packets::TranscribeMedia::Response rva=0x9d47c0
+  response field transcription: std::optional<std::string>
+  response field transcriptionStatus: char
+packet opcode=203
+  request Api::OneMe::Packets::Attachments::PhotoUrlRefresh::Parameters rva=0x843120
+  request field media: std::vector<Api::OneMe::Packets::Attachments::PhotoUrlRefresh::PhotosUpdate>
+  request field itemType: std::optional<std::string>
+  response Api::OneMe::Packets::Attachments::PhotoUrlRefresh::Response rva=0x8436f0
+  response field media: std::vector<Api::OneMe::Types::PhotoAttachment>
+packet opcode=208
+  request Api::OneMe::Packets::Stories::StoriesList::Parameters rva=0x10a8f60
+  request field cursor: std::string
+  request field count: std::optional<int32_t>
+  response Api::OneMe::Packets::Stories::StoriesList::Response rva=0x10aa540
+  response field cursor: std::optional<std::string>
+  response field storiesPreviews: std::vector<Api::OneMe::Types::StoriesPreview>
+packet opcode=209
+  request Api::OneMe::Packets::Stories::StoriesListByOwnerId::Parameters rva=0x10a9180
+  request field owners: std::vector<Api::OneMe::Types::StoryOwner>
+  response Api::OneMe::Packets::Stories::StoriesListByOwnerId::Response rva=0x10aa750
+  response field storiesPreviews: std::vector<Api::OneMe::Types::StoriesPreview>
+packet opcode=210
+  request Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Parameters rva=0x10a8670
+  request field owners: std::vector<Api::OneMe::Types::StoryOwner>
+  response Api::OneMe::Packets::Stories::StoriesGetByOwnerId::Response rva=0x10a9cc0
+  response field peerStories: std::vector<Api::OneMe::Types::PeerStories>
+  response field storiesPreviews: std::vector<Api::OneMe::Types::StoriesPreview>
+packet opcode=211
+  request Api::OneMe::Packets::Stories::StoriesGetStats::Parameters rva=0x10a8d50
+  request field storyIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Stories::StoriesGetStats::Response rva=0x10aa2e0
+  response field storyStats: std::vector<Api::OneMe::Types::StoryStat>
+packet opcode=212
+  request Api::OneMe::Packets::Stories::StoriesGetDetailedStats::Parameters rva=0x10a8af0
+  request field storyId: int64_t
+  request field filter: std::optional<char>
+  request field marker: std::optional<int64_t>
+  response Api::OneMe::Packets::Stories::StoriesGetDetailedStats::Response rva=0x10aa0d0
+  response field storyDetailedStats: std::vector<Api::OneMe::Types::StoryDetailedStats>
+  response field marker: std::optional<int64_t>
+packet opcode=213
+  request Api::OneMe::Packets::Stories::StoriesReact::Parameters rva=0x10a9600
+  request field owner: Api::OneMe::Types::StoryOwner
+  request field storyId: int64_t
+  request field reaction: std::optional<Api::OneMe::Types::StoryReaction>
+  response Api::OneMe::Packets::Stories::StoriesReact::Response rva=0x10aaa30
+  response field success: bool
+packet opcode=214
+  request Api::OneMe::Packets::Stories::StoriesMark::Parameters rva=0x10a9360
+  request field owner: Api::OneMe::Types::StoryOwner
+  request field storyId: int64_t
+  response Api::OneMe::Packets::Stories::StoriesMark::Response rva=0x10aa8d0
+  response field success: bool
+packet opcode=217
+  request Api::OneMe::Packets::Stories::StoriesEdit::Parameters rva=0x10a8470
+  request field storyId: int64_t
+  request field settings: std::optional<int32_t>
+  response Api::OneMe::Packets::Stories::StoriesEdit::Response rva=0x10a9a80
+  response field story: Api::OneMe::Types::StoryItem
+packet opcode=218
+  request Api::OneMe::Packets::Stories::StoriesDelete::Parameters rva=0x10a8290
+  request field storyIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Stories::StoriesDelete::Response rva=0x10a98e0
+  response field storiesPreview: Api::OneMe::Types::StoriesPreview
+packet opcode=220
+  request Api::OneMe::Packets::Stories::StoriesGetByStoryId::Parameters rva=0x10a8870
+  request field owner: Api::OneMe::Types::StoryOwner
+  request field storyIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Stories::StoriesGetByStoryId::Response rva=0x10a9ed0
+  response field stories: std::vector<Api::OneMe::Types::StoryItem>
+packet opcode=256
+  request Api::OneMe::Packets::OrgInfo::Parameters rva=0xec42c0
+  request field organizationIds: std::vector<int64_t>
+  response Api::OneMe::Packets::OrgInfo::Response rva=0xec4780
+  response field organizations: std::vector<Api::OneMe::Types::Organization>
+packet opcode=257
+  request Api::OneMe::Packets::Reactions::SetChatReactions::Parameters rva=0xf96250
+  request field chatId: int64_t
+  request field value: std::optional<bool>
+  request field count: std::optional<char>
+  request field included: std::optional<bool>
+  request field reactionIds: std::optional<std::vector<std::string>>
+  request field reset: std::optional<bool>
+  response Api::OneMe::Packets::Reactions::SetChatReactions::Response rva=0xf96480
+  response field chatReactionsSettings: std::optional<Api::OneMe::Types::ChatReactionsSettings>
+packet opcode=258
+  request Api::OneMe::Packets::Reactions::GetChatReactions::Parameters rva=0x481890
+  request field chatIds: std::vector<int64_t>
+  response Api::OneMe::Packets::Reactions::GetChatReactions::Response rva=0x481960
+  response field chatReactionsSettings: std::optional<std::vector<Api::OneMe::Types::ChatReactionsSettings>>
+packet opcode=259
+  request Api::OneMe::Packets::Assets::Remove::Parameters rva=0x7eb970
+  request field type: std::string
+  request field ids: std::vector<int64_t>
+  response Api::OneMe::Packets::Assets::Remove::Response rva=0x7ec6b0
+  response field success: std::optional<bool>
+  response field updateTime: std::optional<int64_t>
+packet opcode=261
+  request Api::OneMe::Packets::Assets::ListModify::Parameters rva=0x7eb680
+  request field type: std::string
+  request field ids: std::vector<int64_t>
+  request field updateTime: std::optional<int64_t>
+  response Api::OneMe::Packets::Assets::ListModify::Response rva=0x7ec4a0
+  response field success: std::optional<bool>
+  response field updateTime: std::optional<int64_t>
+packet opcode=272
+  request Api::OneMe::Packets::Folders::Get::Parameters rva=0xbaba80
+  request field folderSync: std::optional<int64_t>
+  response Api::OneMe::Packets::Folders::Get::Response rva=0xbac8a0
+  response field folderSync: int64_t
+  response field folders: std::optional<std::vector<Api::OneMe::Types::ChatFolder>>
+  response field foldersOrder: std::optional<std::vector<std::string>>
+  response field allFilterExcludeFolders: std::optional<std::vector<std::string>>
+packet opcode=274
+  request Api::OneMe::Packets::Folders::Update::Parameters rva=0xbac140
+  request field id: std::string
+  request field title: std::string
+  request field emoji: std::optional<std::string>
+  request field include: std::optional<std::vector<int64_t>>
+  request field favorites: std::optional<std::vector<int64_t>>
+  request field filters: std::optional<std::vector<char>>
+  request field options: std::optional<std::vector<char>>
+  response Api::OneMe::Packets::Folders::Update::Response rva=0xbace00
+  response field folder: Api::OneMe::Types::ChatFolder
+  response field folderSync: int64_t
+  response field foldersOrder: std::optional<std::vector<std::string>>
+packet opcode=275
+  request Api::OneMe::Packets::Folders::Reorder::Parameters rva=0xbabc30
+  request field foldersOrder: std::vector<std::string>
+  response Api::OneMe::Packets::Folders::Reorder::Response rva=0xbacb60
+  response field folderSync: int64_t
+  response field foldersOrder: std::vector<std::string>
+packet opcode=276
+  request Api::OneMe::Packets::Folders::Delete::Parameters rva=0xbab8f0
+  request field folderIds: std::vector<std::string>
+  response Api::OneMe::Packets::Folders::Delete::Response rva=0xbac530
+  response field folderSync: int64_t
+  response field foldersOrder: std::vector<std::string>
+packet opcode=288
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::Auth::OneMe::CreateQr::Response rva=0x1209110
+  response field trackId: std::optional<std::string>
+  response field pollingInterval: std::optional<int64_t>
+  response field ttl: std::optional<int64_t>
+  response field qrLink: std::optional<std::string>
+packet opcode=289
+  request Api::OneMe::Packets::Auth::OneMe::AuthCheck::Parameters rva=0x1206490
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::AuthCheck::Response rva=0x12084c0
+  response field status: std::optional<Api::OneMe::Packets::Auth::OneMe::AuthCheck::Response::Status>
+packet opcode=291
+  request Api::OneMe::Packets::Auth::OneMe::AuthByTrack::Parameters rva=0x12062c0
+  request field trackId: std::string
+  response Api::OneMe::Packets::Auth::OneMe::AuthByTrack::Response rva=0x1208260
+  response field tokenAttrs: std::optional<std::unordered_map<std::string, Api::OneMe::Packets::Auth::OneMe::TokenAttributes>>
+  response field profile: std::optional<Api::OneMe::Types::Profile>
+  response field passwordChallenge: std::optional<Api::OneMe::Packets::Auth::OneMe::PasswordChallenge>
+packet opcode=300
+  request Api::OneMe::Packets::Suggest::ChatSuggest::Parameters rva=0x1185ae0
+  request field chatId: std::optional<int64_t>
+  request field folderId: std::optional<std::string>
+  request field userChatIds: std::optional<std::vector<int64_t>>
+  response Api::OneMe::Packets::Suggest::ChatSuggest::Response rva=0x1185d30
+  response field chats: std::vector<Api::OneMe::Types::Chat>
+packet opcode=301
+  request Api::OneMe::Packets::Attachments::AudioPlay::Parameters rva=0x81ab70
+  request field audioId: int64_t
+  request field chatId: std::optional<int64_t>
+  request field messageId: std::optional<int64_t>
+  request field token: std::optional<std::string>
+  response Api::OneMe::Packets::Attachments::AudioPlay::Response rva=0x81b8e0
+  response field opus: std::optional<std::string>
+  response field m4a: std::optional<std::string>
+  response field mp3: std::optional<std::string>
+packet opcode=302
+  request Api::OneMe::Packets::Banners::BannersGet::Parameters rva=0x406da0
+  request field bannersSync: int64_t
+  response Api::OneMe::Packets::Banners::BannersGet::Payload rva=0x406e40
+  response field showTime: std::optional<int64_t>
+  response field banners: std::optional<std::vector<Api::OneMe::Types::Banner>>
+  response field updateTime: int64_t
+packet opcode=304
+  request Api::OneMe::Packets::Polls::SendVote::Parameters rva=0xd56290
+  request field chatId: int64_t
+  request field pollId: int64_t
+  request field messageId: int64_t
+  request field answersIds: std::vector<char>
+  response Api::OneMe::Packets::Polls::SendVote::Response rva=0xd56db0
+  response field state: Api::OneMe::Types::PollState
+packet opcode=305
+  request Api::OneMe::Packets::Polls::VotersListByAnswer::Parameters rva=0xd56650
+  request field pollId: int64_t
+  request field chatId: int64_t
+  request field messageId: int64_t
+  request field answerId: char
+  request field marker: std::optional<int64_t>
+  request field count: std::optional<int32_t>
+  response Api::OneMe::Packets::Polls::VotersListByAnswer::Response rva=0xd57010
+  response field marker: std::optional<int64_t>
+  response field voters: std::optional<std::vector<Api::OneMe::Types::PollAnswerStats>>
+  response field voteCount: std::optional<int32_t>
+packet opcode=306
+  request Api::OneMe::Packets::Polls::GetPollUpdates::Parameters rva=0xd55fc0
+  request field chatId: int64_t
+  request field polls: std::vector<Api::OneMe::Packets::Polls::GetPollUpdates::Parameters::ChatPollUpdate>
+  response Api::OneMe::Packets::Polls::GetPollUpdates::Response rva=0xd56c20
+  response field polls: std::vector<Api::OneMe::Types::Poll>
+packet opcode=307
+  request Api::OneMe::Packets::EmptyParameters
+  response Api::OneMe::Packets::EmptyResponse
+packet opcode=308
+  request Api::OneMe::Packets::EntityOrgInfo::Parameters rva=0xe903e0
+  request field entityId: Api::OneMe::Packets::EntityOrgInfo::EntityId
+  response Api::OneMe::Packets::EntityOrgInfo::Response rva=0xe90b10
+  response field buttons: std::vector<Api::OneMe::Packets::EntityOrgInfo::Button>
+
+Events
+event opcode=1
+  kind: special_packet
+  name: Api::OneMe::Packets::Ping
+  base_kind: Api::OneMe::Packets::BaseEvent
+  request Api::OneMe::Packets::Ping::Payload
+  request field interactive: bool
+event opcode=20
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::LogoutData::Response rva=0xc941c0
+  response warn: no data found
+event opcode=120
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationCallAcceptedData::Response rva=0xc94700
+  response field conversationId: std::string
+event opcode=121
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationCallFinishData::Response rva=0xc947d0
+  response field conversationId: std::string
+event opcode=128
+  request Api::OneMe::Packets::Events::NotificationMessageData::Parameters rva=0xc93230
+  request field chatId: int64_t
+  request field messageId: int64_t
+  response Api::OneMe::Packets::Events::NotificationMessageData::Payload rva=0xc93600
+  response field chatId: int64_t
+  response field postId: std::optional<int64_t>
+  response field message: Api::OneMe::Types::Message
+  response field chat: std::optional<Api::OneMe::Types::Chat>
+  response field prevMessageId: std::optional<int64_t>
+  response field unread: std::optional<int32_t>
+  response field mark: std::optional<int64_t>
+  response field invisible: std::optional<bool>
+event opcode=129
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::TypingData::Payload rva=0xc93f60
+  response field chatId: int64_t
+  response field userId: int64_t
+  response field type: std::optional<std::string>
+event opcode=130
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationMarkData::Response rva=0xc94bd0
+  response field chatId: int64_t
+  response field userId: int64_t
+  response field mark: int64_t
+  response field unread: std::optional<int32_t>
+  response field setAsUnread: std::optional<bool>
+event opcode=131
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationContactData::Response rva=0xc94970
+  response field contact: Api::OneMe::Types::Contact
+event opcode=132
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::PresenceNotificationMessageData::Payload rva=0xc93e00
+  response field userId: int64_t
+  response field presence: Api::OneMe::Types::Presence
+  response field time: std::optional<int64_t>
+event opcode=134
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::ConfigChangeData::Payload rva=0xc93320
+  response field config: Api::OneMe::Types::Configuration
+event opcode=135
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationChatData::Response rva=0xc948a0
+  response field chat: Api::OneMe::Types::Chat
+event opcode=136
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationAttachData::Response rva=0xc94580
+  response field videoId: std::optional<int64_t>
+  response field audioId: std::optional<int64_t>
+  response field fileId: std::optional<int64_t>
+  response field error: std::optional<std::string>
+event opcode=137
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Types::IncomingCall rva=0x4329b0
+  response field conversationId: std::string
+  response field callerId: int64_t
+  response field chatId: std::optional<int64_t>
+  response field sdpOffer: std::optional<std::string>
+  response field vcp: std::optional<std::string>
+  response field type: std::optional<std::string>
+  response field isContact: std::optional<bool>
+  response field country: std::optional<std::string>
+event opcode=140
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::MessagesDeleteRangeData::Response rva=0xc943c0
+  response field chat: Api::OneMe::Types::Chat
+  response field postId: std::optional<int64_t>
+  response field startTime: int64_t
+  response field endTime: int64_t
+event opcode=142
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::MessagesDeleteData::Response rva=0xc94200
+  response field chat: Api::OneMe::Types::Chat
+  response field postId: std::optional<int64_t>
+  response field messageIds: std::vector<int64_t>
+  response field ttl: std::optional<bool>
+event opcode=150
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Types::Assets::UpdateContent rva=0x3f46f0
+  response field type: std::string
+  response field id: std::optional<int64_t>
+  response field ids: std::optional<std::vector<int64_t>>
+  response field updateType: std::string
+  response field position: std::optional<int32_t>
+  response field sync: std::optional<int64_t>
+  response field recentsList: std::optional<std::vector<Api::OneMe::Types::Assets::RecentItem>>
+  response field recentEmojiList: std::optional<std::vector<Api::OneMe::Types::Assets::RecentEmojiItem>>
+event opcode=154
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationMessageDelayedData::Payload rva=0xc93910
+  response field chatId: int64_t
+  response field userId: int64_t
+  response field updateTypeId: int64_t
+  response field message: std::optional<Api::OneMe::Types::Message>
+  response field messageIds: std::optional<std::vector<int64_t>>
+  response field lastDelayedUpdateTime: int64_t
+event opcode=155
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::ReactionsChangedData::Response rva=0xc94e80
+  response field chatId: int64_t
+  response field postId: std::optional<int64_t>
+  response field messageId: int64_t
+  response field totalCount: int32_t
+  response field counters: std::optional<std::vector<Api::OneMe::Types::MessageReactionCounter>>
+event opcode=156
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::YouReactedData::Response rva=0xc95070
+  response field chatId: int64_t
+  response field postId: std::optional<int64_t>
+  response field messageId: int64_t
+  response field reactionInfo: std::optional<Api::OneMe::Types::MessageReactionInfo>
+event opcode=159
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationProfiletData::Response rva=0xc94db0
+  response field profile: Api::OneMe::Types::Profile
+event opcode=165
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationCallsHistoryData::Payload rva=0xc933f0
+  response field callHistorySync: int64_t
+  response field action: std::string
+  response field callHistoryItems: std::optional<std::vector<Api::OneMe::Types::CallHistoryItem>>
+  response field historyIds: std::optional<std::vector<int64_t>>
+  response field prevCallHistorySync: std::optional<int64_t>
+event opcode=216
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationStoriesUpdateData::Payload rva=0xc93b50
+  response field storiesPreview: Api::OneMe::Types::StoriesPreview
+event opcode=277
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationFoldersData::Response rva=0xc94a40
+  response field folderSync: int64_t
+  response field folders: std::optional<std::vector<Api::OneMe::Types::ChatFolder>>
+  response field foldersOrder: std::optional<std::vector<std::string>>
+  response field allFilterExcludeFolders: std::optional<std::vector<std::string>>
+event opcode=293
+  request Api::OneMe::Packets::Events::NoParameters
+  response Api::OneMe::Packets::Events::NotificationTranscriptionData::Payload rva=0xc93c20
+  response field chatId: int64_t
+  response field messageId: int64_t
+  response field mediaId: int64_t
+  response field transcription: std::optional<std::string>
+  response field transcriptionStatus: char
+
+Models
+model Api::OneMe::Packets::Attachments::FileUpload::FileUploadInfo rva=0x81a7e0
+  field fileId: int64_t
+  field url: std::string
+  field token: std::string
+model Api::OneMe::Packets::Attachments::PhotoUrlRefresh::PhotosUpdate rva=0x843440
+  field chatId: int64_t
+  field postId: std::optional<int64_t>
+  field messageId: int64_t
+  field photoIds: std::vector<int64_t>
+model Api::OneMe::Packets::Attachments::VideoUpload::VideoUploadInfo rva=0x68f8b0
+  field url: std::string
+  field videoId: int64_t
+  field token: std::string
+model Api::OneMe::Packets::Auth::OneMe::AuthCheck::Response::Status rva=0x1209a70
+  field loginAvailable: std::optional<bool>
+  field expiresAt: std::optional<int64_t>
+model Api::OneMe::Packets::Auth::OneMe::Details2FA::Response::Password rva=0x66ecb0
+  field enabled: bool
+  field hint: std::optional<std::string>
+  field email: std::optional<std::string>
+model Api::OneMe::Packets::Auth::OneMe::PasswordChallenge rva=0x58a3c0
+  field hint: std::optional<std::string>
+  field email: std::optional<std::string>
+  field trackId: std::string
+  field config: std::optional<Api::OneMe::Packets::Auth::OneMe::PasswordChallenge::Config>
+model Api::OneMe::Packets::Auth::OneMe::PasswordChallenge::Config rva=0x58a100
+  field passMinLen: std::optional<int32_t>
+  field passMaxLen: std::optional<int32_t>
+  field hintMaxLen: std::optional<int32_t>
+model Api::OneMe::Packets::Auth::OneMe::TokenAttributes rva=0x58abd0
+  field token: std::string
+model Api::OneMe::Packets::Comments::GetCommentsUpdates::Response::CommentInfoUpdate rva=0xa179c0
+  field postId: int64_t
+  field commentsInfo: Api::OneMe::Types::CommentsInfo
+model Api::OneMe::Packets::ComplainReasonsGet::ComplainsReason rva=0x48d2c0
+  field typeId: char
+  field reasons: std::vector<Api::OneMe::Packets::ComplainReasonsGet::ComplainsTypeReasonList>
+model Api::OneMe::Packets::ComplainReasonsGet::ComplainsTypeReasonList rva=0x48d3b0
+  field reasonId: char
+  field reasonTitle: std::string
+model Api::OneMe::Packets::EntityOrgInfo::Button rva=0xe8fb20
+  field type: std::optional<std::string>
+  field text: std::optional<std::string>
+  field url: std::optional<std::string>
+  field payload: std::optional<std::string>
+  field webApp: std::optional<std::string>
+  field quick: std::optional<bool>
+  field contactId: std::optional<int64_t>
+model Api::OneMe::Packets::EntityOrgInfo::EntityId rva=0xe900a0
+  field chatId: std::optional<Api::OneMe::Types::ChatId>
+  field userId: std::optional<int64_t>
+model Api::OneMe::Packets::Log::LogEvent rva=0x5c1960
+  field time: std::optional<int64_t>
+  field type: std::string
+  field event: std::string
+  field sessionId: int64_t
+  field userId: std::optional<int64_t>
+  field user2Id: std::optional<int64_t>
+  field params: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Log::EventParams>>
+model Api::OneMe::Packets::Polls::GetPollUpdates::Parameters::ChatPollUpdate rva=0xd559e0
+  field messageId: int64_t
+  field pollId: int64_t
+model Api::OneMe::Packets::UserAgent rva=0xfef9d0
+  field deviceType: std::string
+  field appVersion: std::string
+  field osVersion: std::string
+  field locale: std::string
+  field deviceLocale: std::string
+  field deviceName: std::string
+  field screen: std::string
+  field timezone: std::string
+  field msiProductCode: std::string
+  field buildNumber: int32_t
+model Api::OneMe::Types::AdminParticipant rva=0x42f600
+  field id: std::optional<int64_t>
+  field permissions: std::optional<int32_t>
+  field inviterId: std::optional<int64_t>
+  field alias: std::optional<std::string>
+model Api::OneMe::Types::AnimojiSet rva=0x3db070
+  field id: int64_t
+  field name: std::string
+  field iconUrl: std::string
+  field iconLottieUrl: std::optional<std::string>
+  field updateTime: int64_t
+  field animojiIds: std::vector<int64_t>
+model Api::OneMe::Types::AppAttachment rva=0x14b2240
+  field appId: int64_t
+  field name: std::string
+  field icon: std::optional<std::string>
+  field message: std::optional<std::string>
+  field state: std::optional<int32_t>
+  field timeout: std::optional<int64_t>
+model Api::OneMe::Types::Assets::RecentEmojiItem rva=0x3db420
+  field id: std::optional<int64_t>
+  field type: std::optional<std::string>
+  field value: std::optional<std::string>
+model Api::OneMe::Types::Assets::RecentItem rva=0x3db560
+  field type: std::optional<std::string>
+  field id: std::optional<int64_t>
+  field stickerId: std::optional<int64_t>
+  field gif: std::optional<Api::OneMe::Types::PhotoAttachment>
+model Api::OneMe::Types::Assets::Section rva=0x3db6f0
+  field id: std::string
+  field updateTime: std::optional<int64_t>
+  field title: std::optional<std::string>
+  field stickers: std::optional<std::vector<int64_t>>
+  field marker: std::optional<int64_t>
+  field totalCount: std::optional<int32_t>
+  field collapsed: std::optional<bool>
+  field stickerSets: std::optional<std::vector<int64_t>>
+  field recentsList: std::optional<std::vector<Api::OneMe::Types::Assets::RecentItem>>
+  field recentEmojiList: std::optional<std::vector<Api::OneMe::Types::Assets::RecentEmojiItem>>
+  field animojiSetIds: std::optional<std::vector<int64_t>>
+  field reactions: std::optional<std::vector<int64_t>>
+model Api::OneMe::Types::AudioAttachment rva=0x14b2480
+  field audioId: int64_t
+  field url: std::optional<std::string>
+  field duration: int32_t
+  field wave: std::optional<std::vector<std::byte>>
+  field token: std::optional<std::string>
+model Api::OneMe::Types::AuthorId rva=0x42f790
+  field userId: std::optional<int64_t>
+  field chatId: std::optional<Api::OneMe::Types::ChatId>
+model Api::OneMe::Types::AvatarInfo rva=0x589f90
+  field id: int64_t
+  field url: std::string
+  field def: std::optional<bool>
+model Api::OneMe::Types::Banner rva=0x406900
+  field id: std::string
+  field title: std::string
+  field settings: std::optional<int32_t>
+  field description: std::optional<std::string>
+  field priority: char
+  field repeat: std::optional<char>
+  field rerun: std::optional<int64_t>
+  field animojiId: std::optional<int64_t>
+  field url: std::optional<std::string>
+  field type: std::optional<char>
+model Api::OneMe::Types::BaseAttachment rva=0x3db300
+  field _type: std::string
+  field deleted: std::optional<bool>
+model Api::OneMe::Types::Bot::BotCommand rva=0x40e8a0
+  field botId: int64_t
+  field name: std::string
+  field description: std::optional<std::string>
+model Api::OneMe::Types::Bot::StartMessage rva=0x895b80
+  field media: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+  field text: Api::OneMe::Types::Bot::Text
+model Api::OneMe::Types::Bot::Text rva=0x40ee00
+  field text: std::string
+  field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+model Api::OneMe::Types::Button rva=0x517a60
+  field type: std::optional<std::string>
+  field text: std::optional<std::string>
+  field url: std::optional<std::string>
+  field payload: std::optional<std::string>
+  field quick: std::optional<bool>
+  field contactId: std::optional<int64_t>
+  field buttonIconType: std::optional<char>
+model Api::OneMe::Types::CallAttachment rva=0x14b2830
+  field conversationId: std::string
+  field callType: std::string
+  field hangupType: std::optional<std::string>
+  field duration: std::optional<int32_t>
+  field contactIds: std::optional<std::vector<int64_t>>
+  field joinLink: std::optional<std::string>
+model Api::OneMe::Types::CallChatMembersLoadConfig rva=0x49f480
+  field min-in-call: std::optional<int64_t>
+  field max-load-count: std::optional<int64_t>
+model Api::OneMe::Types::CallHistory rva=0x42fac0
+  field chatId: int64_t
+  field chatType: std::string
+  field contactIds: std::optional<std::vector<int64_t>>
+  field message: Api::OneMe::Types::Message
+model Api::OneMe::Types::CallHistoryItem rva=0x430390
+  field historyId: int64_t
+  field callId: std::string
+  field callName: std::optional<std::string>
+  field callerId: int64_t
+  field messageId: std::optional<int64_t>
+  field chatId: int64_t
+  field callType: std::string
+  field hangupType: std::optional<std::string>
+  field joinLink: std::optional<std::string>
+  field time: int64_t
+  field durationMs: std::optional<int64_t>
+  field groupCallType: std::optional<int32_t>
+model Api::OneMe::Types::CallRateParams rva=0x49f6f0
+  field limit: std::optional<int64_t>
+  field sdk-limit: std::optional<int64_t>
+  field duration: std::optional<int64_t>
+  field delay: std::optional<int64_t>
+model Api::OneMe::Types::Chat rva=0x4307b0
+  field id: int64_t
+  field type: std::string
+  field status: std::string
+  field owner: int64_t
+  field participants: std::map<int64_t, int64_t>
+  field participantsCount: std::optional<int64_t>
+  field created: int64_t
+  field joinTime: std::optional<int64_t>
+  field title: std::optional<std::string>
+  field baseIconUrl: std::optional<std::string>
+  field baseRawIconUrl: std::optional<std::string>
+  field lastMessage: std::optional<Api::OneMe::Types::Message>
+  field lastEventTime: int64_t
+  field cid: std::optional<int64_t>
+  field newMessages: std::optional<int32_t>
+  field prevMessageId: std::optional<int64_t>
+  field restrictions: std::optional<int32_t>
+  field access: std::optional<std::string>
+  field link: std::optional<std::string>
+  field description: std::optional<std::string>
+  field admins: std::optional<std::vector<int64_t>>
+  field adminParticipants: std::optional<std::map<int64_t, Api::OneMe::Types::AdminParticipant>>
+  field options: std::optional<std::map<std::string, bool>>
+  field pinnedMessage: std::optional<Api::OneMe::Types::Message>
+  field hidePinnedMessage: std::optional<bool>
+  field unreadReply: std::optional<bool>
+  field unreadPin: std::optional<bool>
+  field blockedParticipantsCount: std::optional<int32_t>
+  field participantsMarker: std::optional<int64_t>
+  field videoConversation: std::optional<Api::OneMe::Types::VideoConversation>
+  field hasBots: std::optional<bool>
+  field isSuspended: std::optional<bool>
+  field modified: std::optional<int64_t>
+  field liveLocationMessageIds: std::optional<std::map<int64_t, int64_t>>
+  field lastMentionMessageId: std::optional<int64_t>
+  field lastDelayedUpdateTime: std::optional<int64_t>
+  field lastFireDelayedErrorTime: std::optional<int64_t>
+  field lastReactedMessageId: std::optional<int64_t>
+  field lastReaction: std::optional<std::string>
+  field markedAsUnread: std::optional<bool>
+  field invitedBy: std::optional<int64_t>
+  field subject: std::optional<Api::OneMe::Types::MapSubject>
+  field messagesCount: std::optional<int32_t>
+  field reactions: std::optional<Api::OneMe::Types::ChatReactionsSettings>
+  field joinRequestTime: std::optional<int64_t>
+  field liveStreamUpdateTime: std::optional<int64_t>
+  field pendingJoinRequestsCount: std::optional<int32_t>
+  field participantSettings: std::optional<int32_t>
+  field commentsBlacklistCount: std::optional<int32_t>
+model Api::OneMe::Types::ChatFolder rva=0x4ccd90
+  field id: std::string
+  field title: std::string
+  field emoji: std::optional<std::string>
+  field include: std::optional<std::vector<int64_t>>
+  field favorites: std::optional<std::vector<int64_t>>
+  field filters: std::optional<std::vector<char>>
+  field options: std::optional<std::vector<char>>
+  field updateTime: int64_t
+  field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+  field templateId: std::optional<int64_t>
+  field filterSubjects: std::optional<Api::OneMe::Types::MapFilterSubjects>
+  field widgets: std::optional<std::vector<Api::OneMe::Types::FolderWidget>>
+  field sourceId: std::optional<int64_t>
+model Api::OneMe::Types::ChatId rva=0x431730
+  field type: char
+  field primaryId: int64_t
+  field secondaryId: std::optional<int64_t>
+model Api::OneMe::Types::ChatMember rva=0x431880
+  field contact: std::optional<Api::OneMe::Types::Contact>
+  field chat: std::optional<Api::OneMe::Types::Chat>
+  field presence: std::optional<Api::OneMe::Types::Presence>
+  field readMark: std::optional<int64_t>
+  field blockedCommentsTime: std::optional<int64_t>
+  field blockedById: std::optional<int64_t>
+model Api::OneMe::Types::ChatReactionsSettings rva=0x431ab0
+  field chatId: std::optional<int64_t>
+  field isActive: bool
+  field updateTime: int64_t
+  field count: std::optional<char>
+  field included: std::optional<bool>
+  field reactionIds: std::optional<std::vector<std::string>>
+model Api::OneMe::Types::ChatResult rva=0x599cb0
+  field chatId: int64_t
+  field message: Api::OneMe::Types::Message
+  field highlights: std::optional<std::vector<std::string>>
+  field section: std::optional<std::string>
+  field count: std::optional<int64_t>
+  field chat: std::optional<Api::OneMe::Types::Chat>
+model Api::OneMe::Types::ChatSettings rva=0x229290
+  field dontDisturbUntil: std::optional<int64_t>
+  field sound: std::optional<bool>
+  field vibr: std::optional<bool>
+  field led: std::optional<bool>
+  field favIndex: std::optional<int64_t>
+  field favMoveToConvId: std::optional<int64_t>
+  field favMovePosition: std::optional<int32_t>
+model Api::OneMe::Types::CommentsCounterTtl rva=0x134bf10
+  field channel: std::optional<int64_t>
+  field bigchannel: std::optional<int64_t>
+  field participantsCount: std::optional<int64_t>
+model Api::OneMe::Types::CommentsInfo rva=0x431dc0
+  field totalCount: int32_t
+model Api::OneMe::Types::Configuration rva=0x49fe50
+  field hash: std::string
+  field chats: std::optional<std::map<int64_t, Api::OneMe::Types::ChatSettings>>
+  field server: std::optional<Api::OneMe::Types::ServerSettings>
+  field experiments: std::optional<Api::OneMe::Types::ServerSettings>
+  field user: std::optional<Api::OneMe::Types::UserSettings>
+model Api::OneMe::Types::Contact rva=0x431e60
+  field id: int64_t
+  field updateTime: int64_t
+  field photoId: std::optional<int64_t>
+  field baseUrl: std::optional<std::string>
+  field baseRawUrl: std::optional<std::string>
+  field names: std::optional<std::vector<Api::OneMe::Types::ContactName>>
+  field status: std::optional<std::string>
+  field accountStatus: std::optional<int16_t>
+  field phone: std::optional<int64_t>
+  field gender: std::optional<char>
+  field bday: std::optional<std::string>
+  field options: std::optional<std::vector<std::string>>
+  field flags: std::optional<int32_t>
+  field link: std::optional<std::string>
+  field description: std::optional<std::string>
+  field webApp: std::optional<std::string>
+  field menuButton: std::optional<Api::OneMe::Types::MenuButton>
+  field profileStatus: std::optional<std::string>
+  field country: std::optional<std::string>
+  field organizationIds: std::optional<std::vector<int64_t>>
+  field registrationTime: std::optional<int64_t>
+model Api::OneMe::Types::ContactAttachment rva=0x14b2a90
+  field contactId: std::optional<int64_t>
+  field firstName: std::string
+  field lastName: std::optional<std::string>
+  field photoUrl: std::optional<std::string>
+  field phone: std::optional<std::string>
+  field vcfBody: std::optional<std::string>
+model Api::OneMe::Types::ContactName rva=0x432530
+  field firstName: std::optional<std::string>
+  field lastName: std::optional<std::string>
+  field type: std::string
+model Api::OneMe::Types::ContactResult rva=0x4e44e0
+  field contact: Api::OneMe::Types::Contact
+  field summary: std::optional<std::string>
+  field presence: std::optional<Api::OneMe::Types::Presence>
+  field friends: std::optional<std::vector<int64_t>>
+  field friendsCount: std::optional<int64_t>
+  field restricted: std::optional<bool>
+model Api::OneMe::Types::ControlAttachment rva=0x14b2cc0
+  field event: std::string
+  field userIds: std::optional<std::vector<int64_t>>
+  field title: std::optional<std::string>
+  field token: std::optional<std::string>
+  field photoToken: std::optional<std::string>
+  field crop: std::optional<Api::OneMe::Types::Crop>
+  field userId: std::optional<int64_t>
+  field url: std::optional<std::string>
+  field fullUrl: std::optional<std::string>
+  field message: std::optional<std::string>
+  field shortMessage: std::optional<std::string>
+  field showHistory: std::optional<bool>
+  field chatType: std::optional<std::string>
+  field pinnedMessage: std::optional<Api::OneMe::Types::Message>
+  field startPayload: std::optional<std::string>
+model Api::OneMe::Types::Creation2FAConfig rva=0x4a01e0
+  field enabled: std::optional<bool>
+  field pass_min_len: std::optional<int64_t>
+  field pass_max_len: std::optional<int64_t>
+  field hint_max_len: std::optional<int64_t>
+model Api::OneMe::Types::Crop rva=0x5187e0
+  field x1: float
+  field y1: float
+  field x2: float
+  field y2: float
+model Api::OneMe::Types::DelayedTamAttributes rva=0x4327b0
+  field timeToFire: int64_t
+  field notifySender: std::optional<bool>
+model Api::OneMe::Types::FileAttachment rva=0x14b31b0
+  field fileId: int64_t
+  field token: std::string
+  field size: int64_t
+  field name: std::string
+  field preview: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+model Api::OneMe::Types::FolderWidget rva=0x4cd500
+  field id: int64_t
+  field name: std::string
+  field description: std::optional<std::string>
+  field iconUrl: std::optional<std::string>
+  field appId: std::optional<int64_t>
+  field startParam: std::optional<std::string>
+  field url: std::optional<std::string>
+model Api::OneMe::Types::GeoPositionAttachment rva=0x14b33c0
+  field latitude: float
+  field longitude: float
+  field zoom: std::optional<float>
+model Api::OneMe::Types::Icon rva=0x518ee0
+  field url: std::string
+  field width: int32_t
+  field height: int32_t
+model Api::OneMe::Types::InlineKeyboardAttachment rva=0x14b3520
+  field callbackId: std::string
+  field keyboard: Api::OneMe::Types::Keyboard
+model Api::OneMe::Types::Keyboard rva=0x519410
+  field buttons: std::vector<std::vector<Api::OneMe::Types::Button>>
+model Api::OneMe::Types::LiveStream rva=0x4eead0
+  field chatId: int64_t
+  field updateTime: int64_t
+  field media: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+model Api::OneMe::Types::Log::AbStatusParams rva=0x5c14b0
+  field value: int64_t
+model Api::OneMe::Types::Log::AudioParams rva=0x5f3550
+  field aid: int64_t
+  field at: int64_t
+  field cdn_host: std::string
+  field connection_type: int64_t
+  field cached_data: int64_t
+  field asid: std::string
+  field ct: int64_t
+  field param: std::string
+model Api::OneMe::Types::Log::AudioTranscription rva=0x5cc600
+  field message_id: int64_t
+  field media_id: int64_t
+  field message_type: int64_t
+  field source_id: int64_t
+  field source_type: int64_t
+  field result_type: char
+  field duration: int64_t
+  field waiting_time: int64_t
+model Api::OneMe::Types::Log::BannerParams rva=0x5d2a70
+  field bannerType: std::string
+  field bannerSize: std::string
+  field bannerShowType: std::string
+  field screen: std::optional<int32_t>
+model Api::OneMe::Types::Log::CallEventParams rva=0x5d6460
+  field call_id: std::optional<std::string>
+  field is_group: std::optional<bool>
+  field event_label_str: std::optional<std::string>
+  field event_label_int: std::optional<int32_t>
+  field custom_feedback: std::optional<std::string>
+  field error_type: std::optional<std::string>
+  field source: std::optional<std::string>
+  field is_wave: std::optional<bool>
+model Api::OneMe::Types::Log::ChatMessageLinkParams rva=0x5dd520
+  field conversation_id: int64_t
+  field message_id: int64_t
+  field result: std::optional<std::string>
+model Api::OneMe::Types::Log::ChatSuggestParams rva=0x5df6c0
+  field channel_id: std::optional<int64_t>
+  field channel_position: std::optional<int64_t>
+  field channels_shown: std::optional<std::vector<int64_t>>
+model Api::OneMe::Types::Log::ClickParams rva=0x5e2ef0
+  field screen: int32_t
+  field screen_action_id: int64_t
+  field source_meta: Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Log::EventParams>
+model Api::OneMe::Types::Log::ContactOrBlockParams rva=0x14cc460
+  field MESSAGE_CLICKABLE_ELEMENT_ACTIONS: std::optional<int64_t>
+  field DANGEROUS_URL_ACTIONS: std::optional<std::string>
+  field SEARCH_RESPONSE: std::string
+  field CHANNEL_RECSYS_FOLDER: std::optional<int64_t>
+  field AUDIO_TRANSCRIPTION: int64_t
+  field ORGANIZATION_INFO: int64_t
+model Api::OneMe::Types::Log::ContextMenuParams rva=0x5eafd0
+  field screen: std::optional<int32_t>
+  field countChats: std::optional<int64_t>
+  field countMessages: std::optional<int64_t>
+model Api::OneMe::Types::Log::EventParams rva=0x5c16f0
+  warn: no data found
+model Api::OneMe::Types::Log::ForwardPostMeta rva=0x5e3090
+  field message_id: int64_t
+  field channel_id: int64_t
+model Api::OneMe::Types::Log::InformerParams rva=0x5ec500
+  field informer_id: std::string
+  field informer_type: int64_t
+  field result: std::optional<std::string>
+model Api::OneMe::Types::Log::InlineKeyboardActionsSourceMeta rva=0x5ee490
+  field sourceType: std::optional<int64_t>
+  field sourceId: std::optional<int64_t>
+  field messageId: std::optional<int64_t>
+  field inlineText: std::optional<std::string>
+  field inlineParamValue: std::optional<std::string>
+  field inlineButtonEvent: std::optional<int64_t>
+  field inlineButtonLocation: std::optional<int16_t>
+  field inlineButtonIconType: std::optional<int16_t>
+model Api::OneMe::Types::Log::InviteParams rva=0x5f0e20
+  field screen: int32_t
+  field entryPoint: std::string
+  field linkType: std::string
+  field status: std::string
+  field details: std::optional<std::string>
+model Api::OneMe::Types::Log::LogEventParams rva=0x14cbcc0
+  field msg: std::string
+  field details: std::optional<std::string>
+model Api::OneMe::Types::Log::MessageClickableElementParams rva=0x5e8b10
+  field message_id: std::optional<int64_t>
+  field element_type: std::optional<int32_t>
+  field source_id: std::optional<int64_t>
+  field source_type: std::optional<int32_t>
+model Api::OneMe::Types::Log::MessageSendParams rva=0x5f7d40
+  field properties: Api::OneMe::Types::Log::MessageSendProperties
+  field spans: std::vector<Api::OneMe::Types::Log::MessageSendSpan>
+  field errorType: std::optional<int64_t>
+  field errorDesc: std::optional<std::string>
+model Api::OneMe::Types::Log::MessageSendProperties rva=0x5c1c30
+  field flow: int64_t
+  field connection_type: std::optional<int64_t>
+  field attaches: std::map<int64_t, int64_t>
+  field cid: int64_t
+  field chat_id: int64_t
+  field post_id: std::optional<int64_t>
+  field chat_type: int64_t
+  field background: std::optional<int64_t>
+  field queued: std::optional<int64_t>
+  field wait_back_processing: std::optional<int64_t>
+model Api::OneMe::Types::Log::MessageSendSpan rva=0x5c1fe0
+  field name: std::string
+  field duration: int64_t
+model Api::OneMe::Types::Log::NavEventParams rva=0x5fbc90
+  field action_id: int64_t
+  field screen_to: int32_t
+  field prev_time: std::optional<int64_t>
+  field screen_from: std::optional<int32_t>
+  field pip: std::optional<int32_t>
+  field reason: std::optional<int32_t>
+  field source_id: std::optional<int64_t>
+  field source_type: std::optional<int32_t>
+model Api::OneMe::Types::Log::No2faScreenMeta rva=0x5e3190
+  field buttonId: char
+model Api::OneMe::Types::Log::OpenBroadcatButtonMeta rva=0x5e3220
+  field channel_id: int64_t
+  field hashed_broadcast_link: std::string
+model Api::OneMe::Types::Log::OrganizationInfoParams rva=0x5fd730
+  field org_id: int64_t
+  field source_type: char
+  field source_id: int64_t
+  field placement: std::string
+  field screen: int32_t
+  field is_clickable: std::optional<char>
+  field org_link_type: std::optional<std::string>
+model Api::OneMe::Types::Log::PermissionChangedParams rva=0x601280
+  field pType: std::string
+  field pStatus: std::string
+  field screen: std::optional<int32_t>
+model Api::OneMe::Types::Log::PermissionParams rva=0x5c21b0
+  field pType: std::string
+  field pStatus: std::string
+model Api::OneMe::Types::Log::PermissionStatusParams rva=0x6015a0
+  field permissions: std::vector<Api::OneMe::Types::Log::PermissionParams>
+model Api::OneMe::Types::Log::PresenceMessageCounterParams rva=0x603af0
+  field online_contact_opened: int64_t
+  field online_contact_closed: int64_t
+  field online_stranger_opened: int64_t
+  field online_stranger_closed: int64_t
+  field offline_contact_opened: int64_t
+  field offline_contact_closed: int64_t
+  field offline_stranger_opened: int64_t
+  field offline_stranger_closed: int64_t
+model Api::OneMe::Types::Log::ProfileButtonMeta rva=0x5e3330
+  field buttonName: std::string
+model Api::OneMe::Types::Log::ProfileClickableElementParams rva=0x5e8ca0
+  field element_type: std::optional<int32_t>
+  field source_id: std::optional<int64_t>
+  field source_type: std::optional<int32_t>
+model Api::OneMe::Types::Log::QrAuthParams rva=0x5cf1d0
+  field action: std::string
+  field qr_ts_ms: std::optional<int64_t>
+  field qr_ts_ms_old: std::optional<int64_t>
+  field qr_ts_ms_new: std::optional<int64_t>
+  field fail_reason_code: std::optional<int32_t>
+  field userId: std::optional<int64_t>
+  field from: std::optional<std::string>
+  field to: std::optional<std::string>
+  field result: std::optional<std::string>
+model Api::OneMe::Types::Log::RegistrationEventParams rva=0x604e60
+  field screen: std::optional<int32_t>
+  field reason: std::optional<int32_t>
+  field value: std::optional<int64_t>
+  field phoneCountry: std::optional<std::string>
+  field source: std::optional<char>
+model Api::OneMe::Types::Log::ReportBannerActionsParams rva=0x6065f0
+  field conversation_type: std::optional<int64_t>
+  field conversation_id: std::optional<int64_t>
+model Api::OneMe::Types::Log::SearchClickMeta rva=0x5e33f0
+  field queryId: std::optional<std::string>
+  field conversationType: int32_t
+  field conversationId: int64_t
+  field section: int32_t
+  field rank: int64_t
+  field messageId: std::optional<int64_t>
+model Api::OneMe::Types::Log::SearchEventParams rva=0x608f90
+  field inputQuery: std::string
+  field sections: Api::OneMe::Types::Log::SearchEventParams::Sections
+  field counters: Api::OneMe::Types::Log::SearchEventParams::Counters
+model Api::OneMe::Types::Log::SearchEventParams::ChatMeta rva=0x5c1550
+  field conversationType: int32_t
+  field conversationId: int64_t
+model Api::OneMe::Types::Log::SearchEventParams::Counters rva=0x5c1650
+  field LOCAL_SEARCH: std::optional<int32_t>
+model Api::OneMe::Types::Log::SearchEventParams::Item rva=0x5c1730
+  field itemMeta: Api::OneMe::Types::Log::SearchEventParams::ItemMeta
+model Api::OneMe::Types::Log::SearchEventParams::ItemMeta rva=0x5c17f0
+  field chatMeta: Api::OneMe::Types::Log::SearchEventParams::ChatMeta
+model Api::OneMe::Types::Log::SearchEventParams::Items rva=0x5c18b0
+  field items: std::vector<Api::OneMe::Types::Log::SearchEventParams::Item>
+model Api::OneMe::Types::Log::SearchEventParams::Sections rva=0x5c22e0
+  field LOCAL_SEARCH: std::optional<Api::OneMe::Types::Log::SearchEventParams::Items>
+model Api::OneMe::Types::Log::Settings2FAParams rva=0x60ce40
+  field paramValue: std::string
+model Api::OneMe::Types::Log::SettingsBackgoundParams rva=0x60cf10
+  field settingsType: std::string
+  field paramValue: std::string
+  field paramAdditionally: std::optional<Api::OneMe::Types::Log::SettingsBackgroundAdditionallyParams>
+model Api::OneMe::Types::Log::SettingsBackgroundAdditionallyParams rva=0x5c2380
+  field theme: std::optional<int32_t>
+  field isFinal: std::optional<int32_t>
+model Api::OneMe::Types::Log::SettingsTextSizeParams rva=0x60d190
+  field settingsType: std::string
+  field paramValue: int32_t
+model Api::OneMe::Types::Log::SettingsThemeAdditionallyParams rva=0x5c2480
+  field background: std::optional<std::string>
+  field isFinal: std::optional<int32_t>
+model Api::OneMe::Types::Log::SettingsThemeParams rva=0x60d430
+  field settingsType: std::string
+  field paramValue: int32_t
+  field paramAdditionally: std::optional<Api::OneMe::Types::Log::SettingsThemeAdditionallyParams>
+model Api::OneMe::Types::Log::StickerSendParams rva=0x6115b0
+  field screen: std::optional<std::string>
+  field sticker_set_id: std::optional<int64_t>
+  field sticker_set_name: std::optional<std::string>
+  field is_ugc: std::optional<bool>
+model Api::OneMe::Types::Log::StoriesParams rva=0x612e30
+  field story_id: int64_t
+  field owner: Api::OneMe::Types::StoryOwner
+  field reason: std::optional<char>
+  field type: std::optional<char>
+  field view_duration_ms: std::optional<int64_t>
+  field direction: std::optional<char>
+  field input_source: std::optional<char>
+  field position: std::optional<int32_t>
+model Api::OneMe::Types::Log::StoryParams rva=0x5f3840
+  field at: int64_t
+  field cached_data: int64_t
+  field connection_type: int64_t
+  field ct: int64_t
+  field param: std::string
+  field sid: int64_t
+  field ssid: std::string
+model Api::OneMe::Types::Log::StoryViewerPerformanceParams rva=0x620850
+  field properties: Api::OneMe::Types::Log::StoryViewerPerformanceProperties
+  field spans: std::vector<Api::OneMe::Types::Log::StoryViewerPerformanceSpan>
+  field errorType: std::optional<int64_t>
+  field errorDesc: std::optional<std::string>
+model Api::OneMe::Types::Log::StoryViewerPerformanceProperties rva=0x5c2580
+  field mode: std::string
+  field owner_id: int64_t
+  field owner_type: std::string
+  field story_id: std::optional<int64_t>
+  field story_type: std::optional<std::string>
+model Api::OneMe::Types::Log::StoryViewerPerformanceSpan rva=0x5c27c0
+  field name: std::string
+  field duration: int64_t
+model Api::OneMe::Types::Log::UnknownCallerAlertParams rva=0x14cc460
+  field MESSAGE_CLICKABLE_ELEMENT_ACTIONS: std::optional<int64_t>
+  field DANGEROUS_URL_ACTIONS: std::optional<std::string>
+  field SEARCH_RESPONSE: std::string
+  field CHANNEL_RECSYS_FOLDER: std::optional<int64_t>
+  field AUDIO_TRANSCRIPTION: int64_t
+  field ORGANIZATION_INFO: int64_t
+model Api::OneMe::Types::Log::UnknownContactInteractionParams rva=0x62eb10
+  field UIElementType: std::optional<std::string>
+  field screen: std::optional<int32_t>
+  field clickType: std::optional<std::string>
+  field callId: std::optional<std::string>
+model Api::OneMe::Types::Log::UnsafeFilesAlertParams rva=0x630240
+  field conversationType: std::optional<std::string>
+  field conversationId: std::optional<int64_t>
+model Api::OneMe::Types::Log::UnsafeUrlAlertParams rva=0x631d30
+  field UIElementType: std::optional<std::string>
+  field clickType: std::optional<std::string>
+model Api::OneMe::Types::Log::UploadParams rva=0x6349c0
+  field properties: Api::OneMe::Types::Log::UploadProperties
+  field spans: std::vector<Api::OneMe::Types::Log::UploadSpan>
+  field errorType: std::optional<int64_t>
+  field errorDesc: std::optional<std::string>
+model Api::OneMe::Types::Log::UploadProperties rva=0x5c28e0
+  field cid: int64_t
+  field attach_type: int64_t
+  field size: int64_t
+  field connection_type: int64_t
+  field ext: std::optional<std::string>
+  field host: std::optional<std::string>
+  field upload_retried: std::optional<int64_t>
+  field backend: std::optional<int64_t>
+model Api::OneMe::Types::Log::UploadSpan rva=0x5c2bc0
+  field name: std::string
+  field duration: int64_t
+model Api::OneMe::Types::Log::VideoMessageParams rva=0x637db0
+  field local_message_id: std::string
+  field message_id: std::optional<int64_t>
+  field source_id: int64_t
+  field source_type: int64_t
+  field startType: std::optional<int64_t>
+  field reason: std::optional<std::string>
+model Api::OneMe::Types::Log::VideoParams rva=0x5f3b00
+  field vid: int64_t
+  field quality: std::optional<int64_t>
+  field place: int64_t
+  field at: int64_t
+  field ct: int64_t
+  field cdn_host: std::string
+  field connection_type: int64_t
+  field cached_data: int64_t
+  field vsid: std::string
+  field param: std::string
+model Api::OneMe::Types::Log::VideoSpeedChangeMeta rva=0x5e3650
+  field speed: double
+  field sourceType: std::string
+  field speedRememberingToggle: std::optional<bool>
+model Api::OneMe::Types::Log::WebAppActionsParams rva=0x63aab0
+  field botId: int64_t
+  field webAppName: std::string
+  field entryPoint: std::optional<int64_t>
+  field sourceType: std::optional<int64_t>
+  field sourceId: std::optional<int64_t>
+model Api::OneMe::Types::Log::WebAppBridgeParams rva=0x63c4b0
+  field botId: int64_t
+  field webAppName: std::string
+  field success: char
+  field errorType: std::optional<int16_t>
+  field errorMethod: std::optional<int16_t>
+  field errorCode: std::optional<int16_t>
+model Api::OneMe::Types::MapFilterSubjects rva=0x4cd780
+  warn: no data found
+model Api::OneMe::Types::MapSubject rva=0x432c90
+  field organizationIds: std::optional<std::vector<int64_t>>
+model Api::OneMe::Types::MenuButton rva=0x432d40
+  field text: std::optional<std::string>
+model Api::OneMe::Types::Message rva=0x433940
+  field id: int64_t
+  field time: int64_t
+  field type: std::string
+  field updateTime: std::optional<int64_t>
+  field status: std::optional<std::string>
+  field sender: std::optional<int64_t>
+  field cid: std::optional<int64_t>
+  field text: std::optional<std::string>
+  field zoom: std::optional<int32_t>
+  field attaches: std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>>
+  field link: std::optional<std::shared_ptr<Api::OneMe::Types::MessageLink>>
+  field ttl: std::optional<int32_t>
+  field viewTime: std::optional<int64_t>
+  field options: std::optional<int32_t>
+  field liveUntil: std::optional<int64_t>
+  field messagePreview: std::optional<Api::OneMe::Types::MessagePreview>
+  field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+  field reactionInfo: std::optional<Api::OneMe::Types::MessageReactionInfo>
+  field stats: std::optional<Api::OneMe::Types::MessageStats>
+  field delayedAttributes: std::optional<Api::OneMe::Types::DelayedTamAttributes>
+  field commentsInfo: std::optional<Api::OneMe::Types::CommentsInfo>
+model Api::OneMe::Types::MessageElement rva=0x40eb80
+  field entityId: std::optional<int64_t>
+  field entityName: std::optional<std::string>
+  field type: std::string
+  field from: std::optional<int16_t>
+  field length: std::optional<int16_t>
+  field attributes: std::optional<Api::OneMe::Types::MessageElement::AttributesMap>
+model Api::OneMe::Types::MessageElement::AttributesMap rva=0x40e6f0
+  field url: std::optional<std::string>
+  field checkResult: std::optional<char>
+  field animojiSetId: std::optional<int64_t>
+  field animojiLottieUrl: std::optional<std::string>
+model Api::OneMe::Types::MessageLink rva=0x434070
+  field type: std::string
+  field chatId: std::optional<int64_t>
+  field postId: std::optional<int64_t>
+  field chatName: std::optional<std::string>
+  field chatLink: std::optional<std::string>
+  field message: Api::OneMe::Types::Message
+model Api::OneMe::Types::MessagePreview rva=0x434500
+  field text: std::optional<std::string>
+  field attachment: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+model Api::OneMe::Types::MessageReaction rva=0x434610
+  field reactionType: std::string
+  field id: std::string
+model Api::OneMe::Types::MessageReactionCounter rva=0x434740
+  field reaction: std::string
+  field count: int32_t
+model Api::OneMe::Types::MessageReactionEntry rva=0x540ab0
+  field userId: std::optional<int64_t>
+  field reaction: std::optional<std::string>
+model Api::OneMe::Types::MessageReactionInfo rva=0x434a60
+  field counters: std::optional<std::vector<Api::OneMe::Types::MessageReactionCounter>>
+  field totalCount: std::optional<int32_t>
+  field yourReaction: std::optional<std::string>
+model Api::OneMe::Types::MessageResult rva=0x5a7930
+  field message: Api::OneMe::Types::Message
+  field highlights: std::optional<std::vector<std::string>>
+model Api::OneMe::Types::MessageStats rva=0x434cc0
+  field views: std::optional<int32_t>
+  field forwards: std::optional<int32_t>
+model Api::OneMe::Types::OpusSupport rva=0x134c7b0
+  field windows: std::optional<bool>
+  field macos: std::optional<bool>
+  field linux: std::optional<bool>
+model Api::OneMe::Types::OrgLink rva=0x5762c0
+  field placement: char
+  field url: std::optional<std::string>
+  field appId: std::optional<int64_t>
+  field startParam: std::optional<std::string>
+model Api::OneMe::Types::Organization rva=0x576660
+  field id: int64_t
+  field name: std::string
+  field description: std::optional<std::string>
+  field parentId: std::optional<int64_t>
+  field folderTemplateId: std::optional<int64_t>
+  field iconUrl: std::optional<std::string>
+  field emojiStatusId: std::optional<int64_t>
+  field links: std::optional<std::vector<Api::OneMe::Types::OrgLink>>
+  field updateTime: int64_t
+model Api::OneMe::Types::Outgoing::AudioAttachment rva=0x5563d0
+  field token: std::optional<std::string>
+  field duration: std::optional<int32_t>
+  field wave: std::optional<std::vector<std::byte>>
+model Api::OneMe::Types::Outgoing::BaseAttachment rva=0x517650
+  field _type: std::string
+  field deleted: std::optional<bool>
+model Api::OneMe::Types::Outgoing::ContactAttachment rva=0x556520
+  field contactId: int64_t
+model Api::OneMe::Types::Outgoing::ControlAttachment rva=0x5565c0
+  field event: std::string
+  field chatType: std::optional<std::string>
+  field title: std::optional<std::string>
+  field userIds: std::optional<std::vector<int64_t>>
+  field startPayload: std::optional<std::string>
+model Api::OneMe::Types::Outgoing::FileAttachment rva=0x5567d0
+  field token: std::optional<std::string>
+model Api::OneMe::Types::Outgoing::GeoPositionAttachment rva=0x556870
+  field latitude: float
+  field longitude: float
+  field zoom: std::optional<float>
+model Api::OneMe::Types::Outgoing::PhotoAttachment rva=0x556a50
+  field photoToken: std::optional<std::string>
+model Api::OneMe::Types::Outgoing::PollAttachment rva=0x57ee50
+  field pollId: std::optional<int64_t>
+  field title: std::string
+  field answers: std::vector<Api::OneMe::Types::PollAnswer>
+  field settings: int32_t
+model Api::OneMe::Types::Outgoing::ShareAttachment rva=0x556af0
+  field shareId: int64_t
+  field url: std::string
+model Api::OneMe::Types::Outgoing::StickerAttachment rva=0x556c00
+  field stickerId: int64_t
+model Api::OneMe::Types::Outgoing::StoryAttachment rva=0x556ca0
+  field owner: Api::OneMe::Types::StoryOwner
+  field storyId: int64_t
+model Api::OneMe::Types::Outgoing::VideoAttachment rva=0x556dc0
+  field token: std::optional<std::string>
+  field duration: std::optional<int32_t>
+  field wave: std::optional<std::vector<std::byte>>
+  field thumbhash: std::optional<std::vector<std::byte>>
+model Api::OneMe::Types::OutgoingMessage rva=0x565f40
+  field cid: std::optional<int64_t>
+  field text: std::optional<std::string>
+  field zoom: std::optional<int32_t>
+  field attaches: std::optional<std::vector<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::Outgoing::BaseAttachment>>>
+  field link: std::optional<Api::OneMe::Types::OutgoingMessage::OutgoingMessageLink>
+  field attachMEL: std::optional<bool>
+  field ttl: std::optional<int32_t>
+  field isLive: std::optional<bool>
+  field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+  field delayedAttributes: std::optional<Api::OneMe::Types::DelayedTamAttributes>
+  field type: std::optional<std::string>
+model Api::OneMe::Types::OutgoingMessage::OutgoingMessageLink rva=0x5664f0
+  field type: std::string
+  field chatId: std::optional<int64_t>
+  field postId: std::optional<int64_t>
+  field messageId: int64_t
+model Api::OneMe::Types::P2PBusinessStatusPaid rva=0x4a05b0
+  field enabled: std::optional<bool>
+  field durationMs: std::optional<int64_t>
+model Api::OneMe::Types::PeerStories rva=0x5194e0
+  field owner: Api::OneMe::Types::StoryOwner
+  field stories: std::vector<Api::OneMe::Types::StoryItem>
+model Api::OneMe::Types::PhotoAttachment rva=0x134de90
+  field photoId: std::optional<int64_t>
+  field url: std::optional<std::string>
+  field baseUrl: std::optional<std::string>
+  field width: std::optional<int32_t>
+  field height: std::optional<int32_t>
+  field gif: std::optional<bool>
+  field previewData: std::optional<std::vector<std::byte>>
+  field mp4Url: std::optional<std::string>
+  field photoToken: std::optional<std::string>
+  field sensitive: std::optional<bool>
+  field thumbhash: std::optional<std::vector<std::byte>>
+model Api::OneMe::Types::PlatformEnabled rva=0x4a07f0
+  field windows: std::optional<bool>
+  field macos: std::optional<bool>
+  field linux: std::optional<bool>
+model Api::OneMe::Types::Poll rva=0x519990
+  field pollId: int64_t
+  field title: std::string
+  field answers: std::vector<Api::OneMe::Types::PollAnswer>
+  field settings: int32_t
+  field state: Api::OneMe::Types::PollState
+  field version: std::optional<char>
+model Api::OneMe::Types::PollAnswer rva=0x519c10
+  field text: std::string
+  field answerId: std::optional<char>
+model Api::OneMe::Types::PollAnswerStats rva=0x519d30
+  field userId: int64_t
+  field timestamp: int64_t
+model Api::OneMe::Types::PollAttachment rva=0x14b36c0
+  field pollId: int64_t
+  field title: std::string
+  field answers: std::vector<Api::OneMe::Types::PollAnswer>
+  field settings: int32_t
+  field state: Api::OneMe::Types::PollState
+  field version: std::optional<char>
+model Api::OneMe::Types::PollState rva=0x51a450
+  field total: int32_t
+  field result: std::optional<std::vector<Api::OneMe::Types::PollStateResults>>
+  field voterPreviewIds: std::optional<std::vector<int64_t>>
+model Api::OneMe::Types::PollStateResults rva=0x51a5a0
+  field answerId: char
+  field voteCount: int32_t
+  field votes: std::optional<std::vector<Api::OneMe::Types::PollAnswerStats>>
+  field rate: std::optional<char>
+  field options: std::optional<char>
+model Api::OneMe::Types::PollTtl rva=0x4a0a60
+  field chat: std::optional<int64_t>
+  field bigchat: std::optional<int64_t>
+  field channel: std::optional<int64_t>
+model Api::OneMe::Types::Presence rva=0x435320
+  field on: std::optional<std::string>
+  field status: std::optional<char>
+  field seen: std::optional<int64_t>
+model Api::OneMe::Types::PresetAvatarsInfo rva=0x58a6f0
+  field name: std::string
+  field avatars: std::vector<Api::OneMe::Types::AvatarInfo>
+model Api::OneMe::Types::Profile rva=0x4f8700
+  field contact: Api::OneMe::Types::Contact
+  field profileOptions: std::optional<std::vector<char>>
+model Api::OneMe::Types::PublicResult rva=0x5aff10
+  field chat: std::optional<Api::OneMe::Types::Chat>
+  field contact: std::optional<Api::OneMe::Types::ContactResult>
+  field highlights: std::vector<std::string>
+model Api::OneMe::Types::RejectedParticipant rva=0x45ad10
+  field id: int64_t
+  field errorCode: std::string
+model Api::OneMe::Types::ReplyButton rva=0x14b3b70
+  field type: std::string
+  field message: Api::OneMe::Types::OutgoingMessage
+  field text: std::optional<std::string>
+  field image: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+model Api::OneMe::Types::ReplyKeyboardAttachment rva=0x14b3d50
+  field keyboard: std::vector<std::vector<Api::OneMe::Types::ReplyButton>>
+  field defaultInputDisabled: std::optional<bool>
+model Api::OneMe::Types::ServerSettings rva=0x4a4df0
+  field reactions-menu: std::optional<std::vector<std::string>>
+  field max-msg-length: std::optional<int32_t>
+  field file-upload-max-size: std::optional<int64_t>
+  field welcome-sticker-ids: std::optional<std::vector<int64_t>>
+  field max-favorite-chats: std::optional<int64_t>
+  field account-nickname-enabled: std::optional<bool>
+  field invite-link: std::optional<std::string>
+  field invite-short: std::optional<std::string>
+  field invite-long: std::optional<std::string>
+  field invite-header: std::optional<std::string>
+  field update-version-mac: std::optional<std::string>
+  field update-version-win: std::optional<std::string>
+  field channels-enabled: std::optional<bool>
+  field channel-statistics-botid: std::optional<int64_t>
+  field max-participants: std::optional<int32_t>
+  field max-added-participants: std::optional<int32_t>
+  field bot-complaint-enabled: std::optional<bool>
+  field edit-timeout: std::optional<int64_t>
+  field webapp-ds-keys-count: std::optional<int64_t>
+  field max-theme-length: std::optional<int32_t>
+  field max-description-length: std::optional<int32_t>
+  field webapp-ss-keys-count: std::optional<int64_t>
+  field webapp-phone-hash: std::optional<bool>
+  field edit-channel-type-screen-enabled: std::optional<bool>
+  field create-channel-type-screen: std::optional<bool>
+  field esia-enabled: std::optional<bool>
+  field esia-verify-botId: std::optional<int64_t>
+  field saved-messages-aliases: std::optional<std::vector<std::string>>
+  field chat-invite-link-permissions-enabled: std::optional<bool>
+  field delete-for-all: std::optional<bool>
+  field wide-snippet-preview-width: std::optional<int64_t>
+  field video-msg-enabled: std::optional<bool>
+  field video-msg-channels-enabled: std::optional<bool>
+  field video-msg-h264-yuv420p-enabled: std::optional<Api::OneMe::Types::PlatformEnabled>
+  field video-msg-config: std::optional<Api::OneMe::Types::VideoMessageConfig>
+  field search-webapps-showcase: std::optional<Api::OneMe::Types::ShowWebappSearchCase>
+  field unsafe-files-alert: std::optional<bool>
+  field settings-entry-banners: std::optional<std::vector<Api::OneMe::Types::WebAppEntry>>
+  field settings-business: std::optional<std::string>
+  field moscow-theme-enabled: std::optional<bool>
+  field lebedev-theme-enabled: std::optional<bool>
+  field february-23-26-theme: std::optional<bool>
+  field march-8-26-theme: std::optional<bool>
+  field creation-2fa-config: std::optional<Api::OneMe::Types::Creation2FAConfig>
+  field views-count-enabled: std::optional<bool>
+  field reactions-settings-enabled: std::optional<bool>
+  field official-bot-naming-enabled: std::optional<bool>
+  field server-side-complains-enabled: std::optional<bool>
+  field family-protection-botid: std::optional<int64_t>
+  field scheduled-messages-enabled: std::optional<bool>
+  field scheduled-posts-enabled: std::optional<bool>
+  field scheduled-faves-enabled: std::optional<bool>
+  field check-connection-timeout: std::optional<int64_t>
+  field new-avatar-gradient-colors-enabled: std::optional<bool>
+  field informer-coloring: std::optional<bool>
+  field channels-complaint-enabled: std::optional<bool>
+  field non-contact-complaints-enabled: std::optional<bool>
+  field join-requests: std::optional<bool>
+  field calc-audio-wave: std::optional<bool>
+  field calc-video-wave: std::optional<bool>
+  field audio-peaks-count: std::optional<int32_t>
+  field media-thumbhash: std::optional<bool>
+  field desk-audio-msg-fast-upload: std::optional<bool>
+  field desk-video-msg-fast-upload: std::optional<bool>
+  field desk-video-file-fast-upload: std::optional<bool>
+  field audio-write-opus-config: std::optional<Api::OneMe::Types::OpusSupport>
+  field opus-recorder-bitrate: std::optional<int64_t>
+  field stickers-botid: std::optional<int64_t>
+  field bots-channel-adding: std::optional<bool>
+  field presence-view-port: std::optional<bool>
+  field presence-ttl: std::optional<int64_t>
+  field notif-typing-presence: std::optional<bool>
+  field presence-stop-typing: std::optional<bool>
+  field blocked-users: std::optional<bool>
+  field unique-favorites: std::optional<bool>
+  field render-polls: std::optional<bool>
+  field polls-in-p2p-chats: std::optional<bool>
+  field polls-in-p2g-chats: std::optional<int64_t>
+  field polls-in-channels: std::optional<int64_t>
+  field poll-ttl: std::optional<Api::OneMe::Types::PollTtl>
+  field polls-v2: std::optional<bool>
+  field y-map: std::optional<Api::OneMe::Types::YMapConfig>
+  field org-profile: std::optional<bool>
+  field channels-bots-org-profile: std::optional<bool>
+  field orgs-excluded-to-show: std::optional<std::vector<int64_t>>
+  field live-streams: std::optional<bool>
+  field desktop-attachmnets-upload-retries: std::optional<bool>
+  field spell-check-mac: std::optional<bool>
+  field spell-check-win: std::optional<bool>
+  field spell-check-lin: std::optional<bool>
+  field bot-command-list: std::optional<bool>
+  field treat-zero-as-now-for-delayed-message-edit: std::optional<bool>
+  field desktop-clipboard-html-enabled: std::optional<bool>
+  field video-speed: std::optional<bool>
+  field desktop-webp-conversion: std::optional<bool>
+  field image-quality: std::optional<float>
+  field image-width: std::optional<int32_t>
+  field comments-counters-ttl: std::optional<Api::OneMe::Types::CommentsCounterTtl>
+  field edit-comment-timeout: std::optional<bool>
+  field photo-url-refresh: std::optional<bool>
+  field photo-url-refresh-max-media-per-request: std::optional<int64_t>
+  field max-photo-urls-per-request: std::optional<int64_t>
+  field choose-default-folder: std::optional<bool>
+  field show-fast-forward-button: std::optional<bool>
+  field webapp-entry-from-chats-and-search-enabled: std::optional<bool>
+  field update-proxy-enabled: std::optional<bool>
+  field media-proxy-enabled: std::optional<bool>
+  field recent-search-enabled: std::optional<bool>
+  field recovery-reset-2fa: std::optional<bool>
+  field open-channels: std::optional<bool>
+  field font-size-slider: std::optional<bool>
+  field desktop-calls-grpc-cert: std::optional<bool>
+  field calls-sdk-dns-opt: std::optional<bool>
+  field fullscreen-subtitle: std::optional<bool>
+  field fullscreen-chat-media-fallback-enabled: std::optional<bool>
+  field warning-links: std::optional<bool>
+  field desktop-embed-video: std::optional<bool>
+  field p2g-disable-forward: std::optional<bool>
+  field calls-endpoint: std::optional<std::string>
+  field call-rate: std::optional<Api::OneMe::Types::CallRateParams>
+  field gcce: std::optional<bool>
+  field group-call-part-limit: std::optional<int64_t>
+  field gcmpe: std::optional<bool>
+  field cfs: std::optional<bool>
+  field cfj: std::optional<bool>
+  field gcwre: std::optional<bool>
+  field gc-from-p2p: std::optional<bool>
+  field add-participants-to-gc: std::optional<bool>
+  field callEnableIceRenomination: std::optional<bool>
+  field callDontUseVpnForRtp: std::optional<bool>
+  field calls-use-p2p-relay: std::optional<bool>
+  field cse: std::optional<bool>
+  field callVideoEncodersConfig: std::optional<std::string>
+  field callTransparentAudioEnabled: std::optional<bool>
+  field callEnableAudioUnitMac: std::optional<bool>
+  field callAudioUnitMacConfig: std::optional<std::string>
+  field callSSLVerifyConfig: std::optional<std::string>
+  field callSystemAgcEnabled: std::optional<bool>
+  field callAecEnabled: std::optional<bool>
+  field callNoiseCancellationLevel: std::optional<std::string>
+  field callDereverberationEnabled: std::optional<bool>
+  field callInboundNisqaEnabled: std::optional<bool>
+  field callScreenName: std::optional<std::string>
+  field callScreenDevicePath: std::optional<std::string>
+  field callScreenHardwareId: std::optional<std::string>
+  field callScreenOutput: std::optional<std::string>
+  field callSecondScreenName: std::optional<std::string>
+  field callSecondScreenDevicePath: std::optional<std::string>
+  field callSecondScreenHardwareId: std::optional<std::string>
+  field callSecondScreenOutput: std::optional<std::string>
+  field restartSdkOnNewPortWin: std::optional<bool>
+  field restartSdkOnNewPortMac: std::optional<bool>
+  field restartSdkOnNewPortLin: std::optional<bool>
+  field desktop-call-zoom: std::optional<bool>
+  field desktop-call-fullscreen: std::optional<bool>
+  field enable-unknown-contact-bottom-sheet: std::optional<int64_t>
+  field raise-call-window-on-focus: std::optional<bool>
+  field callYuvToBgrOnGpu: std::optional<bool>
+  field call-chat-members-load-config: std::optional<Api::OneMe::Types::CallChatMembersLoadConfig>
+  field call-use-contact-info-with-chat-id: std::optional<bool>
+  field gc-wait-admin: std::optional<bool>
+  field glow-in-p2g: std::optional<bool>
+  field halo-in-p2p: std::optional<bool>
+  field cdce: std::optional<bool>
+  field desktop-call-bootstrap: std::optional<bool>
+  field calls-fakeboss-incoming-call-enabled: std::optional<bool>
+  field incoming-call-orgs: std::optional<bool>
+  field delete-msg-fys-large-chat-disabled: std::optional<bool>
+  field user-debug-report: std::optional<int64_t>
+  field desktop-call-new-grid: std::optional<bool>
+  field contact-add-bottom-sheet: std::optional<bool>
+  field contact-share-enabled: std::optional<bool>
+  field desktop-call-new-share: std::optional<bool>
+  field desktop-call-new-share-mac: std::optional<bool>
+  field desktop-call-new-share-win: std::optional<bool>
+  field desktop-call-new-share-lin: std::optional<bool>
+  field desktop-call-new-share-wayland: std::optional<bool>
+  field desktop-calls-share-instruction: std::optional<bool>
+  field calls-credentials-store-enabled: std::optional<bool>
+  field rooms-miniapp-qr-code: std::optional<bool>
+  field calls-hold-enabled: std::optional<bool>
+  field calls-accept-on-counter-call-enabled: std::optional<bool>
+  field call-record-v2: std::optional<bool>
+  field calls-new-sharing-screen: std::optional<bool>
+  field enable-audio-messages-transcription: std::optional<bool>
+  field enable-video-messages-transcription: std::optional<bool>
+  field retry-transcribe-attempt: std::optional<int64_t>
+  field retry-transcribe-timeout: std::optional<int64_t>
+  field media-not-ready-retry-delay: std::optional<int64_t>
+  field stories: std::optional<bool>
+  field stories-config: std::optional<Api::OneMe::Types::StoriesConfig>
+  field stories-chats: std::optional<bool>
+  field stories-profile: std::optional<bool>
+  field stories-feed-polling: std::optional<bool>
+  field stories-force-update: std::optional<bool>
+  field ab-status: Utilities::StrongTypedef<std::optional<int64_t>>
+  field dev-toggles-enabled: std::optional<bool>
+  field self-service-calls-fix: std::optional<bool>
+  field not-contact-placeholder: std::optional<bool>
+  field organization-placeholder: std::optional<bool>
+  field comments-enabled: std::optional<bool>
+  field comments-reactions-enabled: std::optional<bool>
+  field readmark-validation-disabled: std::optional<bool>
+  field calls-history-new: std::optional<bool>
+  field desktop-calls-history-clear-new: std::optional<bool>
+  field confirm-send: std::optional<bool>
+  field desktop-windows-use-native-webview: std::optional<bool>
+  field multiaccount: std::optional<int32_t>
+  field notification-settings: std::optional<bool>
+  field notification-in-call-setting: std::optional<bool>
+  field channel-subscriptions-recs-limit: std::optional<int64_t>
+  field additional-links: std::optional<bool>
+  field additional-links-limit: std::optional<int64_t>
+  field p2p-business-status-paid: std::optional<Api::OneMe::Types::P2PBusinessStatusPaid>
+  field business-channel-botid: std::optional<int64_t>
+  field show-you-subscribed: std::optional<bool>
+  field channel-cta-button: std::optional<bool>
+  field entity-org-action-ttl: std::optional<int64_t>
+  field chat-bottom-bar-new: std::optional<bool>
+  field channel-recommendations: std::optional<bool>
+  field channel-recommendations-ttl: std::optional<int64_t>
+  field flood-protection-enabled: std::optional<bool>
+  field offline-statistic-enabled: std::optional<bool>
+  field forwarded-post-views: std::optional<bool>
+  field comments-attachments: std::optional<int64_t>
+  field comments-profile-input: std::optional<bool>
+model Api::OneMe::Types::Session rva=0x5b9aa0
+  field time: int64_t
+  field client: std::string
+  field info: std::string
+  field location: std::string
+  field current: std::optional<bool>
+model Api::OneMe::Types::ShareAttachment rva=0x14b3e70
+  field shareId: int64_t
+  field url: std::optional<std::string>
+  field title: std::optional<std::string>
+  field description: std::optional<std::string>
+  field host: std::optional<std::string>
+  field image: std::optional<Api::OneMe::Types::PhotoAttachment>
+  field media: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+  field isSensitive: std::optional<bool>
+model Api::OneMe::Types::ShowWebappSearchCase rva=0x4a89a0
+  field items: std::optional<std::vector<Api::OneMe::Types::ShowWebappSearchCaseItem>>
+model Api::OneMe::Types::ShowWebappSearchCaseItem rva=0x4a8a50
+  field id: std::optional<int64_t>
+  field icon: std::optional<std::string>
+  field title: std::optional<std::string>
+model Api::OneMe::Types::StickerAttachment rva=0x14b4140
+  field stickerId: int64_t
+  field width: int32_t
+  field height: int32_t
+  field updateTime: std::optional<int64_t>
+  field tags: std::optional<std::vector<std::string>>
+  field url: std::string
+  field mp4Url: std::optional<std::string>
+  field videoUrl: std::optional<std::string>
+  field firstUrl: std::optional<std::string>
+  field previewUrl: std::optional<std::string>
+  field lottieUrl: std::optional<std::string>
+  field replies: std::optional<std::vector<int64_t>>
+  field setId: std::optional<int64_t>
+  field authorType: std::optional<std::string>
+  field stickerType: std::optional<std::string>
+  field audio: std::optional<bool>
+model Api::OneMe::Types::StickerSet rva=0x3fe1f0
+  field id: int64_t
+  field name: std::string
+  field iconUrl: std::string
+  field iconLottieUrl: std::optional<std::string>
+  field authorId: std::optional<int64_t>
+  field updateTime: int64_t
+  field stickers: std::vector<int64_t>
+  field link: std::string
+  field installCount: std::optional<int32_t>
+model Api::OneMe::Types::StoriesConfig rva=0x4a8d10
+  field photo-duration: std::optional<int64_t>
+  field update-ttl: std::optional<int64_t>
+  field viewport-ttl: std::optional<int64_t>
+  field list-page-size: std::optional<int64_t>
+model Api::OneMe::Types::StoriesPreview rva=0x51aee0
+  field owner: Api::OneMe::Types::StoryOwner
+  field updateTime: int64_t
+  field totalCount: int16_t
+  field readCount: std::optional<int16_t>
+  field lastStoryExpirationTime: int64_t
+model Api::OneMe::Types::StoryAttachment rva=0x14b4670
+  field owner: Api::OneMe::Types::StoryOwner
+  field storyId: int64_t
+  field previewUrl: std::optional<std::string>
+  field expirationTime: std::optional<int64_t>
+model Api::OneMe::Types::StoryClicableLink rva=0x51b280
+  field url: std::string
+  field checkResult: std::optional<char>
+model Api::OneMe::Types::StoryDetailedStats rva=0x51b3a0
+  field userId: int64_t
+  field reaction: std::optional<Api::OneMe::Types::StoryReaction>
+model Api::OneMe::Types::StoryItem rva=0x51b4b0
+  field id: int64_t
+  field updateTime: int64_t
+  field owner: Api::OneMe::Types::StoryOwner
+  field settings: int32_t
+  field time: int64_t
+  field expiration: int32_t
+  field media: Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>
+  field layers: std::optional<std::vector<Api::OneMe::Types::StoryLayer>>
+  field cid: std::optional<int64_t>
+  field reaction: std::optional<Api::OneMe::Types::StoryReaction>
+  field viewsCount: std::optional<int32_t>
+  field reactionsCount: std::optional<int32_t>
+  field version: std::optional<char>
+model Api::OneMe::Types::StoryLayer rva=0x51b990
+  field type: char
+  field coordinates: Api::OneMe::Types::StoryLayerCoordinates
+  field clickableLink: std::optional<Api::OneMe::Types::StoryClicableLink>
+model Api::OneMe::Types::StoryLayerCoordinates rva=0x51baf0
+  field x: std::optional<float>
+  field y: std::optional<float>
+  field w: std::optional<float>
+  field h: std::optional<float>
+  field rotation: std::optional<float>
+model Api::OneMe::Types::StoryOwner rva=0x51bde0
+  field ownerId: int64_t
+  field type: std::optional<char>
+model Api::OneMe::Types::StoryReaction rva=0x51bee0
+  field reactionType: char
+  field id: std::string
+model Api::OneMe::Types::StoryStat rva=0x51c000
+  field storyId: int64_t
+  field viewsCount: std::optional<int32_t>
+  field reactionsCount: std::optional<int32_t>
+model Api::OneMe::Types::TextObject rva=0x51c140
+  field text: std::string
+  field elements: std::optional<std::vector<Api::OneMe::Types::MessageElement>>
+model Api::OneMe::Types::UnsupportedAttachment rva=0x531d90
+model Api::OneMe::Types::UserSettings rva=0x4a9300
+  field SHOW_READ_MARK: std::optional<bool>
+  field PUSH_NEW_CONTACTS: std::optional<bool>
+  field FIND_BY_PHONE: std::optional<bool>
+  field PUSH_DETAILS: std::optional<bool>
+  field DONT_DISTURB_UNTIL: std::optional<int64_t>
+  field CHATS_PUSH_NOTIFICATION: std::optional<std::string>
+  field DIALOGS_PUSH_NOTIFICATION: std::optional<std::string>
+  field CHATS_PUSH_SOUND: std::optional<std::string>
+  field PUSH_SOUND: std::optional<std::string>
+  field HIDDEN: std::optional<bool>
+  field CHATS_INVITE: std::optional<std::string>
+  field INCOMING_CALL: std::optional<std::string>
+  field INACTIVE_TTL: std::optional<std::string>
+  field M_CALL_PUSH_NOTIFICATION: std::optional<std::string>
+  field STICKERS_SUGGEST: std::optional<std::string>
+  field AUDIO_TRANSCRIPTION_ENABLED: std::optional<bool>
+  field ALT_KEYBOARD: std::optional<bool>
+  field SAFE_MODE: std::optional<bool>
+  field SEARCH_BY_PHONE: std::optional<std::string>
+  field UNSAFE_FILES: std::optional<bool>
+  field CONTENT_LEVEL_ACCESS: std::optional<bool>
+  field FAMILY_PROTECTION: std::optional<std::string>
+  field PHONE_NUMBER_PRIVACY: std::optional<std::string>
+model Api::OneMe::Types::VideoAttachment rva=0x14b49e0
+  field videoId: std::optional<int64_t>
+  field videoType: std::optional<int16_t>
+  field duration: std::optional<int64_t>
+  field thumbnail: std::optional<std::string>
+  field width: std::optional<int32_t>
+  field height: std::optional<int32_t>
+  field embedUrl: std::optional<std::string>
+  field startTime: std::optional<int64_t>
+  field externalUrl: std::optional<std::string>
+  field externalSiteName: std::optional<std::string>
+  field previewData: std::optional<std::vector<std::byte>>
+  field paid: std::optional<bool>
+  field token: std::optional<std::string>
+  field collage: std::optional<Api::OneMe::Types::VideoCollage>
+  field wave: std::optional<std::vector<std::byte>>
+  field thumbhash: std::optional<std::vector<std::byte>>
+  field MP4_1080: std::optional<std::string>
+model Api::OneMe::Types::VideoCollage rva=0x51ca40
+  field url: std::optional<std::string>
+  field frequency: std::optional<int32_t>
+  field height: std::optional<int32_t>
+  field width: std::optional<int32_t>
+  field count: std::optional<int32_t>
+model Api::OneMe::Types::VideoConference rva=0x435730
+  field owner: Api::OneMe::Types::Contact
+  field joinLink: std::string
+  field conferenceId: std::string
+  field callType: std::string
+  field callName: std::optional<std::string>
+  field participantsCount: std::optional<int32_t>
+  field startAt: std::optional<int64_t>
+  field previewParticipantIds: std::optional<std::vector<int64_t>>
+  field chatId: std::optional<int64_t>
+  field type: std::optional<char>
+model Api::OneMe::Types::VideoConversation rva=0x435b10
+  field conversationId: std::string
+  field joinLink: std::optional<std::string>
+  field startedAt: std::optional<int64_t>
+  field approxParticipantsCount: std::optional<int32_t>
+  field previewParticipantIds: std::optional<std::vector<int64_t>>
+  field type: std::optional<char>
+model Api::OneMe::Types::VideoMessageConfig rva=0x4a9b80
+  field duration: std::optional<int32_t>
+  field quality: std::optional<int32_t>
+  field detect-upload: std::optional<int32_t>
+  field long-press-mode: std::optional<int32_t>
+model Api::OneMe::Types::WebAppEntry rva=0x4a9d00
+  field icon: std::optional<std::string>
+  field title: std::optional<std::string>
+  field appId: std::optional<int64_t>
+  field startParam: std::optional<std::string>
+model Api::OneMe::Types::WidgetAttachment rva=0x14b4f40
+  field message: std::vector<Api::OneMe::Types::WidgetContent>
+model Api::OneMe::Types::WidgetContent rva=0x51cd80
+  field type: int16_t
+  field media: std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>
+  field text: std::optional<Api::OneMe::Types::TextObject>
+  field icon: std::optional<Api::OneMe::Types::Icon>
+model Api::OneMe::Types::YMapConfig rva=0x4a9f50
+  field tile: std::optional<std::string>
+  field geocoder: std::optional<std::string>
+  field static: std::optional<std::string>
+
+Polymorphic Models
+polymorphic Api::OneMe::Types::BaseAttachment
+  root_sources: protocol_field, rtti_heuristic
+  discriminator: _type: std::string
+  base rva=0x3db300 fields=2
+  variant Api::OneMe::Types::AppAttachment rva=0x14b2240 local_fields=6 all_fields=8
+  variant Api::OneMe::Types::AudioAttachment rva=0x14b2480 local_fields=5 all_fields=7
+  variant Api::OneMe::Types::CallAttachment rva=0x14b2830 local_fields=6 all_fields=8
+  variant Api::OneMe::Types::ContactAttachment rva=0x14b2a90 local_fields=6 all_fields=8
+  variant Api::OneMe::Types::ControlAttachment rva=0x14b2cc0 local_fields=15 all_fields=17
+  variant Api::OneMe::Types::FileAttachment rva=0x14b31b0 local_fields=5 all_fields=7
+  variant Api::OneMe::Types::GeoPositionAttachment rva=0x14b33c0 local_fields=3 all_fields=5
+  variant Api::OneMe::Types::InlineKeyboardAttachment rva=0x14b3520 local_fields=2 all_fields=4
+  variant Api::OneMe::Types::PhotoAttachment rva=0x134de90 local_fields=11 all_fields=13
+  variant Api::OneMe::Types::PollAttachment rva=0x14b36c0 local_fields=6 all_fields=8
+  variant Api::OneMe::Types::ReplyKeyboardAttachment rva=0x14b3d50 local_fields=2 all_fields=4
+  variant Api::OneMe::Types::ShareAttachment rva=0x14b3e70 local_fields=8 all_fields=10
+  variant Api::OneMe::Types::StickerAttachment rva=0x14b4140 local_fields=16 all_fields=18
+  variant Api::OneMe::Types::StoryAttachment rva=0x14b4670 local_fields=4 all_fields=6
+  variant Api::OneMe::Types::UnsupportedAttachment rva=0x531d90 local_fields=0 all_fields=2
+  variant Api::OneMe::Types::VideoAttachment rva=0x14b49e0 local_fields=17 all_fields=19
+  variant Api::OneMe::Types::WidgetAttachment rva=0x14b4f40 local_fields=1 all_fields=3
+  rtti_subclass Api::OneMe::Types::AppAttachment rva=0x14b2240 local_fields=6 all_fields=8
+  rtti_subclass Api::OneMe::Types::AudioAttachment rva=0x14b2480 local_fields=5 all_fields=7
+  rtti_subclass Api::OneMe::Types::CallAttachment rva=0x14b2830 local_fields=6 all_fields=8
+  rtti_subclass Api::OneMe::Types::ContactAttachment rva=0x14b2a90 local_fields=6 all_fields=8
+  rtti_subclass Api::OneMe::Types::ControlAttachment rva=0x14b2cc0 local_fields=15 all_fields=17
+  rtti_subclass Api::OneMe::Types::FileAttachment rva=0x14b31b0 local_fields=5 all_fields=7
+  rtti_subclass Api::OneMe::Types::GeoPositionAttachment rva=0x14b33c0 local_fields=3 all_fields=5
+  rtti_subclass Api::OneMe::Types::InlineKeyboardAttachment rva=0x14b3520 local_fields=2 all_fields=4
+  rtti_subclass Api::OneMe::Types::PhotoAttachment rva=0x134de90 local_fields=11 all_fields=13
+  rtti_subclass Api::OneMe::Types::PollAttachment rva=0x14b36c0 local_fields=6 all_fields=8
+  rtti_subclass Api::OneMe::Types::ReplyKeyboardAttachment rva=0x14b3d50 local_fields=2 all_fields=4
+  rtti_subclass Api::OneMe::Types::ShareAttachment rva=0x14b3e70 local_fields=8 all_fields=10
+  rtti_subclass Api::OneMe::Types::StickerAttachment rva=0x14b4140 local_fields=16 all_fields=18
+  rtti_subclass Api::OneMe::Types::StoryAttachment rva=0x14b4670 local_fields=4 all_fields=6
+  rtti_subclass Api::OneMe::Types::UnsupportedAttachment rva=0x531d90 local_fields=0 all_fields=2
+  rtti_subclass Api::OneMe::Types::VideoAttachment rva=0x14b49e0 local_fields=17 all_fields=19
+  rtti_subclass Api::OneMe::Types::WidgetAttachment rva=0x14b4f40 local_fields=1 all_fields=3
+polymorphic Api::OneMe::Types::Log::EventParams
+  root_sources: protocol_field, rtti_heuristic
+  base rva=0x5c16f0 fields=0
+  variant Api::OneMe::Types::Log::AbStatusParams rva=0x5c14b0 local_fields=1 all_fields=1
+  variant Api::OneMe::Types::Log::AudioParams rva=0x5f3550 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::AudioTranscription rva=0x5cc600 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::BannerParams rva=0x5d2a70 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::CallEventParams rva=0x5d6460 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::ChatMessageLinkParams rva=0x5dd520 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::ChatSuggestParams rva=0x5df6c0 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::ClickParams rva=0x5e2ef0 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::ContactOrBlockParams rva=0x14cc460 local_fields=6 all_fields=6
+  variant Api::OneMe::Types::Log::ContextMenuParams rva=0x5eafd0 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::ForwardPostMeta rva=0x5e3090 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::InformerParams rva=0x5ec500 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::InlineKeyboardActionsSourceMeta rva=0x5ee490 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::InviteParams rva=0x5f0e20 local_fields=5 all_fields=5
+  variant Api::OneMe::Types::Log::LogEventParams rva=0x14cbcc0 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::MessageClickableElementParams rva=0x5e8b10 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::MessageSendParams rva=0x5f7d40 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::NavEventParams rva=0x5fbc90 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::No2faScreenMeta rva=0x5e3190 local_fields=1 all_fields=1
+  variant Api::OneMe::Types::Log::OpenBroadcatButtonMeta rva=0x5e3220 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::OrganizationInfoParams rva=0x5fd730 local_fields=7 all_fields=7
+  variant Api::OneMe::Types::Log::PermissionChangedParams rva=0x601280 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::PermissionStatusParams rva=0x6015a0 local_fields=1 all_fields=1
+  variant Api::OneMe::Types::Log::PresenceMessageCounterParams rva=0x603af0 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::ProfileButtonMeta rva=0x5e3330 local_fields=1 all_fields=1
+  variant Api::OneMe::Types::Log::ProfileClickableElementParams rva=0x5e8ca0 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::QrAuthParams rva=0x5cf1d0 local_fields=9 all_fields=9
+  variant Api::OneMe::Types::Log::RegistrationEventParams rva=0x604e60 local_fields=5 all_fields=5
+  variant Api::OneMe::Types::Log::ReportBannerActionsParams rva=0x6065f0 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::SearchClickMeta rva=0x5e33f0 local_fields=6 all_fields=6
+  variant Api::OneMe::Types::Log::SearchEventParams rva=0x608f90 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::Settings2FAParams rva=0x60ce40 local_fields=1 all_fields=1
+  variant Api::OneMe::Types::Log::SettingsBackgoundParams rva=0x60cf10 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::SettingsTextSizeParams rva=0x60d190 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::SettingsThemeParams rva=0x60d430 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::StickerSendParams rva=0x6115b0 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::StoriesParams rva=0x612e30 local_fields=8 all_fields=8
+  variant Api::OneMe::Types::Log::StoryParams rva=0x5f3840 local_fields=7 all_fields=7
+  variant Api::OneMe::Types::Log::StoryViewerPerformanceParams rva=0x620850 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::UnknownCallerAlertParams rva=0x14cc460 local_fields=6 all_fields=6
+  variant Api::OneMe::Types::Log::UnknownContactInteractionParams rva=0x62eb10 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::UnsafeFilesAlertParams rva=0x630240 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::UnsafeUrlAlertParams rva=0x631d30 local_fields=2 all_fields=2
+  variant Api::OneMe::Types::Log::UploadParams rva=0x6349c0 local_fields=4 all_fields=4
+  variant Api::OneMe::Types::Log::VideoMessageParams rva=0x637db0 local_fields=6 all_fields=6
+  variant Api::OneMe::Types::Log::VideoParams rva=0x5f3b00 local_fields=10 all_fields=10
+  variant Api::OneMe::Types::Log::VideoSpeedChangeMeta rva=0x5e3650 local_fields=3 all_fields=3
+  variant Api::OneMe::Types::Log::WebAppActionsParams rva=0x63aab0 local_fields=5 all_fields=5
+  variant Api::OneMe::Types::Log::WebAppBridgeParams rva=0x63c4b0 local_fields=6 all_fields=6
+  rtti_subclass Api::OneMe::Types::Log::AbStatusParams rva=0x5c14b0 local_fields=1 all_fields=1
+  rtti_subclass Api::OneMe::Types::Log::AudioParams rva=0x5f3550 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::AudioTranscription rva=0x5cc600 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::BannerParams rva=0x5d2a70 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::CallEventParams rva=0x5d6460 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::ChatMessageLinkParams rva=0x5dd520 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::ChatSuggestParams rva=0x5df6c0 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::ClickParams rva=0x5e2ef0 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::ContactOrBlockParams rva=0x14cc460 local_fields=6 all_fields=6
+  rtti_subclass Api::OneMe::Types::Log::ContextMenuParams rva=0x5eafd0 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::ForwardPostMeta rva=0x5e3090 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::InformerParams rva=0x5ec500 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::InlineKeyboardActionsSourceMeta rva=0x5ee490 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::InviteParams rva=0x5f0e20 local_fields=5 all_fields=5
+  rtti_subclass Api::OneMe::Types::Log::LogEventParams rva=0x14cbcc0 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::MessageClickableElementParams rva=0x5e8b10 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::MessageSendParams rva=0x5f7d40 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::NavEventParams rva=0x5fbc90 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::No2faScreenMeta rva=0x5e3190 local_fields=1 all_fields=1
+  rtti_subclass Api::OneMe::Types::Log::OpenBroadcatButtonMeta rva=0x5e3220 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::OrganizationInfoParams rva=0x5fd730 local_fields=7 all_fields=7
+  rtti_subclass Api::OneMe::Types::Log::PermissionChangedParams rva=0x601280 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::PermissionStatusParams rva=0x6015a0 local_fields=1 all_fields=1
+  rtti_subclass Api::OneMe::Types::Log::PresenceMessageCounterParams rva=0x603af0 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::ProfileButtonMeta rva=0x5e3330 local_fields=1 all_fields=1
+  rtti_subclass Api::OneMe::Types::Log::ProfileClickableElementParams rva=0x5e8ca0 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::QrAuthParams rva=0x5cf1d0 local_fields=9 all_fields=9
+  rtti_subclass Api::OneMe::Types::Log::RegistrationEventParams rva=0x604e60 local_fields=5 all_fields=5
+  rtti_subclass Api::OneMe::Types::Log::ReportBannerActionsParams rva=0x6065f0 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::SearchClickMeta rva=0x5e33f0 local_fields=6 all_fields=6
+  rtti_subclass Api::OneMe::Types::Log::SearchEventParams rva=0x608f90 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::Settings2FAParams rva=0x60ce40 local_fields=1 all_fields=1
+  rtti_subclass Api::OneMe::Types::Log::SettingsBackgoundParams rva=0x60cf10 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::SettingsTextSizeParams rva=0x60d190 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::SettingsThemeParams rva=0x60d430 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::StickerSendParams rva=0x6115b0 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::StoriesParams rva=0x612e30 local_fields=8 all_fields=8
+  rtti_subclass Api::OneMe::Types::Log::StoryParams rva=0x5f3840 local_fields=7 all_fields=7
+  rtti_subclass Api::OneMe::Types::Log::StoryViewerPerformanceParams rva=0x620850 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::UnknownCallerAlertParams rva=0x14cc460 local_fields=6 all_fields=6
+  rtti_subclass Api::OneMe::Types::Log::UnknownContactInteractionParams rva=0x62eb10 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::UnsafeFilesAlertParams rva=0x630240 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::UnsafeUrlAlertParams rva=0x631d30 local_fields=2 all_fields=2
+  rtti_subclass Api::OneMe::Types::Log::UploadParams rva=0x6349c0 local_fields=4 all_fields=4
+  rtti_subclass Api::OneMe::Types::Log::VideoMessageParams rva=0x637db0 local_fields=6 all_fields=6
+  rtti_subclass Api::OneMe::Types::Log::VideoParams rva=0x5f3b00 local_fields=10 all_fields=10
+  rtti_subclass Api::OneMe::Types::Log::VideoSpeedChangeMeta rva=0x5e3650 local_fields=3 all_fields=3
+  rtti_subclass Api::OneMe::Types::Log::WebAppActionsParams rva=0x63aab0 local_fields=5 all_fields=5
+  rtti_subclass Api::OneMe::Types::Log::WebAppBridgeParams rva=0x63c4b0 local_fields=6 all_fields=6
+polymorphic Api::OneMe::Types::Log::UnknownContactInteractionParams
+  root_sources: rtti_heuristic
+  base rva=0x62eb10 fields=4
+  rtti_subclass Api::OneMe::Types::Log::ContactOrBlockParams rva=0x14cc460 local_fields=6 all_fields=10
+  rtti_subclass Api::OneMe::Types::Log::UnknownCallerAlertParams rva=0x14cc460 local_fields=6 all_fields=10
+polymorphic Api::OneMe::Types::Outgoing::BaseAttachment
+  root_sources: protocol_field, rtti_heuristic
+  discriminator: _type: std::string
+  base rva=0x517650 fields=2
+  variant Api::OneMe::Types::Outgoing::AudioAttachment rva=0x5563d0 local_fields=3 all_fields=5
+  variant Api::OneMe::Types::Outgoing::ContactAttachment rva=0x556520 local_fields=1 all_fields=3
+  variant Api::OneMe::Types::Outgoing::ControlAttachment rva=0x5565c0 local_fields=5 all_fields=7
+  variant Api::OneMe::Types::Outgoing::FileAttachment rva=0x5567d0 local_fields=1 all_fields=3
+  variant Api::OneMe::Types::Outgoing::GeoPositionAttachment rva=0x556870 local_fields=3 all_fields=5
+  variant Api::OneMe::Types::Outgoing::PhotoAttachment rva=0x556a50 local_fields=1 all_fields=3
+  variant Api::OneMe::Types::Outgoing::PollAttachment rva=0x57ee50 local_fields=4 all_fields=6
+  variant Api::OneMe::Types::Outgoing::ShareAttachment rva=0x556af0 local_fields=2 all_fields=4
+  variant Api::OneMe::Types::Outgoing::StickerAttachment rva=0x556c00 local_fields=1 all_fields=3
+  variant Api::OneMe::Types::Outgoing::StoryAttachment rva=0x556ca0 local_fields=2 all_fields=4
+  variant Api::OneMe::Types::Outgoing::VideoAttachment rva=0x556dc0 local_fields=4 all_fields=6
+  rtti_subclass Api::OneMe::Types::Outgoing::AudioAttachment rva=0x5563d0 local_fields=3 all_fields=5
+  rtti_subclass Api::OneMe::Types::Outgoing::ContactAttachment rva=0x556520 local_fields=1 all_fields=3
+  rtti_subclass Api::OneMe::Types::Outgoing::ControlAttachment rva=0x5565c0 local_fields=5 all_fields=7
+  rtti_subclass Api::OneMe::Types::Outgoing::FileAttachment rva=0x5567d0 local_fields=1 all_fields=3
+  rtti_subclass Api::OneMe::Types::Outgoing::GeoPositionAttachment rva=0x556870 local_fields=3 all_fields=5
+  rtti_subclass Api::OneMe::Types::Outgoing::PhotoAttachment rva=0x556a50 local_fields=1 all_fields=3
+  rtti_subclass Api::OneMe::Types::Outgoing::PollAttachment rva=0x57ee50 local_fields=4 all_fields=6
+  rtti_subclass Api::OneMe::Types::Outgoing::ShareAttachment rva=0x556af0 local_fields=2 all_fields=4
+  rtti_subclass Api::OneMe::Types::Outgoing::StickerAttachment rva=0x556c00 local_fields=1 all_fields=3
+  rtti_subclass Api::OneMe::Types::Outgoing::StoryAttachment rva=0x556ca0 local_fields=2 all_fields=4
+  rtti_subclass Api::OneMe::Types::Outgoing::VideoAttachment rva=0x556dc0 local_fields=4 all_fields=6
+
+String Enums
+string_enum ACTIVATION_START
+string_enum ACTIVE
+string_enum ADDED
+string_enum ADMIN
+string_enum AFTER_INITIATION
+string_enum ALL_CAN_PIN_MESSAGE
+string_enum ALT_KEYBOARD
+string_enum ANIMOJI
+string_enum ANIMOJI_SET
+string_enum ANSI
+string_enum ANSWERED
+string_enum ATTACH
+string_enum AUDIO
+string_enum AUDIO_CALL_INTERRUPTION
+string_enum AUDIO_ECHO
+string_enum AUDIO_ENABLED
+string_enum AUDIO_FREEZES
+string_enum AUDIO_QUALITY
+string_enum AUDIO_STATS
+string_enum AUDIO_TRANSCRIPTION
+string_enum AUDIO_TRANSCRIPTION_ENABLED
+string_enum AUTH_QR
+string_enum AUTH_VALIDATE_PASSWORD
+string_enum A_PLUS_CHANNEL
+string_enum B9LE
+string_enum B9LM
+string_enum BACKGROUND
+string_enum BANNER
+string_enum BEFORE_JOIN
+string_enum BLOCK
+string_enum BLOCKED
+string_enum BLOCKED_MEMBER
+string_enum BOTS
+string_enum BUSY
+string_enum CALL
+string_enum CALL_BY_LINK
+string_enum CALL_CONTACT
+string_enum CALL_REVIEW
+string_enum CALL_SERVICE_START
+string_enum CANCELED
+string_enum CHANGE_EMAIL
+string_enum CHANGE_PASSWORD
+string_enum CHANNEL
+string_enum CHANNEL_ADMIN
+string_enum CHANNEL_RECSYS_FEED
+string_enum CHANNEL_RECSYS_FOLDER
+string_enum CHAT
+string_enum CHATS
+string_enum CHATS_INVITE
+string_enum CHATS_PUSH_NOTIFICATION
+string_enum CHATS_PUSH_SOUND
+string_enum CHAT_HEAD
+string_enum CHAT_MESSAGE_LINK
+string_enum CHAT_OPENED
+string_enum CHAT_PROFILE_CLICKABLE_ELEMENT_ACTIONS
+string_enum CHECK_CODE
+string_enum CLICK
+string_enum CLOSE
+string_enum CLOSED
+string_enum CODE
+string_enum COLD_START
+string_enum COMMENTS
+string_enum COMMENTS_ATTACHMENTS_DISABLED
+string_enum COMMENTS_BLACKLIST
+string_enum COMMENTS_DISABLED
+string_enum CONFIRM_BEFORE_SEND
+string_enum CONTACT
+string_enum CONTACTS
+string_enum CONTACT_OR_BLOCK
+string_enum CONTACT_RENAME_BANNER
+string_enum CONTENT_LEVEL_ACCESS
+string_enum CONTENT_LEVEL_CHAT
+string_enum CONTEXT_MENU
+string_enum CONTROL
+string_enum CUSTOM
+string_enum DANGEROUS_FILE_ACTIONS
+string_enum DANGEROUS_URL_ACTIONS
+string_enum DASH
+string_enum DELAYED
+string_enum DEST
+string_enum DIALOG
+string_enum DIALOGS_PUSH_NOTIFICATION
+string_enum DIALOG_SAVED_MESSAGES
+string_enum DIALOG_WITH_BOT
+string_enum DISABLE
+string_enum DISABLE_FORWARD
+string_enum DONT_DISTURB_UNTIL
+string_enum DURING_CALL
+string_enum EDITED
+string_enum EMAIL_CODE_REQUESTED
+string_enum EMAIL_CONFIRMED
+string_enum EMAIL_NOT_CONFIRMED
+string_enum EMOJI
+string_enum EMPHASIZED
+string_enum ERROR
+string_enum EVENT_MESSAGE_COUNTER
+string_enum EXTERNAL
+string_enum EXTREMISM
+string_enum FAILED
+string_enum FAILED_PACKET
+string_enum FAKE
+string_enum FAMILY_PROTECTION
+string_enum FAVORITE_STICKER
+string_enum FAVORITE_STICKERS
+string_enum FAVORITE_STICKER_SET
+string_enum FAVORITE_STICKER_SETS
+string_enum FILE
+string_enum FIND_BY_PHONE
+string_enum FINISH_CALL
+string_enum FORWARD
+string_enum GROUP_CALL_JOIN
+string_enum GROUP_CALL_JOIN_FAILED
+string_enum HAS_WEBAPP
+string_enum HEADING
+string_enum HIDDEN
+string_enum HIDE_STORIES
+string_enum HISTORY
+string_enum HUNGUP
+string_enum INACTIVE_TTL
+string_enum INCOMING_CALL
+string_enum INCOMING_CALL_INIT
+string_enum INCOMING_CALL_RECEIVED
+string_enum INFORMER
+string_enum INLINE_KEYBOARD
+string_enum INVISIBLE
+string_enum INVITE_MAX_BANNER
+string_enum JOIN_REQUEST
+string_enum LEFT
+string_enum LINK
+string_enum LIST_UPDATED
+string_enum LIVE
+string_enum LOCAL_SEARCH
+string_enum LOCATION
+string_enum LOGIN
+string_enum LOTTIE
+string_enum MANAGEABLE
+string_enum MEMBER
+string_enum MEMBERS_CAN_SEE_PRIVATE_LINK
+string_enum MENU
+string_enum MESSAGE
+string_enum MESSAGES
+string_enum MESSAGE_CLICKABLE_ELEMENT_ACTIONS
+string_enum MESSAGE_COPY_NOT_ALLOWED
+string_enum MISSED
+string_enum MONOSPACED
+string_enum MP4_1080
+string_enum MP4_144
+string_enum MP4_240
+string_enum MP4_360
+string_enum MP4_480
+string_enum MP4_720
+string_enum M_CALL_PUSH_NOTIFICATION
+string_enum NARNIA
+string_enum NETWORK_ERROR
+string_enum NEW_STICKER_SETS
+string_enum NOBODY
+string_enum NOT_MATCH
+string_enum NO_FORWARD
+string_enum OFFICIAL
+string_enum ONEME
+string_enum ONLY_ADMIN_CAN_ADD_MEMBER
+string_enum ONLY_ADMIN_CAN_CALL
+string_enum ONLY_OWNER_CAN_CHANGE_ICON_TITLE
+string_enum OPEN
+string_enum ORGANIZATION_INFO
+string_enum OTHER
+string_enum OUT_OF_CALL
+string_enum O_DASH
+string_enum O_HLS
+string_enum PERF
+string_enum PERMISSION
+string_enum PHONE_NUMBER_PRIVACY
+string_enum PHOTO
+string_enum POLL
+string_enum POPULAR
+string_enum PORNO
+string_enum PRESENCE
+string_enum PRESET_AVATAR
+string_enum PRIVATE
+string_enum PRIVATE_CHANNEL
+string_enum PRIVATE_CHAT
+string_enum PROFILE
+string_enum PUBLIC
+string_enum PUBLIC_CHANNEL
+string_enum PUBLIC_CHAT
+string_enum PUBLIC_CHATS
+string_enum PUSH_DETAILS
+string_enum PUSH_NEW_CONTACTS
+string_enum PUSH_SOUND
+string_enum QUOTE
+string_enum REACTION
+string_enum READ_MESSAGE
+string_enum READ_REACTION
+string_enum RECENT
+string_enum REFRESH
+string_enum REGISTER
+string_enum REGISTRATION
+string_enum REGULAR
+string_enum REJECTED
+string_enum REMOVE
+string_enum REMOVED
+string_enum REPLY
+string_enum REPLY_KEYBOARD
+string_enum REPORT_BANNER_ACTIONS
+string_enum REQUEST_PERMISSION_CAM
+string_enum REQUEST_PERMISSION_MIC
+string_enum RESEND
+string_enum RESTRICTED
+string_enum SAFE_MODE
+string_enum SEARCH_BY_PHONE
+string_enum SEARCH_RESPONSE
+string_enum SENT_BY_PHONE
+string_enum SERVICE_ACCOUNT
+string_enum SERVICE_CHAT
+string_enum SETTINGS
+string_enum SET_AS_UNREAD
+string_enum SHARE
+string_enum SHOW_READ_MARK
+string_enum SHOW_STORIES
+string_enum SIGN_ADMIN
+string_enum SPAM
+string_enum START_AUTH
+string_enum START_CALL
+string_enum STATIC
+string_enum STICKER
+string_enum STICKERS_SUGGEST
+string_enum STICKER_SET
+string_enum STORY
+string_enum STORY_NAV
+string_enum STORY_OPEN
+string_enum STORY_PREVIEW_OPEN
+string_enum STORY_REPLY
+string_enum STORY_STATS
+string_enum STRIKETHROUGH
+string_enum STRONG
+string_enum SUCCESS
+string_enum SYSTEM
+string_enum TEXT
+string_enum TEXT_SIZE
+string_enum THEME
+string_enum THREAT
+string_enum TRY_DELETE_PROFILE
+string_enum UNBLOCK
+string_enum UNDERLINE
+string_enum UNKNOWN_CALLER_ALERT
+string_enum UNSAFE_FILES
+string_enum UPDATE
+string_enum UPDATED
+string_enum UPLOAD_MAX_RETRY_COUNT
+string_enum USER
+string_enum USERS_FREEZES
+string_enum USER_MENTION
+string_enum UUUUUUU
+string_enum VIDEO
+string_enum VIDEO_CALL_INTERRUPTION
+string_enum VIDEO_ENABLED
+string_enum VIDEO_FREEZES
+string_enum VIDEO_MESSAGE
+string_enum VIDEO_MSG
+string_enum VIDEO_QUALITY
+string_enum VIDEO_STATS
+string_enum VIDEO_SYNC
+string_enum VOICE_COMMUNICATION_PROBLEM
+string_enum W5OFT
+string_enum WARM_START
+string_enum WEBAPP_ACTION
+string_enum WEBAPP_BRIDGE
+string_enum WIDGET
