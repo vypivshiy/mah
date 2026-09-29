@@ -5,7 +5,7 @@ use iced_x86::{Decoder, DecoderOptions, Instruction, Mnemonic, OpKind, Register}
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-const MAX_FACTORY_FUNCTION_LEN: u32 = 2048;
+pub const MAX_FACTORY_FUNCTION_LEN: u32 = 4096;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DiscriminatorScanDiagnostics {
@@ -96,6 +96,9 @@ fn diagnostics_from_scan(
 }
 
 fn miss_from_factory_fact(fact: &FactoryDiscriminatorFacts) -> Option<DiscriminatorExtractionMiss> {
+    if !fact.direct_type_assignments.is_empty() {
+        return None;
+    }
     let reason = factory_fact_miss_reason(fact)?;
     let variant_name = if fact.constructed_variants.len() == 1 {
         fact.constructed_variants.iter().next().cloned()
@@ -231,7 +234,7 @@ fn values_from_evidence(evidence: &[DiscriminatorEvidence]) -> BTreeMap<String, 
         .collect()
 }
 
-fn is_scream_case_discriminator_value(value: &str) -> bool {
+pub fn is_scream_case_discriminator_value(value: &str) -> bool {
     if value.is_empty() || value.len() > 64 {
         return false;
     }
@@ -247,6 +250,97 @@ fn is_scream_case_discriminator_value(value: &str) -> bool {
     bytes
         .iter()
         .all(|byte| byte.is_ascii_uppercase() || byte.is_ascii_digit() || *byte == b'_')
+}
+
+pub fn strip_ref_count_obj2(type_name: &str) -> Option<&str> {
+    let mut s = type_name.trim();
+    for prefix in &["class ", "struct "] {
+        if s.starts_with(prefix) {
+            s = &s[prefix.len()..];
+            break;
+        }
+    }
+    let rest = if let Some(r) = s.strip_prefix("std::_Ref_count_obj2<") {
+        r
+    } else if let Some(r) = s.strip_prefix("_Ref_count_obj2<") {
+        r
+    } else {
+        return None;
+    };
+    let trimmed = rest.trim();
+    let inner = trimmed.strip_suffix('>')?;
+    let mut inner = inner.trim();
+    for prefix in &["class ", "struct "] {
+        if inner.starts_with(prefix) {
+            inner = &inner[prefix.len()..];
+            break;
+        }
+    }
+    Some(inner.trim())
+}
+
+pub fn match_candidate_variant(
+    raw_type_name: &str,
+    candidate_variants: &BTreeSet<String>,
+) -> Option<String> {
+    if candidate_variants.contains(raw_type_name) {
+        return Some(raw_type_name.to_string());
+    }
+    if let Some(inner) = strip_ref_count_obj2(raw_type_name) {
+        if candidate_variants.contains(inner) {
+            return Some(inner.to_string());
+        }
+    }
+    None
+}
+
+pub fn resolve_vtable_variant(
+    rtti: &RttiEngine,
+    vtable_rva: u32,
+    candidate_variants: &BTreeSet<String>,
+) -> Option<String> {
+    let type_name = rtti.vtable_to_type.get(&vtable_rva)?;
+    match_candidate_variant(type_name, candidate_variants)
+}
+
+pub fn resolve_string_literal(pe: &PeImage, target_rva: u32) -> Option<String> {
+    if let Some(val) = pe.read_cstring(target_rva) {
+        if val == "_type" || is_scream_case_discriminator_value(val) {
+            return Some(val.to_string());
+        }
+    }
+    if let Some(slice) = pe.slice_at_rva(target_rva, 8) {
+        if let Ok(bytes) = slice.try_into() {
+            let ptr = u64::from_le_bytes(bytes);
+            if ptr >= pe.image_base {
+                let str_rva = (ptr - pe.image_base) as u32;
+                if let Some(val) = pe.read_cstring(str_rva) {
+                    if val == "_type" || is_scream_case_discriminator_value(val) {
+                        return Some(val.to_string());
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+pub fn build_discriminator_catalog(
+    polymorphic_models: &[crate::dumper::PolymorphicModelEntry],
+) -> BTreeMap<String, BTreeMap<String, String>> {
+    let mut catalog: BTreeMap<String, BTreeMap<String, String>> = BTreeMap::new();
+    for poly in polymorphic_models {
+        let mut map = BTreeMap::new();
+        for variant in poly.variants.iter().chain(poly.rtti_subclasses.iter()) {
+            if let Some(ref tag) = variant.tag {
+                map.insert(tag.clone(), variant.name.clone());
+            }
+        }
+        if !map.is_empty() {
+            catalog.insert(poly.name.clone(), map);
+        }
+    }
+    catalog
 }
 
 fn candidate_converter_factory_functions<'pe, 'data>(
@@ -287,31 +381,33 @@ fn is_converter_factory_candidate(
     while decoder.can_decode() {
         let mut insn = Instruction::default();
         decoder.decode_out(&mut insn);
-        if insn.mnemonic() != Mnemonic::Lea
-            || insn.op1_kind() != OpKind::Memory
-            || insn.memory_base() != Register::RIP
-        {
-            continue;
-        }
 
-        let target_va = insn.memory_displacement64();
+        let mem_disp = if insn.op0_kind() == OpKind::Memory && insn.memory_base() == Register::RIP {
+            Some(insn.memory_displacement64())
+        } else if insn.op1_kind() == OpKind::Memory && insn.memory_base() == Register::RIP {
+            Some(insn.memory_displacement64())
+        } else {
+            None
+        };
+
+        let Some(target_va) = mem_disp else {
+            continue;
+        };
+
         if target_va < pe.image_base {
             continue;
         }
         let target_rva = (target_va - pe.image_base) as u32;
-        if rtti
-            .vtable_to_type
-            .get(&target_rva)
-            .is_some_and(|type_name| candidate_variants.contains(type_name))
-        {
+
+        if resolve_vtable_variant(rtti, target_rva, candidate_variants).is_some() {
             saw_variant_construction = true;
         }
-        if let Some(value) = pe.read_cstring(target_rva) {
+        if let Some(value) = resolve_string_literal(pe, target_rva) {
             saw_type_field |= value == "_type";
-            saw_type_value |= is_scream_case_discriminator_value(value);
+            saw_type_value |= is_scream_case_discriminator_value(&value);
         }
 
-        if saw_variant_construction && saw_type_field && saw_type_value {
+        if saw_variant_construction && (saw_type_field || saw_type_value) {
             return true;
         }
     }
@@ -342,18 +438,38 @@ fn scan_function_facts(
         function_rva: func.begin_address,
         ..FactoryDiscriminatorFacts::default()
     };
+    let mut current_candidate_tag: Option<String> = None;
 
     while decoder.can_decode() {
         let mut insn = Instruction::default();
         decoder.decode_out(&mut insn);
 
         match insn.mnemonic() {
-            Mnemonic::Lea => handle_lea(pe, rtti, candidate_variants, &mut reg_state, &insn),
-            Mnemonic::Mov => handle_mov(&mut reg_state, &mut facts, &insn),
+            Mnemonic::Lea => handle_lea(
+                pe,
+                rtti,
+                candidate_variants,
+                &mut reg_state,
+                &mut current_candidate_tag,
+                &insn,
+            ),
+            Mnemonic::Mov => handle_mov(
+                pe,
+                rtti,
+                candidate_variants,
+                &mut reg_state,
+                &mut current_candidate_tag,
+                &mut facts,
+                &insn,
+            ),
             Mnemonic::Xor | Mnemonic::Sub => clear_written_register(&mut reg_state, &insn),
             Mnemonic::Call => {
                 record_type_assignment_from_call(&reg_state, &mut facts);
                 clear_volatile_registers(&mut reg_state);
+            }
+            Mnemonic::Jmp | Mnemonic::Ret => {
+                current_candidate_tag = None;
+                clear_written_register(&mut reg_state, &insn);
             }
             _ => clear_written_register(&mut reg_state, &insn),
         }
@@ -371,6 +487,7 @@ fn handle_lea(
     rtti: &RttiEngine,
     candidate_variants: &BTreeSet<String>,
     reg_state: &mut HashMap<Register, RegValue>,
+    current_candidate_tag: &mut Option<String>,
     insn: &Instruction,
 ) {
     let dest = insn.op0_register().full_register();
@@ -386,25 +503,28 @@ fn handle_lea(
     }
     let target_rva = (target_va - pe.image_base) as u32;
 
-    if let Some(type_name) = rtti.vtable_to_type.get(&target_rva) {
-        if candidate_variants.contains(type_name) {
-            reg_state.insert(dest, RegValue::VariantVtable(type_name.clone()));
-            return;
-        }
+    if let Some(variant_name) = resolve_vtable_variant(rtti, target_rva, candidate_variants) {
+        reg_state.insert(dest, RegValue::VariantVtable(variant_name));
+        return;
     }
 
-    if let Some(value) = pe.read_cstring(target_rva) {
-        if value == "_type" || is_scream_case_discriminator_value(value) {
-            reg_state.insert(dest, RegValue::StringLiteral(value.to_string()));
-            return;
+    if let Some(value) = resolve_string_literal(pe, target_rva) {
+        if is_scream_case_discriminator_value(&value) {
+            *current_candidate_tag = Some(value.clone());
         }
+        reg_state.insert(dest, RegValue::StringLiteral(value));
+        return;
     }
 
     reg_state.remove(&dest);
 }
 
 fn handle_mov(
+    pe: &PeImage,
+    rtti: &RttiEngine,
+    candidate_variants: &BTreeSet<String>,
     reg_state: &mut HashMap<Register, RegValue>,
+    current_candidate_tag: &mut Option<String>,
     facts: &mut FactoryDiscriminatorFacts,
     insn: &Instruction,
 ) {
@@ -417,6 +537,25 @@ fn handle_mov(
             } else {
                 reg_state.remove(&dest);
             }
+        } else if insn.op1_kind() == OpKind::Memory && insn.memory_base() == Register::RIP {
+            let target_va = insn.memory_displacement64();
+            if target_va >= pe.image_base {
+                let target_rva = (target_va - pe.image_base) as u32;
+                if let Some(variant_name) =
+                    resolve_vtable_variant(rtti, target_rva, candidate_variants)
+                {
+                    reg_state.insert(dest, RegValue::VariantVtable(variant_name));
+                    return;
+                }
+                if let Some(value) = resolve_string_literal(pe, target_rva) {
+                    if is_scream_case_discriminator_value(&value) {
+                        *current_candidate_tag = Some(value.clone());
+                    }
+                    reg_state.insert(dest, RegValue::StringLiteral(value));
+                    return;
+                }
+            }
+            reg_state.remove(&dest);
         } else {
             reg_state.remove(&dest);
         }
@@ -430,7 +569,15 @@ fn handle_mov(
                 facts.constructed_variants.insert(variant_name.clone());
                 let object_reg = insn.memory_base().full_register();
                 if object_reg != Register::None && object_reg != Register::RIP {
-                    reg_state.insert(object_reg, RegValue::ConstructedVariant(variant_name));
+                    reg_state.insert(object_reg, RegValue::ConstructedVariant(variant_name.clone()));
+                }
+                if let Some(tag) = current_candidate_tag.take() {
+                    facts.type_assignments.insert(tag.clone());
+                    facts
+                        .direct_type_assignments
+                        .entry(variant_name)
+                        .or_default()
+                        .insert(tag);
                 }
             }
         }
@@ -647,5 +794,142 @@ mod tests {
         assert!(evidence_from_factory_facts(&[facts(0x1000, &[photo], &["Photo"])]).is_empty());
         assert!(!is_scream_case_discriminator_value("_type"));
         assert!(is_scream_case_discriminator_value("VIDEO_NOTE"));
+    }
+
+    #[test]
+    fn test_strip_ref_count_obj2_variants() {
+        assert_eq!(
+            strip_ref_count_obj2("std::_Ref_count_obj2<struct Api::OneMe::Types::PhotoAttachment>"),
+            Some("Api::OneMe::Types::PhotoAttachment")
+        );
+        assert_eq!(
+            strip_ref_count_obj2("class std::_Ref_count_obj2<struct Api::OneMe::Types::VideoAttachment>"),
+            Some("Api::OneMe::Types::VideoAttachment")
+        );
+        assert_eq!(
+            strip_ref_count_obj2("_Ref_count_obj2<class Api::OneMe::Types::AudioAttachment>"),
+            Some("Api::OneMe::Types::AudioAttachment")
+        );
+        assert_eq!(
+            strip_ref_count_obj2("std::_Ref_count_obj2<Api::OneMe::Types::FileAttachment >"),
+            Some("Api::OneMe::Types::FileAttachment")
+        );
+        assert_eq!(
+            strip_ref_count_obj2("Api::OneMe::Types::PhotoAttachment"),
+            None
+        );
+    }
+
+    #[test]
+    fn test_match_candidate_variant() {
+        let mut candidates = BTreeSet::new();
+        candidates.insert("Api::OneMe::Types::PhotoAttachment".to_string());
+        candidates.insert("Api::OneMe::Types::VideoAttachment".to_string());
+
+        // Direct match
+        assert_eq!(
+            match_candidate_variant("Api::OneMe::Types::PhotoAttachment", &candidates).as_deref(),
+            Some("Api::OneMe::Types::PhotoAttachment")
+        );
+
+        // Wrapped in std::_Ref_count_obj2
+        assert_eq!(
+            match_candidate_variant(
+                "std::_Ref_count_obj2<struct Api::OneMe::Types::PhotoAttachment>",
+                &candidates
+            )
+            .as_deref(),
+            Some("Api::OneMe::Types::PhotoAttachment")
+        );
+
+        // Unknown type
+        assert_eq!(
+            match_candidate_variant(
+                "std::_Ref_count_obj2<struct Api::OneMe::Types::UnknownAttachment>",
+                &candidates
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn test_build_discriminator_catalog_lexicographical_sorting() {
+        use crate::dumper::{PolymorphicBase, PolymorphicModelEntry, PolymorphicVariant};
+
+        let make_variant = |name: &str, tag: Option<&str>| PolymorphicVariant {
+            name: name.to_string(),
+            offset: None,
+            fields: Vec::new(),
+            all_fields: Vec::new(),
+            tag: tag.map(str::to_string),
+        };
+
+        let models = vec![
+            PolymorphicModelEntry {
+                name: "BaseB".to_string(),
+                root_sources: vec!["protocol_field".to_string()],
+                discriminator: None,
+                base: PolymorphicBase {
+                    offset: None,
+                    fields: Vec::new(),
+                },
+                variants: vec![
+                    make_variant("VariantZ", Some("ZETA")),
+                    make_variant("VariantA", Some("ALPHA")),
+                ],
+                rtti_subclasses: Vec::new(),
+            },
+            PolymorphicModelEntry {
+                name: "BaseA".to_string(),
+                root_sources: vec!["protocol_field".to_string()],
+                discriminator: None,
+                base: PolymorphicBase {
+                    offset: None,
+                    fields: Vec::new(),
+                },
+                variants: vec![
+                    make_variant("VariantPhoto", Some("PHOTO")),
+                    make_variant("VariantVideo", Some("VIDEO")),
+                    make_variant("VariantNoTag", None),
+                ],
+                rtti_subclasses: Vec::new(),
+            },
+            PolymorphicModelEntry {
+                name: "BaseEmpty".to_string(),
+                root_sources: vec!["rtti_heuristic".to_string()],
+                discriminator: None,
+                base: PolymorphicBase {
+                    offset: None,
+                    fields: Vec::new(),
+                },
+                variants: Vec::new(),
+                rtti_subclasses: vec![make_variant("EmptyVariant", None)],
+            },
+        ];
+
+        let catalog = build_discriminator_catalog(&models);
+
+        // BaseEmpty has no tags, so it must not be present
+        assert_eq!(catalog.len(), 2);
+        assert!(catalog.contains_key("BaseA"));
+        assert!(catalog.contains_key("BaseB"));
+        assert!(!catalog.contains_key("BaseEmpty"));
+
+        let base_a = &catalog["BaseA"];
+        assert_eq!(base_a.len(), 2);
+        let tags_a: Vec<&str> = base_a.keys().map(String::as_str).collect();
+        assert_eq!(tags_a, vec!["PHOTO", "VIDEO"]);
+        assert_eq!(base_a["PHOTO"], "VariantPhoto");
+        assert_eq!(base_a["VIDEO"], "VariantVideo");
+
+        let base_b = &catalog["BaseB"];
+        assert_eq!(base_b.len(), 2);
+        let tags_b: Vec<&str> = base_b.keys().map(String::as_str).collect();
+        assert_eq!(tags_b, vec!["ALPHA", "ZETA"]);
+    }
+
+    #[test]
+    fn test_max_factory_function_len_is_at_least_4096() {
+        assert!(MAX_FACTORY_FUNCTION_LEN >= 4096);
     }
 }

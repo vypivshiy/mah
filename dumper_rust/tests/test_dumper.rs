@@ -782,3 +782,79 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         vec!["url", "frequency", "height", "width", "count"]
     );
 }
+
+#[test]
+fn test_discriminator_catalog_and_tag_discovery_invariants() {
+    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+        Some(path) => path,
+        None => {
+            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            return;
+        }
+    };
+    if !dll_path.exists() {
+        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
+        return;
+    }
+    let bytes = fs::read(&dll_path).expect("Failed to read DLL");
+    let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");
+    let rtti = RttiEngine::build(&pe).expect("Failed to build RTTI engine");
+    let scanner = ProtocolScanner::scan(&pe, &rtti).expect("Failed to scan protocol entities");
+    let options = DumperOptions {
+        version: dumper_rust::dumper::AppVersion {
+            version: String::new(),
+            build: 0,
+        },
+    };
+    let result = Dumper::dump(&pe, &rtti, &scanner, &options).expect("Failed to execute dumper");
+
+    // 1. Discriminator catalog exists and contains BaseAttachment
+    assert!(
+        result.discriminators.contains_key("Api::OneMe::Types::BaseAttachment"),
+        "Catalog must contain Api::OneMe::Types::BaseAttachment"
+    );
+
+    let base_disc = &result.discriminators["Api::OneMe::Types::BaseAttachment"];
+    println!("BaseAttachment discriminators: {:#?}", base_disc);
+
+    // 2. All core attachment variants have expected tags
+    assert_eq!(base_disc.get("PHOTO").map(String::as_str), Some("Api::OneMe::Types::PhotoAttachment"));
+    assert_eq!(base_disc.get("VIDEO").map(String::as_str), Some("Api::OneMe::Types::VideoAttachment"));
+    assert_eq!(base_disc.get("STICKER").map(String::as_str), Some("Api::OneMe::Types::StickerAttachment"));
+    assert_eq!(base_disc.get("AUDIO").map(String::as_str), Some("Api::OneMe::Types::AudioAttachment"));
+    assert_eq!(base_disc.get("FILE").map(String::as_str), Some("Api::OneMe::Types::FileAttachment"));
+    assert_eq!(base_disc.get("CONTROL").map(String::as_str), Some("Api::OneMe::Types::ControlAttachment"));
+    assert_eq!(base_disc.get("SHARE").map(String::as_str), Some("Api::OneMe::Types::ShareAttachment"));
+    assert_eq!(base_disc.get("CALL").map(String::as_str), Some("Api::OneMe::Types::CallAttachment"));
+    assert_eq!(base_disc.get("APP").map(String::as_str), Some("Api::OneMe::Types::AppAttachment"));
+    assert_eq!(base_disc.get("INLINE_KEYBOARD").map(String::as_str), Some("Api::OneMe::Types::InlineKeyboardAttachment"));
+    assert_eq!(base_disc.get("REPLY_KEYBOARD").map(String::as_str), Some("Api::OneMe::Types::ReplyKeyboardAttachment"));
+    assert_eq!(base_disc.get("CONTACT").map(String::as_str), Some("Api::OneMe::Types::ContactAttachment"));
+    assert_eq!(base_disc.get("LOCATION").map(String::as_str), Some("Api::OneMe::Types::GeoPositionAttachment"));
+    assert_eq!(base_disc.get("WIDGET").map(String::as_str), Some("Api::OneMe::Types::WidgetAttachment"));
+    assert_eq!(base_disc.get("POLL").map(String::as_str), Some("Api::OneMe::Types::PollAttachment"));
+    assert_eq!(base_disc.get("STORY_REPLY").map(String::as_str), Some("Api::OneMe::Types::StoryAttachment"));
+
+    // 3. Outgoing::BaseAttachment also has tags
+    if let Some(outgoing_disc) = result.discriminators.get("Api::OneMe::Types::Outgoing::BaseAttachment") {
+        println!("Outgoing::BaseAttachment discriminators: {:#?}", outgoing_disc);
+        assert_eq!(outgoing_disc.get("PHOTO").map(String::as_str), Some("Api::OneMe::Types::Outgoing::PhotoAttachment"));
+        assert_eq!(outgoing_disc.get("VIDEO").map(String::as_str), Some("Api::OneMe::Types::Outgoing::VideoAttachment"));
+        assert_eq!(outgoing_disc.get("STICKER").map(String::as_str), Some("Api::OneMe::Types::Outgoing::StickerAttachment"));
+        assert_eq!(outgoing_disc.get("AUDIO").map(String::as_str), Some("Api::OneMe::Types::Outgoing::AudioAttachment"));
+    }
+
+    // 4. Verify tag discovery on PolymorphicModelEntry variants
+    let base_poly = result.polymorphic_models.iter().find(|m| m.name == "Api::OneMe::Types::BaseAttachment").unwrap();
+    let photo_var = base_poly.variants.iter().find(|v| v.name == "Api::OneMe::Types::PhotoAttachment").unwrap();
+    assert_eq!(photo_var.tag.as_deref(), Some("PHOTO"));
+
+    let video_var = base_poly.variants.iter().find(|v| v.name == "Api::OneMe::Types::VideoAttachment").unwrap();
+    assert_eq!(video_var.tag.as_deref(), Some("VIDEO"));
+
+    let sticker_var = base_poly.variants.iter().find(|v| v.name == "Api::OneMe::Types::StickerAttachment").unwrap();
+    assert_eq!(sticker_var.tag.as_deref(), Some("STICKER"));
+
+    let audio_var = base_poly.variants.iter().find(|v| v.name == "Api::OneMe::Types::AudioAttachment").unwrap();
+    assert_eq!(audio_var.tag.as_deref(), Some("AUDIO"));
+}
