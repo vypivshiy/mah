@@ -12,21 +12,17 @@ use std::fs;
 use std::time::{Duration, Instant};
 
 mod common;
-use common::resolve_env_path;
+use common::{resolve_core_dll, resolve_env_path};
 
 #[test]
 fn test_dumper_full_pipeline_structural_invariants() {
-    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
-            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            eprintln!("Skipping: core.dll not found");
             return;
         }
     };
-    if !dll_path.exists() {
-        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
-        return;
-    }
     let bytes = fs::read(&dll_path).expect("Failed to read DLL");
     let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");
     let rtti = RttiEngine::build(&pe).expect("Failed to build RTTI engine");
@@ -37,8 +33,10 @@ fn test_dumper_full_pipeline_structural_invariants() {
         version: dumper_rust::dumper::AppVersion {
             version: String::new(),
             build: 0,
+            protocol_version: None,
         },
         config: None,
+        protocol_version: None,
     };
 
     let start_time = Instant::now();
@@ -786,17 +784,13 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
 
 #[test]
 fn test_discriminator_catalog_and_tag_discovery_invariants() {
-    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
-            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            eprintln!("Skipping: core.dll not found");
             return;
         }
     };
-    if !dll_path.exists() {
-        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
-        return;
-    }
     let bytes = fs::read(&dll_path).expect("Failed to read DLL");
     let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");
     let rtti = RttiEngine::build(&pe).expect("Failed to build RTTI engine");
@@ -805,8 +799,10 @@ fn test_discriminator_catalog_and_tag_discovery_invariants() {
         version: dumper_rust::dumper::AppVersion {
             version: String::new(),
             build: 0,
+            protocol_version: None,
         },
         config: None,
+        protocol_version: None,
     };
     let result = Dumper::dump(&pe, &rtti, &scanner, &options).expect("Failed to execute dumper");
 

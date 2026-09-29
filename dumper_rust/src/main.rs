@@ -150,12 +150,20 @@ fn main() -> Result<()> {
         t_scan.elapsed()
     );
 
+    let detected_proto_ver = config_val
+        .as_ref()
+        .and_then(|c| c.get("api_version_uint"))
+        .and_then(|v| v.as_u64())
+        .map(|v| v as u32);
+
     let options = DumperOptions {
         version: dumper_rust::dumper::AppVersion {
             version: args.app_version,
             build: args.build_number,
+            protocol_version: detected_proto_ver,
         },
         config: config_val.clone(),
+        protocol_version: detected_proto_ver,
     };
 
     let t_dump = Instant::now();

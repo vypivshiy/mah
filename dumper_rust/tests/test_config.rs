@@ -7,27 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 
 mod common;
-use common::resolve_env_path;
-
-fn resolve_config_dll() -> Option<PathBuf> {
-    if let Some(path) = resolve_env_path("CONFIG_DLL_PATH") {
-        if path.exists() {
-            return Some(path);
-        }
-    }
-    let direct = PathBuf::from(r"D:\PycharmProjects\mah\CM_FP_Unspecified.config.dll");
-    if direct.exists() {
-        return Some(direct);
-    }
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    if let Some(parent) = manifest_dir.parent() {
-        let candidate = parent.join("CM_FP_Unspecified.config.dll");
-        if candidate.exists() {
-            return Some(candidate);
-        }
-    }
-    None
-}
+use common::resolve_config_dll;
 
 const EXPECTED_CONFIG_KEYS: &[&str] = &[
     "allow_message_text_with_files",

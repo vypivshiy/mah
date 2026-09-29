@@ -2,7 +2,7 @@ use dumper_rust::pe::PeImage;
 use std::fs;
 
 mod common;
-use common::resolve_env_path;
+use common::resolve_core_dll;
 
 #[test]
 fn test_pe_parsing_standalone() {
@@ -115,17 +115,13 @@ fn test_pe_parsing_standalone() {
 
 #[test]
 fn test_pe_parse_and_lookup() {
-    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
-            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            eprintln!("Skipping: core.dll not found");
             return;
         }
     };
-    if !dll_path.exists() {
-        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
-        return;
-    }
     let bytes = fs::read(&dll_path).expect("Failed to read DLL");
 
     let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");

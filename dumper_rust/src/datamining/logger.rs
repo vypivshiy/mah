@@ -59,22 +59,46 @@ pub fn normalize_source_path(path: &str) -> String {
     result
 }
 
-pub fn extract_packet_name(req_full: &str) -> String {
-    let s = req_full.strip_suffix("::Parameters").unwrap_or(req_full);
+pub fn extract_packet_name(packet_model_full: &str) -> String {
+    let s = packet_model_full
+        .strip_suffix("::Parameters")
+        .unwrap_or(packet_model_full);
     let s = s.strip_suffix("::Response").unwrap_or(s);
     let s = s.strip_suffix("::Payload").unwrap_or(s);
     let name = s.rsplit("::").next().unwrap_or(s).trim();
     if name.is_empty() || name == "Parameters" {
-        req_full.to_string()
+        packet_model_full.to_string()
     } else {
         name.to_string()
     }
 }
 
 pub fn split_function_name(func_name: &str) -> (String, String) {
-    match func_name.rsplit_once("::") {
-        Some((cls, mth)) => (cls.to_string(), mth.to_string()),
-        None => (String::new(), func_name.to_string()),
+    let trimmed = func_name.trim();
+    // 1. Strip parameter list (e.g. "func(int, char*)")
+    let without_params = if let Some(idx) = trimmed.find('(') {
+        trimmed[..idx].trim()
+    } else {
+        trimmed
+    };
+
+    // 2. Strip trailing const/volatile qualifiers if any
+    let clean_sig = without_params
+        .strip_suffix("const")
+        .unwrap_or(without_params)
+        .trim();
+
+    // 3. Strip return type or calling convention prefix if separated by whitespace (e.g., "void __cdecl Class::method")
+    let symbol = if let Some(last_space) = clean_sig.rfind(' ') {
+        clean_sig[last_space + 1..].trim()
+    } else {
+        clean_sig
+    };
+
+    // 4. Split class and method
+    match symbol.rsplit_once("::") {
+        Some((cls, mth)) => (cls.trim().to_string(), mth.trim().to_string()),
+        None => (String::new(), symbol.to_string()),
     }
 }
 
@@ -604,6 +628,16 @@ mod tests {
         let (class3, method3) = split_function_name("standaloneFunc");
         assert_eq!(class3, "");
         assert_eq!(method3, "standaloneFunc");
+
+        let (class4, method4) =
+            split_function_name("void Core::Calls::CallsInteractor::doRequestContacts(int)");
+        assert_eq!(class4, "Core::Calls::CallsInteractor");
+        assert_eq!(method4, "doRequestContacts");
+
+        let (class5, method5) =
+            split_function_name("Core::Calls::CallsInteractor::doRequestContacts() const");
+        assert_eq!(class5, "Core::Calls::CallsInteractor");
+        assert_eq!(method5, "doRequestContacts");
     }
 
     #[test]

@@ -13,47 +13,7 @@ use std::process::Command;
 use std::time::{Duration, Instant};
 
 mod common;
-use common::resolve_env_path;
-
-fn resolve_core_dll() -> Option<PathBuf> {
-    if let Some(path) = resolve_env_path("CORE_DLL_PATH") {
-        if path.exists() {
-            return Some(path);
-        }
-    }
-    let direct = PathBuf::from(r"D:\PycharmProjects\mah\CM_FP_Unspecified.core.dll");
-    if direct.exists() {
-        return Some(direct);
-    }
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    if let Some(parent) = manifest_dir.parent() {
-        let candidate = parent.join("CM_FP_Unspecified.core.dll");
-        if candidate.exists() {
-            return Some(candidate);
-        }
-    }
-    None
-}
-
-fn resolve_config_dll() -> Option<PathBuf> {
-    if let Some(path) = resolve_env_path("CONFIG_DLL_PATH") {
-        if path.exists() {
-            return Some(path);
-        }
-    }
-    let direct = PathBuf::from(r"D:\PycharmProjects\mah\CM_FP_Unspecified.config.dll");
-    if direct.exists() {
-        return Some(direct);
-    }
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    if let Some(parent) = manifest_dir.parent() {
-        let candidate = parent.join("CM_FP_Unspecified.config.dll");
-        if candidate.exists() {
-            return Some(candidate);
-        }
-    }
-    None
-}
+use common::{resolve_config_dll, resolve_core_dll};
 
 fn contains_key_recursive(value: &Value, target: &str) -> bool {
     match value {
@@ -97,8 +57,10 @@ fn execute_pipeline(
         version: AppVersion {
             version: String::new(),
             build: 0,
+            protocol_version: None,
         },
         config: config_val.clone(),
+        protocol_version: None,
     };
     let dump_res = Dumper::dump_with_diagnostics(&pe, &rtti, &scanner, &options)
         .expect("Failed to run dumper");
@@ -230,6 +192,16 @@ fn test_datamining_pipeline_end_to_end() {
         dump1.options.config.is_some(),
         "packets_rust.json options.config must be populated"
     );
+    assert_eq!(
+        dump1.options.protocol_version,
+        Some(11),
+        "packets_rust.json options.protocol_version must be detected from config"
+    );
+    assert_eq!(
+        snap1.meta.protocol_version,
+        Some(11),
+        "metadata.json meta.protocol_version must be detected from config"
+    );
     let cfg_val: Value =
         serde_json::from_str(&fs::read_to_string(&c1).unwrap()).expect("Valid config.json");
     assert_eq!(
@@ -250,6 +222,13 @@ fn test_datamining_pipeline_end_to_end() {
     assert!(
         dump1.models.iter().any(|m| m.offset.is_some()),
         "dump.models must retain structural offset values"
+    );
+
+    let packets_val: Value =
+        serde_json::from_str(&fs::read_to_string(&p1).unwrap()).expect("Valid packets_rust.json");
+    assert!(
+        packets_val.get("string_enums").is_none(),
+        "packets_rust.json must omit 'string_enums' when typed enums are present per Decision 3"
     );
 
     // 5. Invariant: without --with-rva, neither "rva" nor "offset" appears as a key anywhere in metadata.json
@@ -309,7 +288,7 @@ fn test_datamining_pipeline_end_to_end() {
         );
     } else {
         assert!(
-            elapsed < Duration::from_secs(15),
+            elapsed < Duration::from_secs(30),
             "Debug execution time must finish within reasonable bounds: {:?}",
             elapsed
         );

@@ -482,6 +482,32 @@ fn scan_function_facts(
     }
 }
 
+fn resolve_rip_target_reg_value(
+    pe: &PeImage,
+    rtti: &RttiEngine,
+    candidate_variants: &BTreeSet<String>,
+    current_candidate_tag: &mut Option<String>,
+    target_va: u64,
+) -> Option<RegValue> {
+    if target_va < pe.image_base {
+        return None;
+    }
+    let target_rva = (target_va - pe.image_base) as u32;
+
+    if let Some(variant_name) = resolve_vtable_variant(rtti, target_rva, candidate_variants) {
+        return Some(RegValue::VariantVtable(variant_name));
+    }
+
+    if let Some(value) = resolve_string_literal(pe, target_rva) {
+        if is_scream_case_discriminator_value(&value) {
+            *current_candidate_tag = Some(value.clone());
+        }
+        return Some(RegValue::StringLiteral(value));
+    }
+
+    None
+}
+
 fn handle_lea(
     pe: &PeImage,
     rtti: &RttiEngine,
@@ -496,27 +522,17 @@ fn handle_lea(
         return;
     }
 
-    let target_va = insn.memory_displacement64();
-    if target_va < pe.image_base {
+    if let Some(val) = resolve_rip_target_reg_value(
+        pe,
+        rtti,
+        candidate_variants,
+        current_candidate_tag,
+        insn.memory_displacement64(),
+    ) {
+        reg_state.insert(dest, val);
+    } else {
         reg_state.remove(&dest);
-        return;
     }
-    let target_rva = (target_va - pe.image_base) as u32;
-
-    if let Some(variant_name) = resolve_vtable_variant(rtti, target_rva, candidate_variants) {
-        reg_state.insert(dest, RegValue::VariantVtable(variant_name));
-        return;
-    }
-
-    if let Some(value) = resolve_string_literal(pe, target_rva) {
-        if is_scream_case_discriminator_value(&value) {
-            *current_candidate_tag = Some(value.clone());
-        }
-        reg_state.insert(dest, RegValue::StringLiteral(value));
-        return;
-    }
-
-    reg_state.remove(&dest);
 }
 
 fn handle_mov(
@@ -538,24 +554,17 @@ fn handle_mov(
                 reg_state.remove(&dest);
             }
         } else if insn.op1_kind() == OpKind::Memory && insn.memory_base() == Register::RIP {
-            let target_va = insn.memory_displacement64();
-            if target_va >= pe.image_base {
-                let target_rva = (target_va - pe.image_base) as u32;
-                if let Some(variant_name) =
-                    resolve_vtable_variant(rtti, target_rva, candidate_variants)
-                {
-                    reg_state.insert(dest, RegValue::VariantVtable(variant_name));
-                    return;
-                }
-                if let Some(value) = resolve_string_literal(pe, target_rva) {
-                    if is_scream_case_discriminator_value(&value) {
-                        *current_candidate_tag = Some(value.clone());
-                    }
-                    reg_state.insert(dest, RegValue::StringLiteral(value));
-                    return;
-                }
+            if let Some(val) = resolve_rip_target_reg_value(
+                pe,
+                rtti,
+                candidate_variants,
+                current_candidate_tag,
+                insn.memory_displacement64(),
+            ) {
+                reg_state.insert(dest, val);
+            } else {
+                reg_state.remove(&dest);
             }
-            reg_state.remove(&dest);
         } else {
             reg_state.remove(&dest);
         }

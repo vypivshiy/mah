@@ -23,6 +23,8 @@ pub struct AppVersion {
     pub version: String,
     #[serde(rename = "build_number")]
     pub build: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol_version: Option<u32>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -32,6 +34,8 @@ pub struct OptionsInfo {
     #[serde(rename = "build_number")]
     pub build: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol_version: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub config: Option<serde_json::Value>,
 }
 
@@ -40,6 +44,7 @@ impl From<AppVersion> for OptionsInfo {
         Self {
             version: v.version,
             build: v.build,
+            protocol_version: v.protocol_version,
             config: None,
         }
     }
@@ -50,6 +55,8 @@ pub struct DumperOptions {
     pub version: AppVersion,
     #[serde(default)]
     pub config: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol_version: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -147,7 +154,8 @@ pub struct DumpResult {
     pub enums: BTreeMap<String, BTreeMap<String, u64>>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub discriminators: BTreeMap<String, BTreeMap<String, String>>,
-    pub string_enums: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub string_enums: Option<Vec<String>>,
     pub error: serde_json::Value,
 }
 
@@ -216,14 +224,42 @@ impl Dumper {
         scanner: &ProtocolScanner,
         options: &DumperOptions,
     ) -> Result<DumpWithDiagnostics> {
-        let (app_ver, build_num) =
+        let mut proto_ver = options.protocol_version.or(options.version.protocol_version);
+        if proto_ver.is_none() {
+            if let Some(cfg) = &options.config {
+                if let Some(pv) = cfg.get("api_version_uint").and_then(|v| v.as_u64()) {
+                    proto_ver = Some(pv as u32);
+                }
+            }
+        }
+
+        let (mut app_ver, mut build_num) =
             if !options.version.version.is_empty() && options.version.build > 0 {
                 (options.version.version.clone(), options.version.build)
             } else if let Some(av) = detect_version_from_bytes(pe.raw) {
-                (av.version, av.build)
+                let v = if !options.version.version.is_empty() {
+                    options.version.version.clone()
+                } else {
+                    av.version
+                };
+                let b = if options.version.build > 0 {
+                    options.version.build
+                } else {
+                    av.build
+                };
+                (v, b)
             } else {
                 ("unknown".to_string(), 0)
             };
+
+        if let Some(pv) = proto_ver {
+            if app_ver.is_empty() || app_ver == "unknown" {
+                app_ver = format!("proto-{}", pv);
+            }
+            if build_num == 0 {
+                build_num = pv;
+            }
+        }
 
         let source = PeModelResolutionSource::new(pe, rtti);
         let mut model_resolver = ModelResolver::new(source);
@@ -329,12 +365,18 @@ impl Dumper {
         };
 
         let enums = crate::datamining::enums::extract_static_enums(pe);
+        let string_enums = if enums.is_empty() {
+            Some(scanner.string_enums.clone())
+        } else {
+            None
+        };
 
         Ok(DumpWithDiagnostics {
             dump: DumpResult {
                 options: OptionsInfo {
                     version: app_ver,
                     build: build_num,
+                    protocol_version: proto_ver,
                     config: options.config.clone(),
                 },
                 packets,
@@ -343,7 +385,7 @@ impl Dumper {
                 polymorphic_models,
                 enums,
                 discriminators,
-                string_enums: scanner.string_enums.clone(),
+                string_enums,
                 error: default_error_payload,
             },
             diagnostics,
@@ -861,6 +903,7 @@ pub fn detect_version_from_bytes(bytes: &[u8]) -> Option<AppVersion> {
                     return Some(AppVersion {
                         version: ver,
                         build,
+                        protocol_version: None,
                     });
                 }
             }

@@ -6,10 +6,23 @@ use crate::pe::PeImage;
 /// Form of the static 24-byte record in `.rdata`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum EnumTableForm {
-    /// Form A: `std::pair<std::string_view, uint64_t>` (8 bytes ptr, 8 bytes len, 8 bytes val)
-    FormA,
-    /// Form B: `std::pair<uint64_t, std::string_view>` (8 bytes val, 8 bytes ptr, 8 bytes len)
-    FormB,
+    /// String key first: `std::pair<std::string_view, uint64_t>` (8 bytes ptr, 8 bytes len, 8 bytes val)
+    StringKeyFirst,
+    /// Value first: `std::pair<uint64_t, std::string_view>` (8 bytes val, 8 bytes ptr, 8 bytes len)
+    ValueFirst,
+}
+
+impl EnumTableForm {
+    pub const ALL: [Self; 2] = [Self::StringKeyFirst, Self::ValueFirst];
+
+    /// Extracts (str_ptr, str_len, value) from the 3 64-bit words of a 24-byte record.
+    #[inline]
+    pub fn parse_record(self, v0: u64, v1: u64, v2: u64) -> (u64, usize, u64) {
+        match self {
+            Self::StringKeyFirst => (v0, v1 as usize, v2),
+            Self::ValueFirst => (v1, v2 as usize, v0),
+        }
+    }
 }
 
 /// A raw entry parsed from a 24-byte record.
@@ -52,7 +65,7 @@ pub fn resolve_pe_string<'a>(pe: &'a PeImage<'a>, va: u64, len: usize) -> Option
     if len == 0 || len > MAX_ENUM_STRING_LEN || va < pe.image_base {
         return None;
     }
-    let rva = (va - pe.image_base) as u64;
+    let rva = va - pe.image_base;
     if rva > u32::MAX as u64 {
         return None;
     }
@@ -70,7 +83,7 @@ pub fn is_valid_enum_string_bytes(bytes: &[u8]) -> bool {
     if bytes.is_empty() || bytes.len() > MAX_ENUM_STRING_LEN {
         return false;
     }
-    bytes.iter().all(|&b| b >= 0x20 && b <= 0x7E)
+    bytes.iter().all(|&b| (0x20..=0x7E).contains(&b))
 }
 
 /// Creates a string resolver for a synthetic memory buffer.
@@ -83,7 +96,7 @@ pub fn create_buffer_string_resolver<'a>(
         if len == 0 || len > MAX_ENUM_STRING_LEN || va < image_base {
             return None;
         }
-        let rva = (va - image_base) as u64;
+        let rva = va - image_base;
         let buf_start = buffer_rva as u64;
         let buf_end = buf_start + buffer.len() as u64;
         if rva < buf_start || rva + (len as u64) > buf_end {
@@ -119,10 +132,7 @@ where
         let v1 = u64::from_le_bytes(chunk[8..16].try_into().unwrap());
         let v2 = u64::from_le_bytes(chunk[16..24].try_into().unwrap());
 
-        let (str_ptr, str_len, value) = match form {
-            EnumTableForm::FormA => (v0, v1 as usize, v2),
-            EnumTableForm::FormB => (v1, v2 as usize, v0),
-        };
+        let (str_ptr, str_len, value) = form.parse_record(v0, v1, v2);
 
         if value >= MAX_ENUM_VALUE {
             break;
@@ -153,50 +163,63 @@ where
     }
 }
 
+fn categorize_server_error_codes(entries: &[(String, u64)]) -> bool {
+    // ServerErrorCodes: e.g. call.blocked -> 6, privacy.violation -> 5
+    let has_call_blocked = entries.iter().any(|(k, v)| k == "call.blocked" && *v == 6);
+    let has_privacy_violation = entries.iter().any(|(k, v)| k == "privacy.violation" && *v == 5);
+    let has_known_names = entries.iter().any(|(k, _)| {
+        k == "call.blocked"
+            || k == "privacy.violation"
+            || k == "user.blocked"
+            || k == "not.chat.participant"
+            || k == "wait.for.admin"
+    });
+    let mostly_dot_keys = entries.len() >= 3
+        && entries.iter().filter(|(k, _)| k.contains('.') && !k.contains('/')).count() * 2 >= entries.len();
+
+    has_call_blocked || has_privacy_violation || (has_known_names && mostly_dot_keys)
+}
+
+fn categorize_user_settings(entries: &[(String, u64)]) -> bool {
+    // UserSettings: e.g. userSettings/showReadmark -> 0, notifications/..., statistic/...
+    let has_user_settings_show = entries.iter().any(|(k, v)| k == "userSettings/showReadmark" && *v == 0);
+    let has_user_settings_keys = entries.iter().any(|(k, _)| k.starts_with("userSettings/"));
+    has_user_settings_show || has_user_settings_keys
+}
+
+fn categorize_call_problems(entries: &[(String, u64)]) -> bool {
+    // CallProblems: e.g. AUDIO_FREEZES -> 1, USERS_FREEZES -> 10
+    let has_audio_freezes = entries.iter().any(|(k, v)| k == "AUDIO_FREEZES" && *v == 1);
+    let has_users_freezes = entries.iter().any(|(k, v)| k == "USERS_FREEZES" && *v == 10);
+    let has_call_problems_keys = entries.iter().any(|(k, _)| {
+        k == "AUDIO_FREEZES"
+            || k == "VIDEO_FREEZES"
+            || k == "AUDIO_QUALITY"
+            || k == "VOICE_COMMUNICATION_PROBLEM"
+    });
+    has_audio_freezes || has_users_freezes || has_call_problems_keys
+}
+
 /// Default domain categorizer mapping recognized tables to canonical categories.
 pub fn default_categorizer(entries: &[(String, u64)], form: EnumTableForm) -> Option<String> {
     match form {
-        EnumTableForm::FormA => {
-            // ServerErrorCodes: e.g. call.blocked -> 6, privacy.violation -> 5
-            let has_call_blocked = entries.iter().any(|(k, v)| k == "call.blocked" && *v == 6);
-            let has_privacy_violation = entries.iter().any(|(k, v)| k == "privacy.violation" && *v == 5);
-            let has_known_names = entries.iter().any(|(k, _)| {
-                k == "call.blocked"
-                    || k == "privacy.violation"
-                    || k == "user.blocked"
-                    || k == "not.chat.participant"
-                    || k == "wait.for.admin"
-            });
-            let mostly_dot_keys = entries.len() >= 3
-                && entries.iter().filter(|(k, _)| k.contains('.') && !k.contains('/')).count() * 2 >= entries.len();
-
-            if has_call_blocked || has_privacy_violation || (has_known_names && mostly_dot_keys) {
-                return Some("ServerErrorCodes".to_string());
+        EnumTableForm::StringKeyFirst => {
+            if categorize_server_error_codes(entries) {
+                Some("ServerErrorCodes".to_string())
+            } else {
+                None
             }
         }
-        EnumTableForm::FormB => {
-            // UserSettings: e.g. userSettings/showReadmark -> 0, notifications/..., statistic/...
-            let has_user_settings_show = entries.iter().any(|(k, v)| k == "userSettings/showReadmark" && *v == 0);
-            let has_user_settings_keys = entries.iter().any(|(k, _)| k.starts_with("userSettings/"));
-            if has_user_settings_show || has_user_settings_keys {
-                return Some("UserSettings".to_string());
-            }
-
-            // CallProblems: e.g. AUDIO_FREEZES -> 1, USERS_FREEZES -> 10
-            let has_audio_freezes = entries.iter().any(|(k, v)| k == "AUDIO_FREEZES" && *v == 1);
-            let has_users_freezes = entries.iter().any(|(k, v)| k == "USERS_FREEZES" && *v == 10);
-            let has_call_problems_keys = entries.iter().any(|(k, _)| {
-                k == "AUDIO_FREEZES"
-                    || k == "VIDEO_FREEZES"
-                    || k == "AUDIO_QUALITY"
-                    || k == "VOICE_COMMUNICATION_PROBLEM"
-            });
-            if has_audio_freezes || has_users_freezes || has_call_problems_keys {
-                return Some("CallProblems".to_string());
+        EnumTableForm::ValueFirst => {
+            if categorize_user_settings(entries) {
+                Some("UserSettings".to_string())
+            } else if categorize_call_problems(entries) {
+                Some("CallProblems".to_string())
+            } else {
+                None
             }
         }
     }
-    None
 }
 
 /// Scans raw memory buffer representing `.rdata` and discovers categorized enum tables.
@@ -217,7 +240,7 @@ where
     while off + 24 <= rdata.len() {
         let mut matched = None;
 
-        for &form in &[EnumTableForm::FormA, EnumTableForm::FormB] {
+        for &form in &EnumTableForm::ALL {
             if let Some(table) = scan_table_at(rdata, off, rdata_rva, form, &resolve_string) {
                 if table.entries.len() >= 3 {
                     let entry_tuples: Vec<(String, u64)> = table
@@ -361,10 +384,10 @@ mod tests {
 
         // Test scan_table_at
         let resolver = create_buffer_string_resolver(&buffer, rdata_rva, image_base);
-        let raw_table = scan_table_at(&buffer, table_off, rdata_rva, EnumTableForm::FormA, &resolver)
+        let raw_table = scan_table_at(&buffer, table_off, rdata_rva, EnumTableForm::StringKeyFirst, &resolver)
             .expect("Should discover raw Form A table");
 
-        assert_eq!(raw_table.form, EnumTableForm::FormA);
+        assert_eq!(raw_table.form, EnumTableForm::StringKeyFirst);
         assert_eq!(raw_table.rva_start, rdata_rva + table_off as u32);
         assert_eq!(raw_table.rva_end, rdata_rva + table_off as u32 + 3 * 24);
         assert_eq!(raw_table.entries.len(), 3);
@@ -555,7 +578,7 @@ mod tests {
 
         // Buffer after 3 entries is zeroes (padding)
         let resolver = create_buffer_string_resolver(&buffer, rdata_rva, image_base);
-        let table = scan_table_at(&buffer, table_off, rdata_rva, EnumTableForm::FormA, &resolver)
+        let table = scan_table_at(&buffer, table_off, rdata_rva, EnumTableForm::StringKeyFirst, &resolver)
             .expect("table");
 
         assert_eq!(table.entries.len(), 3);
@@ -600,7 +623,7 @@ mod tests {
 
         // At 0x78 (offset - 8), Form B can parse 2 entries:
         // [0, va1, len1], [6, va2, len2]
-        // But ServerErrorCodes requires Form A!
+        // But ServerErrorCodes requires StringKeyFirst!
         let discovered = extract_static_enum_tables_from_buffer(
             &buffer,
             rdata_rva,
@@ -609,10 +632,10 @@ mod tests {
             default_categorizer,
         );
 
-        // Exactly ONE table discovered at 0x80 (Form A), not phantom at 0x78
+        // Exactly ONE table discovered at 0x80 (StringKeyFirst), not phantom at 0x78
         assert_eq!(discovered.len(), 1);
         assert_eq!(discovered[0].category, "ServerErrorCodes");
-        assert_eq!(discovered[0].form, EnumTableForm::FormA);
+        assert_eq!(discovered[0].form, EnumTableForm::StringKeyFirst);
         assert_eq!(discovered[0].rva_start, rdata_rva + 0x80);
     }
 }

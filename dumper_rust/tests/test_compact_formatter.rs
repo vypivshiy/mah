@@ -1,4 +1,4 @@
-use dumper_rust::compact::format_compact_dump;
+use dumper_rust::compact::{format_compact_dump, format_compact_dump_with_options};
 use dumper_rust::dumper::{
     DumpResult, EventEntry, ModelEntry, OptionsInfo, PolymorphicBase, PolymorphicDiscriminator,
     PolymorphicModelEntry, PolymorphicVariant, TypeDescriptorEntry,
@@ -101,6 +101,7 @@ fn synthetic_dump() -> DumpResult {
         options: OptionsInfo {
             version: "5.6.7".to_string(),
             build: 890,
+            protocol_version: None,
             config: None,
         },
         packets: vec![
@@ -198,7 +199,7 @@ fn synthetic_dump() -> DumpResult {
         ],
         enums: Default::default(),
         discriminators: Default::default(),
-        string_enums: vec!["ZULU".to_string(), "ALPHA".to_string(), "BETA".to_string()],
+        string_enums: Some(vec!["ZULU".to_string(), "ALPHA".to_string(), "BETA".to_string()]),
         error: serde_json::json!({}),
     }
 }
@@ -213,46 +214,45 @@ fn compact_formatter_emits_stable_line_oriented_output() {
         "\n",
         "Packets\n",
         "packet opcode=10\n",
-        "  request Api::OneMe::Packets::Alpha::Request rva=0x10\n",
+        "  request Api::OneMe::Packets::Alpha::Request\n",
         "  request field first: int32_t\n",
         "  request field second: std::string\n",
-        "  response Api::OneMe::Packets::Alpha::Response rva=0x11\n",
+        "  response Api::OneMe::Packets::Alpha::Response\n",
         "packet opcode=20\n",
-        "  request Api::OneMe::Packets::Zeta::Request rva=0x20\n",
+        "  request Api::OneMe::Packets::Zeta::Request\n",
         "  request warn: no data found\n",
-        "  response Api::OneMe::Packets::Zeta::Response rva=0x21\n",
+        "  response Api::OneMe::Packets::Zeta::Response\n",
         "  response field ok: bool\n",
         "\n",
         "Events\n",
         "event opcode=2\n",
-        "  request Api::OneMe::Events::Beta::Request rva=0x30\n",
-        "  response Api::OneMe::Events::Beta::Response rva=0x31\n",
+        "  request Api::OneMe::Events::Beta::Request\n",
+        "  response Api::OneMe::Events::Beta::Response\n",
         "  response warn: no response data\n",
         "event opcode=9\n",
         "  kind: special_packet\n",
         "  name: Api::OneMe::Packets::Ping\n",
         "  base_kind: Api::OneMe::Packets::BaseEvent\n",
-        "  rva: 0x40\n",
         "  warn: event incomplete\n",
-        "  request Api::OneMe::Packets::Ping::Payload rva=0x40\n",
+        "  request Api::OneMe::Packets::Ping::Payload\n",
         "  request field interactive: bool\n",
         "\n",
         "Models\n",
-        "model Api::OneMe::Types::Alpha rva=0x50\n",
+        "model Api::OneMe::Types::Alpha\n",
         "  field id: int64_t\n",
-        "model Api::OneMe::Types::Zeta rva=0x60\n",
+        "model Api::OneMe::Types::Zeta\n",
         "  warn: model no data\n",
         "\n",
         "Polymorphic Models\n",
         "polymorphic Api::OneMe::Types::AlphaBase\n",
         "  root_sources: protocol_field, rtti_heuristic\n",
         "  discriminator: _type: std::string\n",
-        "  base rva=0x70 fields=1\n",
-        "  variant Api::OneMe::Types::AlphaVariant rva=0x71 local_fields=1 all_fields=2 tag=ALPHA\n",
-        "  rtti_subclass Api::OneMe::Types::AlphaVariant rva=0x71 local_fields=1 all_fields=2\n",
+        "  base fields=1\n",
+        "  variant Api::OneMe::Types::AlphaVariant local_fields=1 all_fields=2 tag=ALPHA\n",
+        "  rtti_subclass Api::OneMe::Types::AlphaVariant local_fields=1 all_fields=2\n",
         "polymorphic Api::OneMe::Types::ZetaBase\n",
         "  root_sources: rtti_heuristic\n",
-        "  base rva=0x80 fields=0\n",
+        "  base fields=0\n",
         "\n",
         "String Enums\n",
         "string_enum ALPHA\n",
@@ -273,7 +273,7 @@ fn compact_formatter_keeps_header_metadata_stable_and_omits_noisy_fields() {
     assert!(!formatted.contains("image_base"));
     assert!(!formatted.contains("required"));
     assert!(!formatted.contains('|'));
-    assert!(formatted.contains("rva=0x10"));
+    assert!(!formatted.contains("rva="));
 }
 
 #[test]
@@ -288,10 +288,10 @@ fn compact_formatter_summarizes_polymorphic_groups_without_expanding_fields() {
         .unwrap();
 
     assert!(polymorphic_section.contains(
-        "variant Api::OneMe::Types::AlphaVariant rva=0x71 local_fields=1 all_fields=2 tag=ALPHA"
+        "variant Api::OneMe::Types::AlphaVariant local_fields=1 all_fields=2 tag=ALPHA"
     ));
     assert!(polymorphic_section.contains(
-        "rtti_subclass Api::OneMe::Types::AlphaVariant rva=0x71 local_fields=1 all_fields=2"
+        "rtti_subclass Api::OneMe::Types::AlphaVariant local_fields=1 all_fields=2"
     ));
     assert!(!polymorphic_section.contains("wire_variant"));
     assert!(!polymorphic_section.contains("rtti_variant"));
@@ -327,7 +327,17 @@ fn compact_formatter_omits_discriminator_line_when_none() {
     let formatted = format_compact_dump(&dump);
     assert!(formatted.contains("polymorphic Api::OneMe::Types::Log::EventParams\n"));
     assert!(!formatted.contains("discriminator:"));
-    assert!(formatted.contains("  variant Api::OneMe::Types::Log::CallEventParams rva=0x110 local_fields=1 all_fields=2\n"));
+    assert!(formatted.contains("  variant Api::OneMe::Types::Log::CallEventParams local_fields=1 all_fields=2\n"));
+}
+
+#[test]
+fn compact_formatter_with_rva_option_includes_rvas() {
+    let formatted = format_compact_dump_with_options(&synthetic_dump(), true);
+    assert!(formatted.contains("rva=0x10"));
+    assert!(formatted.contains("rva: 0x40"));
+    assert!(formatted.contains(
+        "variant Api::OneMe::Types::AlphaVariant rva=0x71 local_fields=1 all_fields=2 tag=ALPHA"
+    ));
 }
 
 #[test]

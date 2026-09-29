@@ -18,6 +18,8 @@ use crate::scanner::ProtocolScanner;
 pub struct MetadataMeta {
     pub app_version: String,
     pub build_number: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol_version: Option<u32>,
 }
 
 /// Executive summary counters at the top of `metadata.json`.
@@ -109,20 +111,18 @@ pub fn build_metadata_snapshot(
     log_templates.sort();
     log_templates.dedup();
 
-    // Optional RVA lookup if with_rva is requested
+    // Clean packet RVA lookup if with_rva is requested (using CommonPacket vtable address)
     let mut opcode_rvas: HashMap<u32, String> = HashMap::new();
     if with_rva {
-        for p in &dump.packets {
-            if let Some(ref off) = p.request.offset {
-                opcode_rvas.insert(p.opcode, off.clone());
-            }
-        }
         let re = Regex::new(r"Api::OneMe::Packets::CommonPacket<(\d+)\s*,").unwrap();
         for (&vtable_rva, name) in &rtti.vtable_to_type {
             if let Some(cap) = re.captures(name) {
                 if let Ok(op) = cap[1].parse::<u32>() {
-                    if !name.contains("_Ref_count_obj2") || !opcode_rvas.contains_key(&op) {
+                    let is_wrapper = name.contains("_Ref_count_obj2");
+                    if !is_wrapper {
                         opcode_rvas.insert(op, format!("0x{:x}", vtable_rva));
+                    } else {
+                        opcode_rvas.entry(op).or_insert_with(|| format!("0x{:x}", vtable_rva));
                     }
                 }
             }
@@ -156,9 +156,29 @@ pub fn build_metadata_snapshot(
     };
 
     // 6. Application version header
+    let proto_ver = dump.options.protocol_version.or_else(|| {
+        config
+            .and_then(|c| c.get("api_version_uint"))
+            .and_then(|v| v.as_u64())
+            .map(|v| v as u32)
+    });
+
+    let mut app_version = dump.options.version.clone();
+    let mut build_number = dump.options.build;
+
+    if let Some(pv) = proto_ver {
+        if app_version.is_empty() || app_version == "unknown" {
+            app_version = format!("proto-{}", pv);
+        }
+        if build_number == 0 {
+            build_number = pv;
+        }
+    }
+
     let meta = MetadataMeta {
-        app_version: dump.options.version.clone(),
-        build_number: dump.options.build,
+        app_version,
+        build_number,
+        protocol_version: proto_ver,
     };
 
     // 7. Client config (sorted object if dictionary)
@@ -234,6 +254,7 @@ mod tests {
             meta: MetadataMeta {
                 app_version: "1.2.3".to_string(),
                 build_number: 456,
+                protocol_version: None,
             },
             summary: MetadataSummary {
                 total_packets: 1,
@@ -287,6 +308,7 @@ mod tests {
             meta: MetadataMeta {
                 app_version: "1.2.3".to_string(),
                 build_number: 456,
+                protocol_version: None,
             },
             summary: MetadataSummary {
                 total_packets: 1,
@@ -317,5 +339,36 @@ mod tests {
         assert!(contains_key_recursive(&val, "rva"));
         assert!(!contains_key_recursive(&val, "offset"));
         assert_eq!(val["packets_catalog"][0]["rva"], "0x12345");
+    }
+
+    #[test]
+    fn test_metadata_snapshot_protocol_version_from_config() {
+        let snapshot = MetadataSnapshot {
+            meta: MetadataMeta {
+                app_version: "1.2.3".to_string(),
+                build_number: 456,
+                protocol_version: Some(11),
+            },
+            summary: MetadataSummary {
+                total_packets: 0,
+                total_events: 0,
+                total_models: 0,
+                total_features: 0,
+                total_source_files: 0,
+                total_log_templates: 0,
+            },
+            client_config: serde_json::json!({ "api_version_uint": 11 }),
+            features: BTreeMap::new(),
+            enums: BTreeMap::new(),
+            discriminators: BTreeMap::new(),
+            packets_catalog: Vec::new(),
+            source_files: Vec::new(),
+            log_templates: Vec::new(),
+        };
+
+        let json_str = format_metadata_json(&snapshot).expect("Must format metadata JSON");
+        let val: serde_json::Value =
+            serde_json::from_str(&json_str).expect("Must parse formatted JSON");
+        assert_eq!(val["meta"]["protocol_version"], 11);
     }
 }

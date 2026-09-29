@@ -1,5 +1,4 @@
 use std::fs;
-use std::path::PathBuf;
 
 use dumper_rust::datamining::{
     extract_static_enum_tables, extract_static_enums, EnumTableForm,
@@ -7,22 +6,11 @@ use dumper_rust::datamining::{
 use dumper_rust::pe::PeImage;
 
 mod common;
-use common::resolve_env_path;
-
-fn get_core_dll_path() -> Option<PathBuf> {
-    resolve_env_path("CORE_DLL_PATH").or_else(|| {
-        let hardcoded = PathBuf::from(r"D:\PycharmProjects\mah\CM_FP_Unspecified.core.dll");
-        if hardcoded.exists() {
-            Some(hardcoded)
-        } else {
-            None
-        }
-    })
-}
+use common::resolve_core_dll;
 
 #[test]
 fn test_core_dll_static_enum_tables_extraction() {
-    let dll_path = match get_core_dll_path() {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
             eprintln!("Skipping integration test: CORE_DLL_PATH not found");
@@ -42,7 +30,7 @@ fn test_core_dll_static_enum_tables_extraction() {
         .iter()
         .find(|t| t.category == "ServerErrorCodes")
         .expect("ServerErrorCodes table must be discovered");
-    assert_eq!(sec_table.form, EnumTableForm::FormA);
+    assert_eq!(sec_table.form, EnumTableForm::StringKeyFirst);
     assert_eq!(sec_table.rva_start, 0x1808690);
     assert_eq!(sec_table.rva_end, 0x1808768);
     assert_eq!(sec_table.entries.len(), 9);
@@ -52,7 +40,7 @@ fn test_core_dll_static_enum_tables_extraction() {
         .iter()
         .find(|t| t.category == "UserSettings")
         .expect("UserSettings table must be discovered");
-    assert_eq!(us_table.form, EnumTableForm::FormB);
+    assert_eq!(us_table.form, EnumTableForm::ValueFirst);
     assert_eq!(us_table.rva_start, 0x18824b0);
     assert_eq!(us_table.rva_end, 0x1882750);
     assert_eq!(us_table.entries.len(), 28);
@@ -62,7 +50,7 @@ fn test_core_dll_static_enum_tables_extraction() {
         .iter()
         .find(|t| t.category == "CallProblems")
         .expect("CallProblems table must be discovered");
-    assert_eq!(cp_table.form, EnumTableForm::FormB);
+    assert_eq!(cp_table.form, EnumTableForm::ValueFirst);
     assert_eq!(cp_table.rva_start, 0x181f030);
     assert_eq!(cp_table.rva_end, 0x181f120);
     assert_eq!(cp_table.entries.len(), 10);

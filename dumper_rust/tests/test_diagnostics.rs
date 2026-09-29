@@ -51,6 +51,7 @@ fn main_dump_serialization_does_not_include_diagnostics_by_default() {
         options: OptionsInfo {
             version: "test".to_string(),
             build: 1,
+            protocol_version: None,
             config: None,
         },
         packets: Vec::new(),
@@ -59,7 +60,7 @@ fn main_dump_serialization_does_not_include_diagnostics_by_default() {
         polymorphic_models: Vec::new(),
         enums: Default::default(),
         discriminators: Default::default(),
-        string_enums: Vec::new(),
+        string_enums: None,
         error: serde_json::json!({}),
     };
 

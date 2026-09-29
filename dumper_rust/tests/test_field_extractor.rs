@@ -4,21 +4,17 @@ use dumper_rust::rtti::RttiEngine;
 use std::fs;
 
 mod common;
-use common::resolve_env_path;
+use common::resolve_core_dll;
 
 #[test]
 fn test_dynamic_extract_fields_by_model_name() {
-    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
-            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            eprintln!("Skipping: core.dll not found");
             return;
         }
     };
-    if !dll_path.exists() {
-        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
-        return;
-    }
     let bytes = fs::read(&dll_path).expect("Failed to read DLL");
     let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");
     let rtti = RttiEngine::build(&pe).expect("Failed to build RTTI engine");

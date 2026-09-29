@@ -6,7 +6,7 @@ use crate::extractor::ExtractedField;
 use std::fmt::Write;
 
 pub fn format_compact_dump(dump: &DumpResult) -> String {
-    format_compact_dump_with_options(dump, true)
+    format_compact_dump_with_options(dump, false)
 }
 
 pub fn format_compact_dump_with_options(dump: &DumpResult, with_rva: bool) -> String {
@@ -19,7 +19,9 @@ pub fn format_compact_dump_with_options(dump: &DumpResult, with_rva: bool) -> St
     write_events(&mut out, &dump.events, with_rva);
     write_models(&mut out, &dump.models, with_rva);
     write_polymorphic_models(&mut out, &dump.polymorphic_models, with_rva);
-    write_string_enums(&mut out, &dump.string_enums);
+    if let Some(ref string_enums) = dump.string_enums {
+        write_string_enums(&mut out, string_enums);
+    }
 
     out
 }

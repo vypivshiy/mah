@@ -572,9 +572,14 @@ cargo run --release -p dumper_rust -- CM_FP_Unspecified.core.dll -o packets_rust
   <TARGET>                               Путь к исследуемому бинарному файлу core.dll
 
 Опции:
+      --config <PATH>                    Явный путь к DLL конфигурации (по умолчанию <TARGET_STEM>.config.dll)
   -o, --output <OUTPUT>                  Путь для сохранения JSON-схемы [по умолчанию: packets_rust.json]
-  -c, --compact-output [<COMPACT>]       Путь для сохранения компактного текстового дампа [по умолчанию: packets_rust.compact.txt]
+      --metadata-output <PATH>           Путь для сохранения канонического diff-снапшота [по умолчанию: metadata.json]
+      --config-output <PATH>             Путь для сохранения отдельного файла конфигурации [по умолчанию: config.json]
+  -c, --compact-output [<COMPACT>]       Путь для сохранения компактного текстового дампа
       --diagnostics-output <PATH>        Путь для сохранения диагностического файла метаданных
+      --with-rva                         Включение volatile-адресов памяти (RVA) в metadata.json и компактный дамп
+      --no-metadata                      Отключение генерации diff-снапшота метаданных (metadata.json)
       --app-version <VERSION>            Ручное переопределение версии клиента (по умолчанию извлекается из бинарника)
       --build-number <NUMBER>            Ручное переопределение номера сборки (по умолчанию извлекается из бинарника)
   -h, --help                             Вывод справочной информации

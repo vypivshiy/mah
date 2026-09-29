@@ -4,7 +4,7 @@ use dumper_rust::type_parser::decompose_type;
 use std::fs;
 
 mod common;
-use common::resolve_env_path;
+use common::resolve_core_dll;
 
 fn serializable_member_rtti(value_type: &str, owner_type: &str) -> String {
     format!(
@@ -137,17 +137,13 @@ fn test_demangle_sample() {
 
 #[test]
 fn test_rtti_engine_build() {
-    let dll_path = match resolve_env_path("CORE_DLL_PATH") {
+    let dll_path = match resolve_core_dll() {
         Some(path) => path,
         None => {
-            eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist");
+            eprintln!("Skipping: core.dll not found");
             return;
         }
     };
-    if !dll_path.exists() {
-        eprintln!("Skipping: CORE_DLL_PATH not set or file does not exist: {:?}", dll_path);
-        return;
-    }
     let bytes = fs::read(&dll_path).expect("Failed to read DLL");
     let pe = PeImage::parse(&bytes).expect("Failed to parse PE image");
 
