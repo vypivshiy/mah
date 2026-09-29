@@ -1,6 +1,7 @@
 use crate::discriminator::{
     scan_discriminator_values_with_diagnostics, DiscriminatorScanDiagnostics,
 };
+pub use crate::discriminator::build_discriminator_catalog;
 use crate::extractor::ExtractedField;
 use crate::model_resolver::{
     is_empty_model_type_name, ModelResolver, ModelResolverDiagnostic, ModelResolverDiagnosticKind,
@@ -122,6 +123,8 @@ pub struct DumpResult {
     pub events: Vec<EventEntry>,
     pub models: Vec<ModelEntry>,
     pub polymorphic_models: Vec<PolymorphicModelEntry>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub discriminators: BTreeMap<String, BTreeMap<String, String>>,
     pub string_enums: Vec<String>,
     pub error: serde_json::Value,
 }
@@ -278,6 +281,8 @@ impl Dumper {
         let models_list =
             build_model_catalog(&packets, &events, &polymorphic_models, &mut find_type_entry);
 
+        let discriminators = build_discriminator_catalog(&polymorphic_models);
+
         let default_error_payload = serde_json::json!({
             "error": "std::string",
             "localizedMessage": "std::string",
@@ -311,6 +316,7 @@ impl Dumper {
                 events,
                 models: models_list,
                 polymorphic_models,
+                discriminators,
                 string_enums: scanner.string_enums.clone(),
                 error: default_error_payload,
             },

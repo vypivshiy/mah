@@ -195,6 +195,7 @@ fn synthetic_dump() -> DumpResult {
                 }],
             },
         ],
+        discriminators: Default::default(),
         string_enums: vec!["ZULU".to_string(), "ALPHA".to_string(), "BETA".to_string()],
         error: serde_json::json!({}),
     }
