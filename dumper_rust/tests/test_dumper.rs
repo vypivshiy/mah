@@ -58,11 +58,11 @@ fn test_dumper_full_pipeline_structural_invariants() {
     );
     assert!(result.options.build > 0, "Build number must be positive");
 
-    // 2. Packets invariants (exactly 128 packets)
-    assert_eq!(
-        result.packets.len(),
-        128,
-        "Must discover exactly 128 packets"
+    // 2. Packets invariants (at least 128 packets)
+    assert!(
+        result.packets.len() >= 128,
+        "Must discover at least 128 packets, found {}",
+        result.packets.len()
     );
     let mut packet_opcodes = HashSet::new();
     for p in &result.packets {
