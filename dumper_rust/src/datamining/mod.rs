@@ -1,6 +1,7 @@
 pub mod config;
 pub mod enums;
 pub mod features;
+pub mod logger;
 
 pub use config::{
     derive_config_path, discover_config_dll, emit_config_json, extract_config,
@@ -19,4 +20,9 @@ pub use features::{
     extract_server_settings_from_source, extract_server_settings_from_source_with_model,
     locate_server_settings, ServerSettingsFeatures, SERVER_SETTINGS_DEMANGLED,
     SERVER_SETTINGS_MANGLED,
+};
+pub use logger::{
+    extract_packet_name, normalize_source_path, split_function_name, LoggerAnalysisResult,
+    LoggerAnalyzer, LoggerCallsite, PacketCatalogEntry, PacketHandlerInfo,
+    DEFAULT_LOGGER_IAT_RVA,
 };
