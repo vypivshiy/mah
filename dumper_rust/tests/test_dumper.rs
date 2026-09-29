@@ -38,6 +38,7 @@ fn test_dumper_full_pipeline_structural_invariants() {
             version: String::new(),
             build: 0,
         },
+        config: None,
     };
 
     let start_time = Instant::now();
@@ -805,6 +806,7 @@ fn test_discriminator_catalog_and_tag_discovery_invariants() {
             version: String::new(),
             build: 0,
         },
+        config: None,
     };
     let result = Dumper::dump(&pe, &rtti, &scanner, &options).expect("Failed to execute dumper");
 

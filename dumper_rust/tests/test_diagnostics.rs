@@ -2,7 +2,7 @@ use dumper_rust::discriminator::{
     DiscriminatorExtractionMiss, DiscriminatorScanDiagnostics, DiscriminatorValueEvidence,
 };
 use dumper_rust::dumper::{
-    AppVersion, DumpDiagnostics, DumpResult, InitializerCandidateDiagnostic,
+    DumpDiagnostics, DumpResult, InitializerCandidateDiagnostic, OptionsInfo,
 };
 use serde_json::Value;
 
@@ -48,14 +48,16 @@ fn diagnostics_sidecar_serializes_initializer_and_discriminator_sections() {
 #[test]
 fn main_dump_serialization_does_not_include_diagnostics_by_default() {
     let dump = DumpResult {
-        options: AppVersion {
+        options: OptionsInfo {
             version: "test".to_string(),
             build: 1,
+            config: None,
         },
         packets: Vec::new(),
         events: Vec::new(),
         models: Vec::new(),
         polymorphic_models: Vec::new(),
+        enums: Default::default(),
         discriminators: Default::default(),
         string_enums: Vec::new(),
         error: serde_json::json!({}),

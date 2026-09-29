@@ -1,6 +1,10 @@
 use anyhow::{Context, Result};
 use clap::Parser;
-use dumper_rust::compact::format_compact_dump;
+use dumper_rust::compact::format_compact_dump_with_options;
+use dumper_rust::datamining::{
+    discover_config_dll, emit_config_json, emit_metadata_json, extract_config_from_file,
+    DataminingCoordinator,
+};
 use dumper_rust::dumper::{Dumper, DumperOptions};
 use dumper_rust::pe::PeImage;
 use dumper_rust::rtti::RttiEngine;
@@ -24,6 +28,26 @@ struct Args {
     /// Output JSON schema file path
     #[arg(short, long, default_value = "packets_rust.json")]
     output: PathBuf,
+
+    /// Optional explicit path to config DLL
+    #[arg(long, value_name = "CONFIG_PATH")]
+    config: Option<PathBuf>,
+
+    /// Output metadata JSON snapshot file path
+    #[arg(long, default_value = "metadata.json", value_name = "PATH")]
+    metadata_output: PathBuf,
+
+    /// Output standalone config JSON file path
+    #[arg(long, default_value = "config.json", value_name = "PATH")]
+    config_output: PathBuf,
+
+    /// Include memory RVA offsets in metadata.json and compact output
+    #[arg(long, default_value_t = false)]
+    with_rva: bool,
+
+    /// Suppress metadata.json generation
+    #[arg(long, default_value_t = false)]
+    no_metadata: bool,
 
     /// Optional diagnostics JSON sidecar output path
     #[arg(long)]
@@ -57,14 +81,39 @@ fn ensure_parent_dir(path: &Path) -> Result<()> {
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let input_path = args.target;
+    let input_path = &args.target;
 
     println!("=== Autonomous Rust Protocol Dumper ===");
     println!("Target binary: {:?}", input_path);
 
     let t_total = Instant::now();
 
-    let bytes = fs::read(&input_path)
+    // 1. Config discovery & extraction
+    let config_dll_path = discover_config_dll(input_path, args.config.as_deref());
+    let mut config_val = None;
+    if let Some(cfg_path) = config_dll_path {
+        println!("Config DLL discovered: {:?}", cfg_path);
+        match extract_config_from_file(&cfg_path) {
+            Ok(cfg) => {
+                if let Err(e) = emit_config_json(&cfg, &args.config_output) {
+                    eprintln!("Warning: Failed to write config.json: {:#}", e);
+                } else {
+                    println!("Config written to: {:?}", args.config_output);
+                }
+                config_val = Some(cfg);
+            }
+            Err(e) => {
+                eprintln!(
+                    "Warning: Failed to extract config from {:?}: {:#}",
+                    cfg_path, e
+                );
+            }
+        }
+    } else if let Some(ref explicit) = args.config {
+        anyhow::bail!("Specified config path does not exist: {:?}", explicit);
+    }
+
+    let bytes = fs::read(input_path)
         .with_context(|| format!("Failed to read DLL file at {:?}", input_path))?;
     println!(
         "Loaded {:.2} MB into memory",
@@ -106,6 +155,7 @@ fn main() -> Result<()> {
             version: args.app_version,
             build: args.build_number,
         },
+        config: config_val.clone(),
     };
 
     let t_dump = Instant::now();
@@ -120,6 +170,26 @@ fn main() -> Result<()> {
     ensure_parent_dir(&args.output)?;
     fs::write(&args.output, &json_bytes)
         .with_context(|| format!("Failed to write dump JSON to {:?}", args.output))?;
+    println!("Output written to: {:?}", args.output);
+
+    if !args.no_metadata {
+        let t_meta = Instant::now();
+        let snapshot = DataminingCoordinator::build(
+            &pe,
+            &rtti,
+            &scanner,
+            &result.dump,
+            config_val.as_ref(),
+            args.with_rva,
+        )
+        .context("Failed to build metadata snapshot")?;
+        println!("Phase 5: Metadata snapshot built in {:?}", t_meta.elapsed());
+
+        emit_metadata_json(&snapshot, &args.metadata_output).with_context(|| {
+            format!("Failed to write metadata JSON to {:?}", args.metadata_output)
+        })?;
+        println!("Metadata written to: {:?}", args.metadata_output);
+    }
 
     if let Some(path) = &args.diagnostics_output {
         ensure_parent_dir(path)?;
@@ -132,13 +202,12 @@ fn main() -> Result<()> {
 
     if let Some(compact_output) = &args.compact_output {
         ensure_parent_dir(compact_output)?;
-        let compact_dump = format_compact_dump(&result.dump);
+        let compact_dump = format_compact_dump_with_options(&result.dump, args.with_rva);
         fs::write(compact_output, compact_dump)
             .with_context(|| format!("Failed to write compact dump to {:?}", compact_output))?;
         println!("Compact output written to: {:?}", compact_output);
     }
 
-    println!("Output written to: {:?}", args.output);
     println!(
         "Version: {} (build {})",
         result.dump.options.version, result.dump.options.build

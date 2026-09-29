@@ -1,4 +1,5 @@
 pub mod config;
+pub mod coordinator;
 pub mod enums;
 pub mod features;
 pub mod logger;
@@ -8,6 +9,10 @@ pub use config::{
     extract_config_blob, extract_config_candidate, extract_config_from_file,
     extract_config_value, format_config_json, try_extract_balanced, ConfigCandidate,
     DEFAULT_MIN_KEYS,
+};
+pub use coordinator::{
+    build_metadata_snapshot, emit_metadata_json, format_metadata_json, DataminingCoordinator,
+    MetadataMeta, MetadataPacketEntry, MetadataSnapshot, MetadataSummary,
 };
 pub use enums::{
     create_buffer_string_resolver, default_categorizer, extract_static_enum_tables,

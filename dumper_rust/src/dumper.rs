@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppVersion {
     #[serde(rename = "app_version")]
     pub version: String,
@@ -25,11 +25,31 @@ pub struct AppVersion {
     pub build: u32,
 }
 
-pub type OptionsInfo = AppVersion;
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OptionsInfo {
+    #[serde(rename = "app_version")]
+    pub version: String,
+    #[serde(rename = "build_number")]
+    pub build: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<serde_json::Value>,
+}
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl From<AppVersion> for OptionsInfo {
+    fn from(v: AppVersion) -> Self {
+        Self {
+            version: v.version,
+            build: v.build,
+            config: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DumperOptions {
     pub version: AppVersion,
+    #[serde(default)]
+    pub config: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -123,6 +143,8 @@ pub struct DumpResult {
     pub events: Vec<EventEntry>,
     pub models: Vec<ModelEntry>,
     pub polymorphic_models: Vec<PolymorphicModelEntry>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub enums: BTreeMap<String, BTreeMap<String, u64>>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub discriminators: BTreeMap<String, BTreeMap<String, String>>,
     pub string_enums: Vec<String>,
@@ -306,16 +328,20 @@ impl Dumper {
             discriminator: discriminator_diagnostics,
         };
 
+        let enums = crate::datamining::enums::extract_static_enums(pe);
+
         Ok(DumpWithDiagnostics {
             dump: DumpResult {
                 options: OptionsInfo {
                     version: app_ver,
                     build: build_num,
+                    config: options.config.clone(),
                 },
                 packets,
                 events,
                 models: models_list,
                 polymorphic_models,
+                enums,
                 discriminators,
                 string_enums: scanner.string_enums.clone(),
                 error: default_error_payload,

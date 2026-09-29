@@ -1,6 +1,6 @@
 use dumper_rust::compact::format_compact_dump;
 use dumper_rust::dumper::{
-    AppVersion, DumpResult, EventEntry, ModelEntry, PolymorphicBase, PolymorphicDiscriminator,
+    DumpResult, EventEntry, ModelEntry, OptionsInfo, PolymorphicBase, PolymorphicDiscriminator,
     PolymorphicModelEntry, PolymorphicVariant, TypeDescriptorEntry,
 };
 use dumper_rust::extractor::ExtractedField;
@@ -98,9 +98,10 @@ fn synthetic_dump() -> DumpResult {
     );
 
     DumpResult {
-        options: AppVersion {
+        options: OptionsInfo {
             version: "5.6.7".to_string(),
             build: 890,
+            config: None,
         },
         packets: vec![
             dumper_rust::dumper::PacketEntry {
@@ -195,6 +196,7 @@ fn synthetic_dump() -> DumpResult {
                 }],
             },
         ],
+        enums: Default::default(),
         discriminators: Default::default(),
         string_enums: vec!["ZULU".to_string(), "ALPHA".to_string(), "BETA".to_string()],
         error: serde_json::json!({}),

@@ -6,21 +6,25 @@ use crate::extractor::ExtractedField;
 use std::fmt::Write;
 
 pub fn format_compact_dump(dump: &DumpResult) -> String {
+    format_compact_dump_with_options(dump, true)
+}
+
+pub fn format_compact_dump_with_options(dump: &DumpResult, with_rva: bool) -> String {
     let mut out = String::new();
 
     writeln!(out, "app_version: {}", dump.options.version).unwrap();
     writeln!(out, "build_number: {}", dump.options.build).unwrap();
 
-    write_packets(&mut out, &dump.packets);
-    write_events(&mut out, &dump.events);
-    write_models(&mut out, &dump.models);
-    write_polymorphic_models(&mut out, &dump.polymorphic_models);
+    write_packets(&mut out, &dump.packets, with_rva);
+    write_events(&mut out, &dump.events, with_rva);
+    write_models(&mut out, &dump.models, with_rva);
+    write_polymorphic_models(&mut out, &dump.polymorphic_models, with_rva);
     write_string_enums(&mut out, &dump.string_enums);
 
     out
 }
 
-fn write_packets(out: &mut String, packets: &[PacketEntry]) {
+fn write_packets(out: &mut String, packets: &[PacketEntry], with_rva: bool) {
     writeln!(out).unwrap();
     writeln!(out, "Packets").unwrap();
 
@@ -34,12 +38,12 @@ fn write_packets(out: &mut String, packets: &[PacketEntry]) {
 
     for packet in packets {
         writeln!(out, "packet opcode={}", packet.opcode).unwrap();
-        write_type_entry(out, "  request", &packet.request);
-        write_type_entry(out, "  response", &packet.response);
+        write_type_entry(out, "  request", &packet.request, with_rva);
+        write_type_entry(out, "  response", &packet.response, with_rva);
     }
 }
 
-fn write_events(out: &mut String, events: &[EventEntry]) {
+fn write_events(out: &mut String, events: &[EventEntry], with_rva: bool) {
     writeln!(out).unwrap();
     writeln!(out, "Events").unwrap();
 
@@ -63,22 +67,24 @@ fn write_events(out: &mut String, events: &[EventEntry]) {
         if let Some(base_kind) = &event.base_kind {
             writeln!(out, "  base_kind: {base_kind}").unwrap();
         }
-        if let Some(offset) = &event.offset {
-            writeln!(out, "  rva: {offset}").unwrap();
+        if with_rva {
+            if let Some(offset) = &event.offset {
+                writeln!(out, "  rva: {offset}").unwrap();
+            }
         }
         if let Some(warn) = &event.warn {
             writeln!(out, "  warn: {warn}").unwrap();
         }
         if let Some(request) = &event.request {
-            write_type_entry(out, "  request", request);
+            write_type_entry(out, "  request", request, with_rva);
         }
         if let Some(response) = &event.response {
-            write_type_entry(out, "  response", response);
+            write_type_entry(out, "  response", response, with_rva);
         }
     }
 }
 
-fn write_models(out: &mut String, models: &[ModelEntry]) {
+fn write_models(out: &mut String, models: &[ModelEntry], with_rva: bool) {
     writeln!(out).unwrap();
     writeln!(out, "Models").unwrap();
 
@@ -86,11 +92,11 @@ fn write_models(out: &mut String, models: &[ModelEntry]) {
     models.sort_by(|a, b| a.name.cmp(&b.name));
 
     for model in models {
-        write_model_entry(out, model);
+        write_model_entry(out, model, with_rva);
     }
 }
 
-fn write_polymorphic_models(out: &mut String, models: &[PolymorphicModelEntry]) {
+fn write_polymorphic_models(out: &mut String, models: &[PolymorphicModelEntry], with_rva: bool) {
     writeln!(out).unwrap();
     writeln!(out, "Polymorphic Models").unwrap();
 
@@ -109,10 +115,10 @@ fn write_polymorphic_models(out: &mut String, models: &[PolymorphicModelEntry]) 
             .unwrap();
         }
         write!(out, "  base").unwrap();
-        write_optional_rva(out, &model.base.offset);
+        write_optional_rva(out, &model.base.offset, with_rva);
         writeln!(out, " fields={}", model.base.fields.len()).unwrap();
-        write_variants(out, "  variant", &model.variants);
-        write_variants(out, "  rtti_subclass", &model.rtti_subclasses);
+        write_variants(out, "  variant", &model.variants, with_rva);
+        write_variants(out, "  rtti_subclass", &model.rtti_subclasses, with_rva);
     }
 }
 
@@ -128,9 +134,9 @@ fn write_string_enums(out: &mut String, string_enums: &[String]) {
     }
 }
 
-fn write_type_entry(out: &mut String, label: &str, entry: &TypeDescriptorEntry) {
+fn write_type_entry(out: &mut String, label: &str, entry: &TypeDescriptorEntry, with_rva: bool) {
     write!(out, "{label} {}", entry.name).unwrap();
-    write_optional_rva(out, &entry.offset);
+    write_optional_rva(out, &entry.offset, with_rva);
     writeln!(out).unwrap();
 
     if let Some(warn) = &entry.warn {
@@ -146,9 +152,9 @@ fn write_type_entry(out: &mut String, label: &str, entry: &TypeDescriptorEntry) 
     }
 }
 
-fn write_model_entry(out: &mut String, model: &ModelEntry) {
+fn write_model_entry(out: &mut String, model: &ModelEntry, with_rva: bool) {
     write!(out, "model {}", model.name).unwrap();
-    write_optional_rva(out, &model.offset);
+    write_optional_rva(out, &model.offset, with_rva);
     writeln!(out).unwrap();
 
     if let Some(warn) = &model.warn {
@@ -163,13 +169,13 @@ fn write_field(out: &mut String, field: &ExtractedField) {
     writeln!(out, "  field {}: {}", field.name, field.field_type.full).unwrap();
 }
 
-fn write_variants(out: &mut String, label: &str, variants: &[PolymorphicVariant]) {
+fn write_variants(out: &mut String, label: &str, variants: &[PolymorphicVariant], with_rva: bool) {
     let mut variants: Vec<_> = variants.iter().collect();
     variants.sort_by(|a, b| a.name.cmp(&b.name));
 
     for variant in variants {
         write!(out, "{label} {}", variant.name).unwrap();
-        write_optional_rva(out, &variant.offset);
+        write_optional_rva(out, &variant.offset, with_rva);
         write!(
             out,
             " local_fields={} all_fields={}",
@@ -190,9 +196,11 @@ fn write_sorted_values(out: &mut String, label: &str, values: &[String]) {
     writeln!(out, "{label}: {}", values.join(", ")).unwrap();
 }
 
-fn write_optional_rva(out: &mut String, offset: &Option<String>) {
-    if let Some(offset) = offset {
-        write!(out, " rva={offset}").unwrap();
+fn write_optional_rva(out: &mut String, offset: &Option<String>, with_rva: bool) {
+    if with_rva {
+        if let Some(offset) = offset {
+            write!(out, " rva={offset}").unwrap();
+        }
     }
 }
 
