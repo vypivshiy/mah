@@ -1,4 +1,5 @@
 pub mod compact;
+pub mod datamining;
 pub mod discriminator;
 pub mod dumper;
 pub mod extractor;
