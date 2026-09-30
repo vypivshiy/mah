@@ -172,6 +172,8 @@ pub fn extract_config_from_file<P: AsRef<Path>>(path: P) -> Result<serde_json::V
 
 /// Derives the expected `*.config.dll` path from a target `*.core.dll` or generic DLL path.
 ///
+/// If `path` is `core.dll`, returns `config.dll`.
+/// If `path` is `config.dll` or ends with `.config.dll`, preserves the name.
 /// If `path` ends with `.core.dll`, replaces `.core.dll` with `.config.dll`.
 /// If `path` ends with `.dll` (and not `.config.dll`), replaces `.dll` with `.config.dll`.
 /// Otherwise appends `.config.dll`.
@@ -183,8 +185,10 @@ pub fn derive_config_path(core_path: &Path) -> PathBuf {
     };
 
     let lower = file_name.to_lowercase();
-    let new_file_name = if lower.ends_with(".config.dll") {
+    let new_file_name = if lower == "config.dll" || lower.ends_with(".config.dll") {
         file_name.to_string()
+    } else if lower == "core.dll" {
+        "config.dll".to_string()
     } else if lower.ends_with(".core.dll") {
         format!("{}.config.dll", &file_name[..file_name.len() - ".core.dll".len()])
     } else if lower.ends_with(".dll") {
@@ -200,12 +204,13 @@ pub fn derive_config_path(core_path: &Path) -> PathBuf {
     }
 }
 
-/// Discovers `*.config.dll` for a given target binary path.
+/// Discovers `*.config.dll` or `config.dll` for a given target binary path.
 ///
 /// 1. If an explicit path override is provided, returns that path directly.
-/// 2. If the derived path (`replace_core_with_config`) exists on disk, returns it.
-/// 3. If any file ending in `.config.dll` exists in the parent directory of `core_dll_path`, returns it.
-/// 4. Checks the current working directory for `CM_FP_Unspecified.config.dll` as a fallback.
+/// 2. If the derived path exists on disk, returns it.
+/// 3. Checks if `config.dll` exists in the parent directory of `core_dll_path`.
+/// 4. If any file ending in `.config.dll` exists in the parent directory, returns the first matching candidate.
+/// 5. Checks the current working directory for `CM_FP_Unspecified.config.dll` or `config.dll` as a fallback.
 pub fn discover_config_dll(
     core_dll_path: &Path,
     explicit_override: Option<&Path>,
@@ -224,13 +229,20 @@ pub fn discover_config_dll(
         .map(|p| if p.as_os_str().is_empty() { Path::new(".") } else { p })
         .unwrap_or_else(|| Path::new("."));
 
+    // Check directly for config.dll in parent
+    let config_plain = parent.join("config.dll");
+    if config_plain.is_file() {
+        return Some(config_plain);
+    }
+
     if let Ok(entries) = fs::read_dir(parent) {
         let mut config_files = Vec::new();
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_file() {
                 if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    if name.to_lowercase().ends_with(".config.dll") {
+                    let lower = name.to_lowercase();
+                    if lower == "config.dll" || lower.ends_with(".config.dll") {
                         config_files.push(path);
                     }
                 }
@@ -242,9 +254,11 @@ pub fn discover_config_dll(
         }
     }
 
-    let cwd_fallback = PathBuf::from("CM_FP_Unspecified.config.dll");
-    if cwd_fallback.is_file() {
-        return Some(cwd_fallback);
+    for fallback_name in &["CM_FP_Unspecified.config.dll", "config.dll"] {
+        let fallback = PathBuf::from(fallback_name);
+        if fallback.is_file() {
+            return Some(fallback);
+        }
     }
 
     None
@@ -438,6 +452,20 @@ mod tests {
         assert_eq!(
             derive_config_path(p3),
             PathBuf::from("C:/test/client.config.dll")
+        );
+
+        // Standalone core.dll to config.dll
+        let p4 = Path::new("C:/test/core.dll");
+        assert_eq!(
+            derive_config_path(p4),
+            PathBuf::from("C:/test/config.dll")
+        );
+
+        // Standalone config.dll preserves config.dll
+        let p5 = Path::new("C:/test/config.dll");
+        assert_eq!(
+            derive_config_path(p5),
+            PathBuf::from("C:/test/config.dll")
         );
 
         // Explicit override priority in discover

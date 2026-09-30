@@ -146,6 +146,8 @@ fn run_dump(args: DumpArgs) -> Result<()> {
         }
     } else if let Some(ref explicit) = args.config {
         anyhow::bail!("Specified config path does not exist: {:?}", explicit);
+    } else {
+        println!("Notice: Config DLL not found. Skipping config extraction.");
     }
 
     let bytes = fs::read(&input_path)
