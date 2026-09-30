@@ -1,16 +1,16 @@
 {
   "meta": {
-    "app_version": "26.33.0",
-    "build_number": 79506,
+    "app_version": "26.34.0",
+    "build_number": 79863,
     "protocol_version": 11
   },
   "summary": {
-    "total_packets": 130,
+    "total_packets": 133,
     "total_events": 24,
-    "total_models": 221,
-    "total_features": 243,
-    "total_source_files": 209,
-    "total_log_templates": 434
+    "total_models": 222,
+    "total_features": 246,
+    "total_source_files": 210,
+    "total_log_templates": 438
   },
   "client_config": {
     "allow_message_text_with_files": false,
@@ -184,6 +184,7 @@
     "desktop-call-bootstrap": "std::optional<bool>",
     "desktop-call-fullscreen": "std::optional<bool>",
     "desktop-call-in-memory-audio-filter": "std::optional<bool>",
+    "desktop-call-main-speaker": "std::optional<bool>",
     "desktop-call-new-grid": "std::optional<bool>",
     "desktop-call-new-share": "std::optional<bool>",
     "desktop-call-new-share-lin": "std::optional<bool>",
@@ -266,6 +267,7 @@
     "offline-statistic-enabled": "std::optional<bool>",
     "opus-recorder-bitrate": "std::optional<int64_t>",
     "opus-recorder-sample-rate": "std::optional<int64_t>",
+    "org-info-cache-ttl": "std::optional<int64_t>",
     "org-profile": "std::optional<bool>",
     "organization-placeholder": "std::optional<bool>",
     "orgs-excluded-to-show": "std::optional<std::vector<int64_t>>",
@@ -336,6 +338,7 @@
     "views-count-enabled": "std::optional<bool>",
     "warning-links": "std::optional<bool>",
     "webapp-ds-keys-count": "std::optional<int64_t>",
+    "webapp-entry-excluded-bots": "std::optional<std::vector<int64_t>>",
     "webapp-entry-from-chats-and-search-enabled": "std::optional<bool>",
     "webapp-phone-hash": "std::optional<bool>",
     "webapp-ss-keys-count": "std::optional<int64_t>",
@@ -893,7 +896,7 @@
       "name": "DeleteUserMessages",
       "handler": {
         "class": "Core::Messages::ModifyInteractor",
-        "method": "doRemoveAllSenderComments",
+        "method": "doRemoveAllSenderMessages",
         "source": "components/core/src/business/messages/message_modify_interactor.cpp"
       }
     },
@@ -1172,6 +1175,18 @@
       "name": "StoriesGetByStoryId"
     },
     {
+      "opcode": 221,
+      "name": "ChatLinksList"
+    },
+    {
+      "opcode": 222,
+      "name": "ChatLinkCreate"
+    },
+    {
+      "opcode": 223,
+      "name": "ChatLinkDelete"
+    },
+    {
       "opcode": 256,
       "name": "OrgInfo"
     },
@@ -1439,6 +1454,7 @@
     "components/core/src/business/providers/entity_organization/entity_organization_provider.cpp",
     "components/core/src/business/providers/link/contact_link_provider.cpp",
     "components/core/src/business/providers/message/message_provider.cpp",
+    "components/core/src/business/providers/organizations/organizations_provider.cpp",
     "components/core/src/business/providers/participants/participants_provider.cpp",
     "components/core/src/business/providers/phone_number/phone_number_provider.cpp",
     "components/core/src/business/providers/presence/presence_provider.cpp",
@@ -1706,6 +1722,7 @@
     "Invalid folder id `{}` in order ids. Request folders with sync=0",
     "Invalid folders order size. Request folders with sync=0",
     "Invalid media upload batch: {} items",
+    "Invalid org-info-cache-ttl setting type",
     "Invalid organization link: required appId or url.",
     "Invalid photo upload batch: {} photos",
     "Invalid photoId. In doc is required.",
@@ -1756,6 +1773,7 @@
     "Pending message '{}' cannot be sent: maximum retries exceeded",
     "Pending message '{}' will be sent in {} sec",
     "Preview and Peer are in an inconsistent state. Explicitly requesting the Preview update.",
+    "Received invalid ChatInfoSubscriberTimeout: {}",
     "Recent search history cleared",
     "Registration event type converter: empty value",
     "Remove history ids",
@@ -1792,6 +1810,7 @@
     "This owner's {} story {} was not found.",
     "This peer owner {} has not been found.",
     "This preview owner {} has not been found.",
+    "Timer settings changed to {} sec",
     "Too many ({}) messages after save for message. Use front",
     "Too many ({}) messages in response for message",
     "Try to read user setting {} before it was set",
@@ -1890,6 +1909,7 @@
     "received: chatId: {}, messages: empty, from: {}; backward: {}, forward {}",
     "remove folder with id={}",
     "removeAllUserComments: invalid sender id type",
+    "removeAllUserMessages: invalid sender id type",
     "removeFromBlackList: invalid sender id type",
     "requestChatSuggest {}",
     "requestContacts: callback is empty!",
