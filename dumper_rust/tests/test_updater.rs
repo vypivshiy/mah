@@ -1,5 +1,6 @@
 use dumper_rust::updater::{
-    self, exit_codes, parse_appcast_xml, resolve_destination, resolve_local_version, FeedVersion,
+    self, compute_chunks, download_installer_with_options, exit_codes, parse_appcast_xml,
+    resolve_destination, resolve_local_version, DownloadMeta, DownloadOptions, FeedVersion,
     UpdateArgs, UpdateCheckResult,
 };
 use std::collections::HashMap;
@@ -1098,4 +1099,150 @@ fn test_resolve_destination_directory() {
 
     let default_dest = resolve_destination(None);
     assert_eq!(default_dest, PathBuf::from("MAX.msi"));
+}
+
+#[test]
+fn test_compute_chunks() {
+    let chunks = compute_chunks(100, 30);
+    assert_eq!(chunks.len(), 4);
+    assert_eq!(chunks[0].start, 0);
+    assert_eq!(chunks[0].end, 29);
+    assert_eq!(chunks[0].size(), 30);
+
+    assert_eq!(chunks[1].start, 30);
+    assert_eq!(chunks[1].end, 59);
+    assert_eq!(chunks[1].size(), 30);
+
+    assert_eq!(chunks[2].start, 60);
+    assert_eq!(chunks[2].end, 89);
+    assert_eq!(chunks[2].size(), 30);
+
+    assert_eq!(chunks[3].start, 90);
+    assert_eq!(chunks[3].end, 99);
+    assert_eq!(chunks[3].size(), 10);
+
+    let empty = compute_chunks(0, 10);
+    assert!(empty.is_empty());
+}
+
+#[test]
+fn test_download_meta_serialization() {
+    let temp = TestDir::new("meta_serde");
+    let meta_path = temp.path().join("test.msi.part.meta");
+
+    let meta = DownloadMeta {
+        url: "https://example.com/file.msi".to_string(),
+        total_size: 1048576,
+        etag: Some("\"abcdef\"".to_string()),
+        last_modified: Some("Wed, 30 Sep 2026 12:00:00 GMT".to_string()),
+        chunk_size: 262144,
+        completed_chunks: vec![0, 1, 2],
+    };
+
+    meta.save(&meta_path).expect("save meta");
+    assert!(meta_path.is_file());
+
+    let loaded = DownloadMeta::load(&meta_path).expect("load meta");
+    assert_eq!(loaded.url, meta.url);
+    assert_eq!(loaded.total_size, meta.total_size);
+    assert_eq!(loaded.etag, meta.etag);
+    assert_eq!(loaded.last_modified, meta.last_modified);
+    assert_eq!(loaded.chunk_size, meta.chunk_size);
+    assert_eq!(loaded.completed_chunks, vec![0, 1, 2]);
+}
+
+#[test]
+fn test_download_parallel_multiple_chunks() {
+    let server = MockServer::new();
+    let mut large_data = Vec::with_capacity(32 * 1024);
+    for i in 0..(32 * 1024) {
+        large_data.push((i % 256) as u8);
+    }
+    server.register_bytes("/large.msi", large_data.clone(), true);
+
+    let temp = TestDir::new("dl_parallel");
+    let dest_file = temp.path().join("parallel.msi");
+
+    let options = DownloadOptions {
+        threads: 4,
+        retries: 3,
+        quiet: true,
+        chunk_size: 4096, // 32KB / 4KB = 8 chunks
+    };
+
+    let url = format!("{}/large.msi", server.base_url);
+    download_installer_with_options(&url, &dest_file, &options).expect("download parallel");
+
+    assert!(dest_file.is_file());
+    assert_eq!(fs::read(&dest_file).unwrap(), large_data);
+
+    let part_file = temp.path().join("parallel.msi.part");
+    let meta_file = temp.path().join("parallel.msi.part.meta");
+    assert!(!part_file.exists());
+    assert!(!meta_file.exists());
+}
+
+#[test]
+fn test_download_parallel_inter_process_resumption() {
+    let server = MockServer::new();
+    let mut large_data = Vec::with_capacity(32 * 1024);
+    for i in 0..(32 * 1024) {
+        large_data.push((i % 256) as u8);
+    }
+    server.register_bytes("/resume_multi.msi", large_data.clone(), true);
+
+    let temp = TestDir::new("dl_parallel_resume");
+    let dest_file = temp.path().join("resumed_multi.msi");
+    let part_file = temp.path().join("resumed_multi.msi.part");
+    let meta_file = temp.path().join("resumed_multi.msi.part.meta");
+    let url = format!("{}/resume_multi.msi", server.base_url);
+
+    // Pre-allocate part file and fill first 2 chunks (8192 bytes)
+    fs::write(&part_file, &large_data).unwrap(); // set full length
+    let meta = DownloadMeta {
+        url: url.clone(),
+        total_size: large_data.len() as u64,
+        etag: None,
+        last_modified: None,
+        chunk_size: 4096,
+        completed_chunks: vec![0, 1], // mark chunks 0 and 1 as done
+    };
+    meta.save(&meta_file).unwrap();
+
+    let options = DownloadOptions {
+        threads: 4,
+        retries: 3,
+        quiet: true,
+        chunk_size: 4096,
+    };
+
+    download_installer_with_options(&url, &dest_file, &options).expect("resume download");
+
+    assert!(dest_file.is_file());
+    assert_eq!(fs::read(&dest_file).unwrap(), large_data);
+    assert!(!part_file.exists());
+    assert!(!meta_file.exists());
+}
+
+#[test]
+fn test_update_args_default_and_custom_threads_retries() {
+    let args_default = UpdateArgs::default();
+    assert_eq!(args_default.threads, Some(8));
+    assert_eq!(args_default.retries, Some(5));
+
+    use clap::Parser;
+    #[derive(Parser, Debug)]
+    struct TestCli {
+        #[command(subcommand)]
+        cmd: TestSubcommand,
+    }
+    #[derive(clap::Subcommand, Debug)]
+    enum TestSubcommand {
+        Update(UpdateArgs),
+    }
+
+    let parsed = TestCli::try_parse_from(["app", "update", "-j", "16", "--retries", "10"]).unwrap();
+    let TestSubcommand::Update(args) = parsed.cmd;
+    assert_eq!(args.threads, Some(16));
+    assert_eq!(args.retries, Some(10));
 }

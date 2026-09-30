@@ -1,13 +1,22 @@
 use clap::Args;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashSet, VecDeque};
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 pub const SPARKLE_NS: &str = "http://www.andymatuschak.org/xml-namespaces/sparkle";
 pub const DEFAULT_FEED_URL: &str = "https://download.max.ru/win/release/update.xml";
 pub const DEFAULT_INSTALLER_NAME: &str = "MAX.msi";
 pub const BUFFER_SIZE: usize = 64 * 1024;
+pub const DEFAULT_CONCURRENCY: usize = 8;
+pub const DEFAULT_RETRIES: usize = 5;
+pub const DEFAULT_CHUNK_SIZE: u64 = 4 * 1024 * 1024; // 4 MB
+pub const CONNECT_TIMEOUT_SECS: u64 = 10;
+pub const READ_TIMEOUT_SECS: u64 = 15;
 
 /// Exit codes for the updater subsystem.
 pub mod exit_codes {
@@ -202,7 +211,7 @@ pub struct UpdateCheckResult {
 }
 
 /// Command-line arguments for update checking and downloading.
-#[derive(Args, Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct UpdateArgs {
     /// Check for available updates without downloading
     #[arg(long, alias = "check-only")]
@@ -231,6 +240,30 @@ pub struct UpdateArgs {
     /// Override metadata.json path for local version detection
     #[arg(long, value_name = "PATH")]
     pub metadata_path: Option<PathBuf>,
+
+    /// Number of concurrent download threads (defaults to 8, 1 for sequential)
+    #[arg(short = 'j', long, value_name = "NUM", default_value = "8")]
+    pub threads: Option<usize>,
+
+    /// Maximum retry attempts per chunk (defaults to 5)
+    #[arg(long, value_name = "NUM", default_value = "5")]
+    pub retries: Option<usize>,
+}
+
+impl Default for UpdateArgs {
+    fn default() -> Self {
+        Self {
+            check: false,
+            force: false,
+            json: false,
+            quiet: false,
+            output: Some(PathBuf::from(DEFAULT_INSTALLER_NAME)),
+            appcast_url: Some(DEFAULT_FEED_URL.to_string()),
+            metadata_path: None,
+            threads: Some(DEFAULT_CONCURRENCY),
+            retries: Some(DEFAULT_RETRIES),
+        }
+    }
 }
 
 /// Return current UTC timestamp in ISO 8601 format with Zulu suffix.
@@ -443,16 +476,735 @@ fn atomic_replace(from: &Path, to: &Path) -> Result<(), UpdaterError> {
     Ok(())
 }
 
-/// Stream download an installer to a `.part` file with HTTP Range resume support,
-/// atomically renaming to destination upon full completion.
-pub fn download_installer_with_progress<F>(
+/// Download configuration options.
+#[derive(Debug, Clone)]
+pub struct DownloadOptions {
+    pub threads: usize,
+    pub retries: usize,
+    pub quiet: bool,
+    pub chunk_size: u64,
+}
+
+impl Default for DownloadOptions {
+    fn default() -> Self {
+        Self {
+            threads: DEFAULT_CONCURRENCY,
+            retries: DEFAULT_RETRIES,
+            quiet: false,
+            chunk_size: DEFAULT_CHUNK_SIZE,
+        }
+    }
+}
+
+/// Metadata tracker for segmented downloads to allow inter-process resumption.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DownloadMeta {
+    pub url: String,
+    pub total_size: u64,
+    pub etag: Option<String>,
+    pub last_modified: Option<String>,
+    pub chunk_size: u64,
+    pub completed_chunks: Vec<usize>,
+}
+
+impl DownloadMeta {
+    pub fn meta_path(part_path: &Path) -> PathBuf {
+        PathBuf::from(format!("{}.meta", part_path.display()))
+    }
+
+    pub fn load(meta_path: &Path) -> Option<Self> {
+        if !meta_path.is_file() {
+            return None;
+        }
+        let content = fs::read_to_string(meta_path).ok()?;
+        serde_json::from_str(&content).ok()
+    }
+
+    pub fn save(&self, meta_path: &Path) -> Result<(), UpdaterError> {
+        let tmp_path = PathBuf::from(format!("{}.tmp", meta_path.display()));
+        let json = serde_json::to_string(self)
+            .map_err(|e| UpdaterError::Io(format!("Failed to serialize meta: {e}")))?;
+        fs::write(&tmp_path, json)
+            .map_err(|e| UpdaterError::Io(format!("Failed to write meta: {e}")))?;
+        let _ = fs::rename(&tmp_path, meta_path);
+        Ok(())
+    }
+}
+
+/// Range chunk description.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChunkInfo {
+    pub index: usize,
+    pub start: u64,
+    pub end: u64, // inclusive
+}
+
+impl ChunkInfo {
+    #[inline]
+    pub fn size(&self) -> u64 {
+        self.end - self.start + 1
+    }
+}
+
+/// Divide total size into chunk ranges.
+pub fn compute_chunks(total_size: u64, chunk_size: u64) -> Vec<ChunkInfo> {
+    if total_size == 0 || chunk_size == 0 {
+        return Vec::new();
+    }
+    let mut chunks = Vec::new();
+    let mut start = 0;
+    let mut index = 0;
+    while start < total_size {
+        let end = (start + chunk_size - 1).min(total_size - 1);
+        chunks.push(ChunkInfo { index, start, end });
+        start = end + 1;
+        index += 1;
+    }
+    chunks
+}
+
+/// Build standard ureq Agent with configured connection and read timeouts.
+pub fn create_http_agent(connect_timeout_secs: u64, read_timeout_secs: u64) -> ureq::Agent {
+    ureq::Agent::config_builder()
+        .timeout_connect(Some(Duration::from_secs(connect_timeout_secs)))
+        .timeout_recv_response(Some(Duration::from_secs(read_timeout_secs)))
+        .timeout_recv_body(Some(Duration::from_secs(read_timeout_secs * 8)))
+        .build()
+        .new_agent()
+}
+
+/// Thread-safe progress reporter computing download speed and estimated time of arrival (ETA).
+pub struct ProgressReporter {
+    initial_bytes: u64,
+    total_bytes: Option<u64>,
+    session_downloaded: AtomicU64,
+    start_time: Instant,
+    last_print: Mutex<Instant>,
+    quiet: bool,
+}
+
+impl ProgressReporter {
+    pub fn new(initial_bytes: u64, total_bytes: Option<u64>, quiet: bool) -> Self {
+        Self {
+            initial_bytes,
+            total_bytes,
+            session_downloaded: AtomicU64::new(0),
+            start_time: Instant::now(),
+            last_print: Mutex::new(Instant::now()),
+            quiet,
+        }
+    }
+
+    pub fn add_bytes(&self, n: u64) {
+        self.session_downloaded.fetch_add(n, Ordering::Relaxed);
+        self.render(false);
+    }
+
+    pub fn log_warning(&self, msg: &str) {
+        if self.quiet {
+            return;
+        }
+        eprint!("\r{:80}\r[warning] {msg}\n", "");
+        let _ = io::stderr().flush();
+        self.render(true);
+    }
+
+    pub fn render(&self, force: bool) {
+        if self.quiet {
+            return;
+        }
+
+        let now = Instant::now();
+        let total_downloaded = self.initial_bytes + self.session_downloaded.load(Ordering::Relaxed);
+
+        if !force {
+            let mut last = self.last_print.lock().unwrap();
+            if now.duration_since(*last) < Duration::from_millis(150) {
+                if let Some(tot) = self.total_bytes {
+                    if total_downloaded < tot {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+            *last = now;
+        }
+
+        let elapsed = self.start_time.elapsed().as_secs_f64();
+        let session_bytes = self.session_downloaded.load(Ordering::Relaxed);
+        let speed_mb_s = if elapsed > 0.05 {
+            (session_bytes as f64 / (1024.0 * 1024.0)) / elapsed
+        } else {
+            0.0
+        };
+
+        if let Some(tot) = self.total_bytes {
+            if tot > 0 {
+                let mb_down = total_downloaded as f64 / (1024.0 * 1024.0);
+                let mb_total = tot as f64 / (1024.0 * 1024.0);
+                let pct = ((total_downloaded as f64 / tot as f64) * 100.0).min(100.0);
+                let remaining = tot.saturating_sub(total_downloaded);
+                let eta_str = if speed_mb_s > 0.01 {
+                    let eta_secs = (remaining as f64 / (speed_mb_s * 1024.0 * 1024.0)).ceil() as u64;
+                    if eta_secs < 60 {
+                        format!("{eta_secs}s")
+                    } else {
+                        format!("{}m {:02}s", eta_secs / 60, eta_secs % 60)
+                    }
+                } else {
+                    "--".to_string()
+                };
+
+                eprint!(
+                    "\rProgress: {:.2} MB / {:.2} MB ({:.1}%) [{:.2} MB/s, ETA: {}]   ",
+                    mb_down, mb_total, pct, speed_mb_s, eta_str
+                );
+                let _ = io::stderr().flush();
+            }
+        } else {
+            let mb_down = total_downloaded as f64 / (1024.0 * 1024.0);
+            eprint!(
+                "\rProgress: {:.2} MB downloaded [{:.2} MB/s]   ",
+                mb_down, speed_mb_s
+            );
+            let _ = io::stderr().flush();
+        }
+    }
+
+    pub fn finish(&self) {
+        if !self.quiet {
+            self.render(true);
+            eprintln!();
+            let _ = io::stderr().flush();
+        }
+    }
+}
+
+/// Download a single chunk range with granular retries and exponential backoff.
+fn download_single_chunk(
+    url: &str,
+    chunk: ChunkInfo,
+    file_mutex: &Arc<Mutex<File>>,
+    reporter: &Arc<ProgressReporter>,
+    first_error: &Arc<Mutex<Option<UpdaterError>>>,
+    max_retries: usize,
+    quiet: bool,
+) -> Result<(), UpdaterError> {
+    let chunk_len = chunk.size();
+    let mut bytes_downloaded_in_chunk = 0u64;
+    let mut last_error_msg = String::new();
+    let mut attempt = 0;
+
+    while attempt <= max_retries {
+        attempt += 1;
+
+        if first_error.lock().unwrap().is_some() {
+            return Err(UpdaterError::Download(
+                "Cancelled due to failure in another stream".to_string(),
+            ));
+        }
+
+        if attempt > 1 {
+            let base_ms = 500u64 * (1u64 << (attempt - 2).min(4));
+            let jitter = (std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .subsec_nanos()
+                % 300) as u64;
+            std::thread::sleep(Duration::from_millis(base_ms + jitter));
+        }
+
+        let range_start = chunk.start + bytes_downloaded_in_chunk;
+        let range_end = chunk.end;
+        let range_header = format!("bytes={range_start}-{range_end}");
+
+        let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+        let req = agent
+            .get(url)
+            .header("User-Agent", "OneMe Desktop Updater")
+            .header("Range", &range_header);
+
+        let resp = match req.call() {
+            Ok(r) => r,
+            Err(ureq::Error::StatusCode(code)) => {
+                last_error_msg = format!("HTTP error {code}");
+                if !quiet {
+                    reporter.log_warning(&format!(
+                        "Chunk {} HTTP error {code}, retry {attempt}/{max_retries}...",
+                        chunk.index
+                    ));
+                }
+                continue;
+            }
+            Err(e) => {
+                last_error_msg = format!("{e}");
+                if !quiet {
+                    reporter.log_warning(&format!(
+                        "Chunk {} connect error ({last_error_msg}), retry {attempt}/{max_retries}...",
+                        chunk.index
+                    ));
+                }
+                continue;
+            }
+        };
+
+        let status = resp.status().as_u16();
+        if status != 206 && !(status == 200 && chunk.start == 0) {
+            last_error_msg = format!("Unexpected HTTP status {status}");
+            if !quiet {
+                reporter.log_warning(&format!(
+                    "Chunk {} status {status}, retry {attempt}/{max_retries}...",
+                    chunk.index
+                ));
+            }
+            continue;
+        }
+
+        let mut reader = resp.into_body().into_reader();
+        let mut buf = [0u8; BUFFER_SIZE];
+        let mut read_failed = false;
+
+        while bytes_downloaded_in_chunk < chunk_len {
+            let needed = (chunk_len - bytes_downloaded_in_chunk).min(BUFFER_SIZE as u64) as usize;
+            match reader.read(&mut buf[..needed]) {
+                Ok(0) => {
+                    if bytes_downloaded_in_chunk < chunk_len {
+                        last_error_msg = format!(
+                            "Premature EOF: received {bytes_downloaded_in_chunk} of {chunk_len} bytes"
+                        );
+                        read_failed = true;
+                    }
+                    break;
+                }
+                Ok(n) => {
+                    let write_pos = chunk.start + bytes_downloaded_in_chunk;
+                    {
+                        let mut f = file_mutex.lock().unwrap();
+                        f.seek(SeekFrom::Start(write_pos))
+                            .map_err(|e| UpdaterError::Io(format!("Seek error: {e}")))?;
+                        f.write_all(&buf[..n])
+                            .map_err(|e| UpdaterError::Io(format!("Write error: {e}")))?;
+                    }
+                    bytes_downloaded_in_chunk += n as u64;
+                    reporter.add_bytes(n as u64);
+                }
+                Err(e) => {
+                    last_error_msg = format!("Read error: {e}");
+                    read_failed = true;
+                    break;
+                }
+            }
+        }
+
+        if read_failed {
+            if !quiet {
+                reporter.log_warning(&format!(
+                    "Chunk {} read interrupted ({last_error_msg}), retry {attempt}/{max_retries}...",
+                    chunk.index
+                ));
+            }
+            continue;
+        }
+
+        if bytes_downloaded_in_chunk == chunk_len {
+            return Ok(());
+        }
+    }
+
+    Err(UpdaterError::Download(format!(
+        "Chunk {} (bytes {}-{}) failed after {max_retries} retry attempts: {last_error_msg}",
+        chunk.index, chunk.start, chunk.end
+    )))
+}
+
+/// Download installer using parallel range chunks and a synchronized work queue.
+fn download_parallel_chunks(
     url: &str,
     dest_path: &Path,
-    mut progress: F,
-) -> Result<(), UpdaterError>
-where
-    F: FnMut(u64, Option<u64>),
-{
+    part_path: &Path,
+    meta_path: &Path,
+    total_size: u64,
+    etag: Option<String>,
+    last_modified: Option<String>,
+    options: &DownloadOptions,
+) -> Result<(), UpdaterError> {
+    let chunks = compute_chunks(total_size, options.chunk_size);
+    let total_chunks = chunks.len();
+
+    let mut completed_chunks: HashSet<usize> = HashSet::new();
+    let mut is_valid_existing_meta = false;
+
+    if let Some(loaded_meta) = DownloadMeta::load(meta_path) {
+        if loaded_meta.url == url
+            && loaded_meta.total_size == total_size
+            && loaded_meta.chunk_size == options.chunk_size
+            && (etag.is_none() || loaded_meta.etag == etag)
+            && (last_modified.is_none() || loaded_meta.last_modified == last_modified)
+            && part_path.is_file()
+            && part_path.metadata().map(|m| m.len()).unwrap_or(0) == total_size
+        {
+            completed_chunks = loaded_meta.completed_chunks.into_iter().collect();
+            is_valid_existing_meta = true;
+        }
+    }
+
+    if !is_valid_existing_meta {
+        // Salvage full chunks from an existing legacy single-stream download if available
+        if part_path.is_file() {
+            let existing_len = part_path.metadata().map(|m| m.len()).unwrap_or(0);
+            if existing_len <= total_size {
+                let full_chunks = (existing_len / options.chunk_size) as usize;
+                for i in 0..full_chunks.min(total_chunks) {
+                    completed_chunks.insert(i);
+                }
+            }
+        }
+
+        // Pre-allocate part_path to total_size
+        let f = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .open(part_path)
+            .map_err(|e| UpdaterError::Io(format!("Failed to open {:?}: {e}", part_path)))?;
+        f.set_len(total_size)
+            .map_err(|e| UpdaterError::Io(format!("Failed to set_len {:?}: {e}", part_path)))?;
+        drop(f);
+
+        let initial_meta = DownloadMeta {
+            url: url.to_string(),
+            total_size,
+            etag: etag.clone(),
+            last_modified: last_modified.clone(),
+            chunk_size: options.chunk_size,
+            completed_chunks: completed_chunks.iter().copied().collect(),
+        };
+        let _ = initial_meta.save(meta_path);
+    }
+
+    if completed_chunks.len() == total_chunks {
+        let _ = fs::remove_file(meta_path);
+        atomic_replace(part_path, dest_path)?;
+        return Ok(());
+    }
+
+    let initial_bytes: u64 = completed_chunks
+        .iter()
+        .map(|&idx| chunks[idx].size())
+        .sum();
+
+    let remaining_chunks: VecDeque<ChunkInfo> = chunks
+        .iter()
+        .filter(|c| !completed_chunks.contains(&c.index))
+        .copied()
+        .collect();
+
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(part_path)
+        .map_err(|e| UpdaterError::Io(format!("Failed to open {:?}: {e}", part_path)))?;
+    let file_mutex = Arc::new(Mutex::new(file));
+
+    let queue = Arc::new(Mutex::new(remaining_chunks));
+    let completed_set = Arc::new(Mutex::new(completed_chunks));
+    let current_meta = DownloadMeta {
+        url: url.to_string(),
+        total_size,
+        etag,
+        last_modified,
+        chunk_size: options.chunk_size,
+        completed_chunks: Vec::new(),
+    };
+    let meta_mutex = Arc::new(Mutex::new(current_meta));
+    let first_error = Arc::new(Mutex::new(None::<UpdaterError>));
+    let reporter = Arc::new(ProgressReporter::new(
+        initial_bytes,
+        Some(total_size),
+        options.quiet,
+    ));
+
+    let num_workers = options.threads.min(queue.lock().unwrap().len()).max(1);
+
+    std::thread::scope(|s| {
+        for _ in 0..num_workers {
+            s.spawn(|| {
+                loop {
+                    if first_error.lock().unwrap().is_some() {
+                        break;
+                    }
+                    let chunk = match queue.lock().unwrap().pop_front() {
+                        Some(c) => c,
+                        None => break,
+                    };
+
+                    match download_single_chunk(
+                        url,
+                        chunk,
+                        &file_mutex,
+                        &reporter,
+                        &first_error,
+                        options.retries,
+                        options.quiet,
+                    ) {
+                        Ok(()) => {
+                            let mut comp = completed_set.lock().unwrap();
+                            comp.insert(chunk.index);
+                            let mut meta_guard = meta_mutex.lock().unwrap();
+                            meta_guard.completed_chunks = comp.iter().copied().collect();
+                            let _ = meta_guard.save(meta_path);
+                        }
+                        Err(e) => {
+                            let mut err_guard = first_error.lock().unwrap();
+                            if err_guard.is_none() {
+                                *err_guard = Some(e);
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    if let Some(err) = first_error.lock().unwrap().take() {
+        return Err(err);
+    }
+
+    let final_size = fs::metadata(part_path).map(|m| m.len()).unwrap_or(0);
+    if final_size != total_size {
+        return Err(UpdaterError::Download(format!(
+            "Downloaded file size mismatch: expected {total_size} bytes, got {final_size} bytes"
+        )));
+    }
+
+    if completed_set.lock().unwrap().len() != total_chunks {
+        return Err(UpdaterError::Download(
+            "Some chunks failed to download completely".to_string(),
+        ));
+    }
+
+    reporter.finish();
+    let _ = fs::remove_file(meta_path);
+    atomic_replace(part_path, dest_path)?;
+    Ok(())
+}
+
+/// Fallback sequential streaming download with retry and resume support.
+fn download_sequential_with_retry(
+    url: &str,
+    dest_path: &Path,
+    part_path: &Path,
+    initial_probe_resp: Option<ureq::http::Response<ureq::Body>>,
+    expected_total: Option<u64>,
+    options: &DownloadOptions,
+) -> Result<(), UpdaterError> {
+    let mut existing_bytes = if part_path.is_file() {
+        part_path.metadata().map(|m| m.len()).unwrap_or(0)
+    } else {
+        0
+    };
+
+    if let Some(tot) = expected_total {
+        if existing_bytes == tot && tot > 0 {
+            atomic_replace(part_path, dest_path)?;
+            return Ok(());
+        }
+    }
+
+    let reporter = Arc::new(ProgressReporter::new(
+        existing_bytes,
+        expected_total,
+        options.quiet,
+    ));
+
+    let mut attempt = 0;
+    let mut last_err = String::new();
+    let mut probe_resp_opt = initial_probe_resp;
+
+    while attempt <= options.retries {
+        attempt += 1;
+
+        if attempt > 1 {
+            let base_ms = 500u64 * (1u64 << (attempt - 2).min(4));
+            let jitter = (std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .subsec_nanos()
+                % 300) as u64;
+            std::thread::sleep(Duration::from_millis(base_ms + jitter));
+        }
+
+        let resp = if let Some(resp) = probe_resp_opt.take() {
+            resp
+        } else {
+            let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+            let mut req = agent
+                .get(url)
+                .header("User-Agent", "OneMe Desktop Updater");
+            if existing_bytes > 0 {
+                req = req.header("Range", format!("bytes={existing_bytes}-"));
+            }
+
+            match req.call() {
+                Ok(r) => r,
+                Err(ureq::Error::StatusCode(416)) if existing_bytes > 0 => {
+                    // HTTP 416 Range Not Satisfiable: file is already fully downloaded
+                    reporter.finish();
+                    atomic_replace(part_path, dest_path)?;
+                    return Ok(());
+                }
+                Err(ureq::Error::StatusCode(code)) => {
+                    return Err(UpdaterError::Download(format!(
+                        "HTTP error {code} downloading installer from {url}"
+                    )));
+                }
+                Err(err) => {
+                    last_err = format!("{err}");
+                    if !options.quiet {
+                        reporter.log_warning(&format!(
+                            "Connection error ({last_err}), retry {attempt}/{}...",
+                            options.retries
+                        ));
+                    }
+                    continue;
+                }
+            }
+        };
+
+        let status = resp.status().as_u16();
+        if status != 200 && status != 206 {
+            return Err(UpdaterError::Download(format!(
+                "Unexpected HTTP status {status} from {url}"
+            )));
+        }
+
+        let is_partial = status == 206;
+        let content_length: Option<u64> = resp
+            .headers()
+            .get("Content-Length")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse().ok());
+
+        let content_range_total: Option<u64> = if is_partial {
+            resp.headers()
+                .get("Content-Range")
+                .and_then(|v| v.to_str().ok())
+                .and_then(parse_content_range_total)
+        } else {
+            None
+        };
+
+        let effective_total = if is_partial {
+            content_range_total.or_else(|| content_length.map(|cl| existing_bytes + cl))
+        } else {
+            content_length
+        }
+        .or(expected_total);
+
+        let (mut out_file, is_append) = if is_partial && existing_bytes > 0 {
+            let f = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(part_path)
+                .map_err(|e| {
+                    UpdaterError::Io(format!("Failed to open {:?} for append: {e}", part_path))
+                })?;
+            (f, true)
+        } else {
+            existing_bytes = 0;
+            let f = File::create(part_path).map_err(|e| {
+                UpdaterError::Io(format!("Failed to create {:?}: {e}", part_path))
+            })?;
+            (f, false)
+        };
+
+        let mut body_reader = resp.into_body().into_reader();
+        let mut buffer = [0u8; BUFFER_SIZE];
+        let mut session_downloaded: u64 = 0;
+        let mut read_failed = false;
+
+        loop {
+            match body_reader.read(&mut buffer) {
+                Ok(0) => break,
+                Ok(n) => {
+                    if let Err(e) = out_file.write_all(&buffer[..n]) {
+                        return Err(UpdaterError::Io(format!(
+                            "Write error during download: {e}"
+                        )));
+                    }
+                    session_downloaded += n as u64;
+                    reporter.add_bytes(n as u64);
+                }
+                Err(e) => {
+                    last_err = format!("Read error during download: {e}");
+                    read_failed = true;
+                    break;
+                }
+            }
+        }
+
+        let _ = out_file.flush();
+        drop(out_file);
+
+        if read_failed {
+            existing_bytes = part_path.metadata().map(|m| m.len()).unwrap_or(0);
+            if !options.quiet {
+                reporter.log_warning(&format!(
+                    "Read interrupted ({last_err}), retry {attempt}/{}...",
+                    options.retries
+                ));
+            }
+            continue;
+        }
+
+        if let Some(expected_cl) = content_length {
+            if session_downloaded < expected_cl {
+                last_err = format!(
+                    "Connection aborted prematurely: received {} of {} bytes",
+                    session_downloaded, expected_cl
+                );
+                existing_bytes = part_path.metadata().map(|m| m.len()).unwrap_or(0);
+                if attempt <= options.retries && is_append {
+                    continue;
+                }
+                return Err(UpdaterError::Download(last_err));
+            }
+        }
+
+        let final_file_size = fs::metadata(part_path)
+            .map(|m| m.len())
+            .unwrap_or(existing_bytes + session_downloaded);
+
+        if let Some(expected_size) = effective_total {
+            if final_file_size != expected_size {
+                return Err(UpdaterError::Download(format!(
+                    "Downloaded file size mismatch: expected {} bytes, got {} bytes",
+                    expected_size, final_file_size
+                )));
+            }
+        }
+
+        reporter.finish();
+        atomic_replace(part_path, dest_path)?;
+        return Ok(());
+    }
+
+    Err(UpdaterError::Download(format!(
+        "Download failed after {} retry attempts: {last_err}",
+        options.retries
+    )))
+}
+
+/// Download installer with options, automatically selecting multi-threaded segmented downloading
+/// when supported by the server and falling back to single-stream download with retries.
+pub fn download_installer_with_options(
+    url: &str,
+    dest_path: &Path,
+    options: &DownloadOptions,
+) -> Result<(), UpdaterError> {
     if let Some(parent) = dest_path.parent() {
         if !parent.as_os_str().is_empty() {
             fs::create_dir_all(parent).map_err(|e| {
@@ -462,6 +1214,7 @@ where
     }
 
     let part_path = PathBuf::from(format!("{}.part", dest_path.display()));
+    let meta_path = DownloadMeta::meta_path(&part_path);
 
     let existing_bytes = if part_path.is_file() {
         part_path.metadata().map(|m| m.len()).unwrap_or(0)
@@ -469,17 +1222,67 @@ where
         0
     };
 
-    let mut req = ureq::get(url).header("User-Agent", "OneMe Desktop Updater");
-    if existing_bytes > 0 {
-        req = req.header("Range", format!("bytes={existing_bytes}-"));
-    }
+    let is_range_remainder = existing_bytes > 0 && !meta_path.is_file();
+    let probe_range = if is_range_remainder {
+        format!("bytes={existing_bytes}-")
+    } else {
+        "bytes=0-0".to_string()
+    };
 
-    let resp = match req.call() {
-        Ok(r) => r,
+    let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+    let probe_req = agent
+        .get(url)
+        .header("User-Agent", "OneMe Desktop Updater")
+        .header("Range", &probe_range);
+
+    let (accept_ranges, total_size, etag, last_modified, probe_resp) = match probe_req.call() {
+        Ok(resp) => {
+            let status = resp.status().as_u16();
+            let etag = resp
+                .headers()
+                .get("etag")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from);
+            let last_modified = resp
+                .headers()
+                .get("last-modified")
+                .and_then(|v| v.to_str().ok())
+                .map(String::from);
+
+            if status == 206 {
+                let range_total = resp
+                    .headers()
+                    .get("Content-Range")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(parse_content_range_total);
+                let resp_to_use = if is_range_remainder {
+                    Some(resp)
+                } else {
+                    let mut reader = resp.into_body().into_reader();
+                    let mut discard = [0u8; 1];
+                    let _ = reader.read(&mut discard);
+                    None
+                };
+                (true, range_total, etag, last_modified, resp_to_use)
+            } else if status == 200 {
+                let content_len = resp
+                    .headers()
+                    .get("Content-Length")
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(|s| s.parse().ok());
+                (false, content_len, etag, last_modified, Some(resp))
+            } else {
+                return Err(UpdaterError::Download(format!(
+                    "Unexpected HTTP status {status} from {url}"
+                )));
+            }
+        }
         Err(ureq::Error::StatusCode(416)) if existing_bytes > 0 => {
-            // HTTP 416 Range Not Satisfiable: file is already fully downloaded
             atomic_replace(&part_path, dest_path)?;
             return Ok(());
+        }
+        Err(ureq::Error::StatusCode(416)) => {
+            (true, Some(0), None, None, None)
         }
         Err(ureq::Error::StatusCode(code)) => {
             return Err(UpdaterError::Download(format!(
@@ -493,139 +1296,64 @@ where
         }
     };
 
-    let status = resp.status().as_u16();
-    if status != 200 && status != 206 {
-        return Err(UpdaterError::Download(format!(
-            "Unexpected HTTP status {status} from {url}"
-        )));
-    }
-
-    let is_partial = status == 206;
-    let content_length: Option<u64> = resp
-        .headers()
-        .get("Content-Length")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.parse().ok());
-
-    let content_range_total: Option<u64> = if is_partial {
-        resp.headers()
-            .get("Content-Range")
-            .and_then(|v| v.to_str().ok())
-            .and_then(parse_content_range_total)
+    if options.threads > 1
+        && accept_ranges
+        && total_size.is_some()
+        && total_size.unwrap() > options.chunk_size
+    {
+        download_parallel_chunks(
+            url,
+            dest_path,
+            &part_path,
+            &meta_path,
+            total_size.unwrap(),
+            etag,
+            last_modified,
+            options,
+        )
     } else {
-        None
-    };
-
-    let expected_total = if is_partial {
-        content_range_total.or_else(|| content_length.map(|cl| existing_bytes + cl))
-    } else {
-        content_length
-    };
-
-    let (mut out_file, initial_bytes) = if is_partial && existing_bytes > 0 {
-        let f = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&part_path)
-            .map_err(|e| {
-                UpdaterError::Io(format!("Failed to open {:?} for append: {e}", part_path))
-            })?;
-        (f, existing_bytes)
-    } else {
-        let f = File::create(&part_path).map_err(|e| {
-            UpdaterError::Io(format!("Failed to create {:?}: {e}", part_path))
-        })?;
-        (f, 0)
-    };
-
-    let mut body_reader = resp.into_body().into_reader();
-    let mut buffer = [0u8; BUFFER_SIZE];
-    let mut session_downloaded: u64 = 0;
-
-    progress(initial_bytes, expected_total);
-
-    loop {
-        let n = body_reader
-            .read(&mut buffer)
-            .map_err(|e| UpdaterError::Download(format!("Read error during download: {e}")))?;
-        if n == 0 {
-            break;
+        if !options.quiet && options.threads > 1 && !accept_ranges {
+            eprintln!("[notice] Server does not support Range requests, falling back to single stream");
         }
-        out_file
-            .write_all(&buffer[..n])
-            .map_err(|e| UpdaterError::Io(format!("Write error during download: {e}")))?;
-        session_downloaded += n as u64;
-        progress(initial_bytes + session_downloaded, expected_total);
+        download_sequential_with_retry(
+            url,
+            dest_path,
+            &part_path,
+            probe_resp,
+            total_size,
+            options,
+        )
     }
-
-    out_file
-        .flush()
-        .map_err(|e| UpdaterError::Io(format!("Flush error: {e}")))?;
-    drop(out_file);
-
-    if let Some(expected_cl) = content_length {
-        if session_downloaded < expected_cl {
-            return Err(UpdaterError::Download(format!(
-                "Connection aborted prematurely: received {} of {} bytes",
-                session_downloaded, expected_cl
-            )));
-        }
-    }
-
-    let final_file_size = fs::metadata(&part_path)
-        .map(|m| m.len())
-        .unwrap_or(initial_bytes + session_downloaded);
-
-    if let Some(expected_size) = expected_total {
-        if final_file_size != expected_size {
-            return Err(UpdaterError::Download(format!(
-                "Downloaded file size mismatch: expected {} bytes, got {} bytes",
-                expected_size, final_file_size
-            )));
-        }
-    }
-
-    atomic_replace(&part_path, dest_path)?;
-    Ok(())
 }
 
-/// Download installer with default progress reporting to stderr.
+/// Download installer with default progress reporting to stderr using standard options.
 pub fn download_installer(
     url: &str,
     dest_path: &Path,
     quiet: bool,
 ) -> Result<(), UpdaterError> {
-    let mut last_percent: Option<u8> = None;
-    download_installer_with_progress(url, dest_path, |downloaded, total| {
-        if !quiet {
-            if let Some(tot) = total {
-                if tot > 0 {
-                    let percent = ((downloaded as f64 / tot as f64) * 100.0) as u8;
-                    if last_percent != Some(percent) {
-                        last_percent = Some(percent);
-                        let mb_down = downloaded as f64 / (1024.0 * 1024.0);
-                        let mb_total = tot as f64 / (1024.0 * 1024.0);
-                        eprint!(
-                            "\rProgress: {:.2} MB / {:.2} MB ({:.1}%)",
-                            mb_down,
-                            mb_total,
-                            (downloaded as f64 / tot as f64) * 100.0
-                        );
-                        let _ = io::stderr().flush();
-                    }
-                }
-            } else {
-                let mb_down = downloaded as f64 / (1024.0 * 1024.0);
-                eprint!("\rProgress: {:.2} MB downloaded", mb_down);
-                let _ = io::stderr().flush();
-            }
-        }
-    })?;
+    let options = DownloadOptions {
+        quiet,
+        ..Default::default()
+    };
+    download_installer_with_options(url, dest_path, &options)
+}
 
-    if !quiet {
-        eprintln!();
-    }
-    Ok(())
+/// Stream download an installer to a `.part` file with HTTP Range resume support,
+/// atomically renaming to destination upon full completion.
+pub fn download_installer_with_progress<F>(
+    url: &str,
+    dest_path: &Path,
+    mut _progress: F,
+) -> Result<(), UpdaterError>
+where
+    F: FnMut(u64, Option<u64>),
+{
+    let options = DownloadOptions {
+        threads: 1,
+        ..Default::default()
+    };
+    download_installer_with_options(url, dest_path, &options)
 }
 
 /// Perform an update check against the feed URL and local version metadata.
@@ -715,7 +1443,14 @@ pub fn execute_update(
         )?;
     }
 
-    download_installer(&release.url, &dest_file, args.quiet)?;
+    let options = DownloadOptions {
+        threads: args.threads.unwrap_or(DEFAULT_CONCURRENCY).max(1),
+        retries: args.retries.unwrap_or(DEFAULT_RETRIES),
+        quiet: args.quiet,
+        chunk_size: DEFAULT_CHUNK_SIZE,
+    };
+
+    download_installer_with_options(&release.url, &dest_file, &options)?;
 
     if !args.quiet {
         writeln!(
