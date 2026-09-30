@@ -1,7 +1,94 @@
 {
   "options": {
     "app_version": "26.33.0",
-    "build_number": 79506
+    "build_number": 79506,
+    "protocol_version": 11,
+    "config": {
+      "allow_message_text_with_files": false,
+      "api_version_uint": 11,
+      "app_folder_name": "ONEME",
+      "app_settings_version": 1,
+      "auto_update_enabled": false,
+      "base_url": "max.ru",
+      "booking_bot_url": "https://max.ru/max_rooms_bot",
+      "bot_start_param": "start",
+      "chat_inactive_interval": 300000,
+      "check_connection_timeout": 30,
+      "check_for_updates_interval": 86400,
+      "check_packets_interval": 30000,
+      "chunk_size": 10485760,
+      "client_friendly_name": "MAX",
+      "client_inactive_interval": 30000,
+      "code_confirmation_chat_name": "Коды подтверждения",
+      "company_friendly_name": "Communication Platform",
+      "csn_stream_ttl_sec": 43200,
+      "dc_stream_ttl_sec": 43200,
+      "default_avatar_format": "png",
+      "default_miniapp_height": 631,
+      "default_miniapp_width": 388,
+      "faq_url": "https://help.max.ru",
+      "how_to_register_url": "https://help.max.ru/help/about/kak-zaregistrirovatsya-v-max",
+      "init_updater_interval": 600,
+      "internal_url_scheme": "max",
+      "is_local_chat_list_enabled": true,
+      "is_local_config_enabled": true,
+      "is_local_contact_list_enabled": true,
+      "is_local_folders_enabled": true,
+      "is_polls_enabled": false,
+      "is_qrcode_login_first": true,
+      "is_unreleased_languages_enabled": false,
+      "local_server_pipe_name": "oneme_local_pipe",
+      "locale_replaces_with_ru": [
+        "az",
+        "hy",
+        "be",
+        "kk",
+        "ky",
+        "mo",
+        "tg",
+        "uz",
+        "tk"
+      ],
+      "logger_severity": 1,
+      "logs_sending_max_files_count_calls": 2,
+      "logs_sending_max_files_count_client": 3,
+      "min_miniapp_height": 631,
+      "min_miniapp_width": 388,
+      "mouse_press_and_hold_interval_ms": 500,
+      "name_max_length": 64,
+      "need_mask_logs": false,
+      "override_polls_version": 0,
+      "personal_recommendations_rules_url": "https://legal.max.ru/recsysrules",
+      "ping_interval": 30000,
+      "prevalidate_public_link_on_client": false,
+      "privacy_policy_url": "https://legal.max.ru/pp",
+      "rooms_auto_update_enabled": true,
+      "rooms_friendly_name": "MAX-ROOMS",
+      "rooms_init_updater_interval": 120,
+      "rooms_update_appcast_filename": "update_rooms.xml",
+      "rooms_update_path": "",
+      "rooms_update_url": "",
+      "screen_type": "2.0x",
+      "self_recovery_url": "https://go.max.ru/selfrecovery",
+      "send_error_logs_to_crash_server": false,
+      "short_link_prefix_url": "max.ru",
+      "single_instance_id": "oneme_instance",
+      "sn_stream_ttl_sec": 43200,
+      "ssl_port": 443,
+      "ssl_url2": "api2.oneme.ru",
+      "start_app_param": "startapp",
+      "support_bot_url": "max://max.ru/support",
+      "update_appcast_filename": "update.xml",
+      "update_fallback_url": "https://download.max.ru/?version={}#desktop",
+      "update_fallback_url_self_service_mac": "jamfselfservice://content?entity=policy&id=899&action=view",
+      "update_fallback_url_self_service_win": "softwarecenter:SoftwareID=ScopeId_62870913-F37D-4CC9-9FE3-D11CFBE99683/Application_8d2f16c9-cee9-412e-b3d2-0079fdda2078",
+      "update_path": "",
+      "update_url": "https://download.max.ru",
+      "use_encrypted_connection": true,
+      "user_agent": "OneMe Desktop",
+      "user_agreement_url": "https://legal.max.ru/ps",
+      "web_app_user_gesture_timeout": 3000
+    }
   },
   "packets": [
     {
@@ -34045,7 +34132,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "APP"
         },
         {
           "name": "Api::OneMe::Types::AudioAttachment",
@@ -34233,7 +34321,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "AUDIO"
         },
         {
           "name": "Api::OneMe::Types::CallAttachment",
@@ -34451,7 +34540,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CALL"
         },
         {
           "name": "Api::OneMe::Types::ContactAttachment",
@@ -34669,7 +34759,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CONTACT"
         },
         {
           "name": "Api::OneMe::Types::ControlAttachment",
@@ -35157,7 +35248,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CONTROL"
         },
         {
           "name": "Api::OneMe::Types::FileAttachment",
@@ -35345,7 +35437,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "FILE"
         },
         {
           "name": "Api::OneMe::Types::GeoPositionAttachment",
@@ -35473,7 +35566,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "LOCATION"
         },
         {
           "name": "Api::OneMe::Types::InlineKeyboardAttachment",
@@ -35571,7 +35665,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "INLINE_KEYBOARD"
         },
         {
           "name": "Api::OneMe::Types::PhotoAttachment",
@@ -35939,7 +36034,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "PHOTO"
         },
         {
           "name": "Api::OneMe::Types::PollAttachment",
@@ -36157,7 +36253,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "POLL"
         },
         {
           "name": "Api::OneMe::Types::ReplyKeyboardAttachment",
@@ -36255,7 +36352,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "REPLY_KEYBOARD"
         },
         {
           "name": "Api::OneMe::Types::ShareAttachment",
@@ -36533,7 +36631,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "SHARE"
         },
         {
           "name": "Api::OneMe::Types::StickerAttachment",
@@ -37051,7 +37150,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "STICKER"
         },
         {
           "name": "Api::OneMe::Types::StoryAttachment",
@@ -37209,7 +37309,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "STORY_REPLY"
         },
         {
           "name": "Api::OneMe::Types::UnsupportedAttachment",
@@ -37794,7 +37895,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "VIDEO"
         },
         {
           "name": "Api::OneMe::Types::WidgetAttachment",
@@ -37862,7 +37964,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "WIDGET"
         }
       ],
       "rtti_subclasses": [
@@ -42199,7 +42302,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "AUDIO_STATS"
         },
         {
           "name": "Api::OneMe::Types::Log::AudioTranscription",
@@ -42447,7 +42551,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "AUDIO_TRANSCRIPTION"
         },
         {
           "name": "Api::OneMe::Types::Log::BannerParams",
@@ -42575,7 +42680,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "BANNER"
         },
         {
           "name": "Api::OneMe::Types::Log::CallEventParams",
@@ -42921,7 +43027,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CHAT_MESSAGE_LINK"
         },
         {
           "name": "Api::OneMe::Types::Log::ChatSuggestParams",
@@ -43177,7 +43284,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::ChannelCreationBotEntryMeta>",
@@ -43275,7 +43383,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::ForwardPostMeta>",
@@ -43373,7 +43482,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::InlineKeyboardActionsSourceMeta>",
@@ -43471,7 +43581,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::No2faScreenMeta>",
@@ -43569,7 +43680,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::OpenBroadcatButtonMeta>",
@@ -43667,7 +43779,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::ProfileButtonMeta>",
@@ -43961,7 +44074,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::StoryLinkMeta>",
@@ -44059,7 +44173,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CLICK"
         },
         {
           "name": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::VideoSpeedChangeMeta>",
@@ -44157,7 +44272,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "MENU"
         },
         {
           "name": "Api::OneMe::Types::Log::ContactOrBlockParams",
@@ -45969,7 +46085,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "ORGANIZATION_INFO"
         },
         {
           "name": "Api::OneMe::Types::Log::PermissionChangedParams",
@@ -46729,7 +46846,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "LOG"
         },
         {
           "name": "Api::OneMe::Types::Log::RegistrationEventParams",
@@ -47053,7 +47171,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "SEARCH_RESPONSE"
         },
         {
           "name": "Api::OneMe::Types::Log::Settings2FAParams",
@@ -47189,7 +47308,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "BACKGROUND"
         },
         {
           "name": "Api::OneMe::Types::Log::SettingsTextSizeParams",
@@ -47257,7 +47377,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "TEXT_SIZE"
         },
         {
           "name": "Api::OneMe::Types::Log::SettingsThemeParams",
@@ -47355,7 +47476,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "THEME"
         },
         {
           "name": "Api::OneMe::Types::Log::StickerSendParams",
@@ -48235,7 +48357,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "STORY_STATS"
         },
         {
           "name": "Api::OneMe::Types::Log::StoryViewerPerformanceParams",
@@ -48363,7 +48486,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "PERF"
         },
         {
           "name": "Api::OneMe::Types::Log::UnknownCallerAlertParams",
@@ -49227,7 +49351,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "DANGEROUS_FILE_ACTIONS"
         },
         {
           "name": "Api::OneMe::Types::Log::UnsafeUrlAlertParams",
@@ -49295,7 +49420,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "DANGEROUS_URL_ACTIONS"
         },
         {
           "name": "Api::OneMe::Types::Log::UploadParams",
@@ -49423,7 +49549,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "PERF"
         },
         {
           "name": "Api::OneMe::Types::Log::VideoMessageParams",
@@ -49919,7 +50046,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "VIDEO_STATS"
         },
         {
           "name": "Api::OneMe::Types::Log::WebAppActionsParams",
@@ -60326,7 +60454,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "AUDIO"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::ContactAttachment",
@@ -60394,7 +60523,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "CONTACT"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::ControlAttachment",
@@ -60582,7 +60712,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "CONTROL"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::FileAttachment",
@@ -60650,7 +60781,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "FILE"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::GeoPositionAttachment",
@@ -60778,7 +60910,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "LOCATION"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::PhotoAttachment",
@@ -60846,7 +60979,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "PHOTO"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::PollAttachment",
@@ -61004,7 +61138,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "POLL"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::ShareAttachment",
@@ -61170,7 +61305,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "STICKER"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::StoryAttachment",
@@ -61268,7 +61404,8 @@
               },
               "required": true
             }
-          ]
+          ],
+          "tag": "STORY_REPLY"
         },
         {
           "name": "Api::OneMe::Types::Outgoing::VideoAttachment",
@@ -61426,7 +61563,8 @@
               },
               "required": false
             }
-          ]
+          ],
+          "tag": "VIDEO"
         }
       ],
       "rtti_subclasses": [
@@ -62661,273 +62799,112 @@
       ]
     }
   ],
-  "string_enums": [
-    "ACTIVATION_START",
-    "ACTIVE",
-    "ADDED",
-    "ADMIN",
-    "AFTER_INITIATION",
-    "ALL_CAN_PIN_MESSAGE",
-    "ALT_KEYBOARD",
-    "ANIMOJI",
-    "ANIMOJI_SET",
-    "ANSI",
-    "ANSWERED",
-    "ATTACH",
-    "AUDIO",
-    "AUDIO_CALL_INTERRUPTION",
-    "AUDIO_ECHO",
-    "AUDIO_ENABLED",
-    "AUDIO_FREEZES",
-    "AUDIO_QUALITY",
-    "AUDIO_STATS",
-    "AUDIO_TRANSCRIPTION",
-    "AUDIO_TRANSCRIPTION_ENABLED",
-    "AUTH_QR",
-    "AUTH_VALIDATE_PASSWORD",
-    "A_PLUS_CHANNEL",
-    "B9LE",
-    "B9LM",
-    "BACKGROUND",
-    "BANNER",
-    "BEFORE_JOIN",
-    "BLOCK",
-    "BLOCKED",
-    "BLOCKED_MEMBER",
-    "BOTS",
-    "BUSY",
-    "CALL",
-    "CALL_BY_LINK",
-    "CALL_CONTACT",
-    "CALL_REVIEW",
-    "CALL_SERVICE_START",
-    "CANCELED",
-    "CHANGE_EMAIL",
-    "CHANGE_PASSWORD",
-    "CHANNEL",
-    "CHANNEL_ADMIN",
-    "CHANNEL_RECSYS_FEED",
-    "CHANNEL_RECSYS_FOLDER",
-    "CHAT",
-    "CHATS",
-    "CHATS_INVITE",
-    "CHATS_PUSH_NOTIFICATION",
-    "CHATS_PUSH_SOUND",
-    "CHAT_HEAD",
-    "CHAT_MESSAGE_LINK",
-    "CHAT_OPENED",
-    "CHAT_PROFILE_CLICKABLE_ELEMENT_ACTIONS",
-    "CHECK_CODE",
-    "CLICK",
-    "CLOSE",
-    "CLOSED",
-    "CODE",
-    "COLD_START",
-    "COMMENTS",
-    "COMMENTS_ATTACHMENTS_DISABLED",
-    "COMMENTS_BLACKLIST",
-    "COMMENTS_DISABLED",
-    "CONFIRM_BEFORE_SEND",
-    "CONTACT",
-    "CONTACTS",
-    "CONTACT_OR_BLOCK",
-    "CONTACT_RENAME_BANNER",
-    "CONTENT_LEVEL_ACCESS",
-    "CONTENT_LEVEL_CHAT",
-    "CONTEXT_MENU",
-    "CONTROL",
-    "CUSTOM",
-    "DANGEROUS_FILE_ACTIONS",
-    "DANGEROUS_URL_ACTIONS",
-    "DASH",
-    "DELAYED",
-    "DEST",
-    "DIALOG",
-    "DIALOGS_PUSH_NOTIFICATION",
-    "DIALOG_SAVED_MESSAGES",
-    "DIALOG_WITH_BOT",
-    "DISABLE",
-    "DISABLE_FORWARD",
-    "DONT_DISTURB_UNTIL",
-    "DURING_CALL",
-    "EDITED",
-    "EMAIL_CODE_REQUESTED",
-    "EMAIL_CONFIRMED",
-    "EMAIL_NOT_CONFIRMED",
-    "EMOJI",
-    "EMPHASIZED",
-    "ERROR",
-    "EVENT_MESSAGE_COUNTER",
-    "EXTERNAL",
-    "EXTREMISM",
-    "FAILED",
-    "FAILED_PACKET",
-    "FAKE",
-    "FAMILY_PROTECTION",
-    "FAVORITE_STICKER",
-    "FAVORITE_STICKERS",
-    "FAVORITE_STICKER_SET",
-    "FAVORITE_STICKER_SETS",
-    "FILE",
-    "FIND_BY_PHONE",
-    "FINISH_CALL",
-    "FORWARD",
-    "GROUP_CALL_JOIN",
-    "GROUP_CALL_JOIN_FAILED",
-    "HEADING",
-    "HIDDEN",
-    "HIDE_STORIES",
-    "HISTORY",
-    "HUNGUP",
-    "INACTIVE_TTL",
-    "INCOMING_CALL",
-    "INCOMING_CALL_INIT",
-    "INCOMING_CALL_RECEIVED",
-    "INFORMER",
-    "INLINE_KEYBOARD",
-    "INVISIBLE",
-    "INVITE_MAX_BANNER",
-    "JOIN_REQUEST",
-    "LEFT",
-    "LINK",
-    "LIST_UPDATED",
-    "LIVE",
-    "LOCAL_SEARCH",
-    "LOCATION",
-    "LOGIN",
-    "LOTTIE",
-    "MANAGEABLE",
-    "MEMBER",
-    "MEMBERS_CAN_SEE_PRIVATE_LINK",
-    "MENU",
-    "MESSAGE",
-    "MESSAGES",
-    "MESSAGE_CLICKABLE_ELEMENT_ACTIONS",
-    "MESSAGE_COPY_NOT_ALLOWED",
-    "MISSED",
-    "MONOSPACED",
-    "MP4_1080",
-    "MP4_144",
-    "MP4_240",
-    "MP4_360",
-    "MP4_480",
-    "MP4_720",
-    "M_CALL_PUSH_NOTIFICATION",
-    "NARNIA",
-    "NETWORK_ERROR",
-    "NEW_STICKER_SETS",
-    "NOBODY",
-    "NOT_MATCH",
-    "OFFICIAL",
-    "ONEME",
-    "ONLY_ADMIN_CAN_ADD_MEMBER",
-    "ONLY_ADMIN_CAN_CALL",
-    "ONLY_OWNER_CAN_CHANGE_ICON_TITLE",
-    "OPEN",
-    "ORGANIZATION_INFO",
-    "OTHER",
-    "OUT_OF_CALL",
-    "O_DASH",
-    "O_HLS",
-    "PERF",
-    "PERMISSION",
-    "PHONE_NUMBER_PRIVACY",
-    "PHOTO",
-    "POLL",
-    "POPULAR",
-    "PORNO",
-    "PRESENCE",
-    "PRESET_AVATAR",
-    "PRIVATE",
-    "PRIVATE_CHANNEL",
-    "PRIVATE_CHAT",
-    "PROFILE",
-    "PUBLIC",
-    "PUBLIC_CHANNEL",
-    "PUBLIC_CHAT",
-    "PUBLIC_CHATS",
-    "PUSH_DETAILS",
-    "PUSH_NEW_CONTACTS",
-    "PUSH_SOUND",
-    "QUOTE",
-    "REACTION",
-    "READ_MESSAGE",
-    "READ_REACTION",
-    "RECENT",
-    "REFRESH",
-    "REGISTER",
-    "REGISTRATION",
-    "REGULAR",
-    "REJECTED",
-    "REMOVE",
-    "REMOVED",
-    "REPLY",
-    "REPLY_KEYBOARD",
-    "REPORT_BANNER_ACTIONS",
-    "REQUEST_PERMISSION_CAM",
-    "REQUEST_PERMISSION_MIC",
-    "RESEND",
-    "RESTRICTED",
-    "SAFE_MODE",
-    "SEARCH_BY_PHONE",
-    "SEARCH_RESPONSE",
-    "SENT_BY_PHONE",
-    "SERVICE_CHAT",
-    "SETTINGS",
-    "SET_AS_UNREAD",
-    "SHARE",
-    "SHOW_READ_MARK",
-    "SHOW_STORIES",
-    "SIGN_ADMIN",
-    "SPAM",
-    "START_AUTH",
-    "START_CALL",
-    "STATIC",
-    "STICKER",
-    "STICKERS_SUGGEST",
-    "STICKER_SET",
-    "STORY",
-    "STORY_NAV",
-    "STORY_OPEN",
-    "STORY_PREVIEW_OPEN",
-    "STORY_REPLY",
-    "STORY_STATS",
-    "STRIKETHROUGH",
-    "STRONG",
-    "SUCCESS",
-    "SYSTEM",
-    "TEXT",
-    "TEXT_SIZE",
-    "THEME",
-    "THREAT",
-    "TRY_DELETE_PROFILE",
-    "UNBLOCK",
-    "UNDERLINE",
-    "UNKNOWN_CALLER_ALERT",
-    "UNSAFE_FILES",
-    "UPDATE",
-    "UPDATED",
-    "UPLOAD",
-    "UPLOAD_MAX_RETRY_COUNT",
-    "USER",
-    "USERS_FREEZES",
-    "USER_MENTION",
-    "UUUUUUU",
-    "VIDEO",
-    "VIDEO_CALL_INTERRUPTION",
-    "VIDEO_ENABLED",
-    "VIDEO_FREEZES",
-    "VIDEO_MESSAGE",
-    "VIDEO_MSG",
-    "VIDEO_QUALITY",
-    "VIDEO_STATS",
-    "VIDEO_SYNC",
-    "VOICE_COMMUNICATION_PROBLEM",
-    "WARM_START",
-    "WEBAPP_ACTION",
-    "WEBAPP_BRIDGE",
-    "WIDGET"
-  ],
+  "enums": {
+    "CallProblems": {
+      "AUDIO_CALL_INTERRUPTION": 2,
+      "AUDIO_ECHO": 5,
+      "AUDIO_FREEZES": 1,
+      "AUDIO_QUALITY": 4,
+      "USERS_FREEZES": 10,
+      "VIDEO_CALL_INTERRUPTION": 9,
+      "VIDEO_FREEZES": 6,
+      "VIDEO_QUALITY": 7,
+      "VIDEO_SYNC": 8,
+      "VOICE_COMMUNICATION_PROBLEM": 3
+    },
+    "ServerErrorCodes": {
+      "call.blocked": 6,
+      "edit.not.allowed": 11,
+      "limit.reached": 7,
+      "not.admin": 12,
+      "not.chat.participant": 3,
+      "privacy.violation": 5,
+      "user.blocked": 9,
+      "user.restricted.call": 8,
+      "wait.for.admin": 4
+    },
+    "UserSettings": {
+      "notifications/channelCommentsLevel": 24,
+      "notifications/channelsEnabled": 23,
+      "notifications/muteInCalls": 26,
+      "notifications/notificationSilentMode": 19,
+      "notifications/p2gEnabled": 21,
+      "notifications/p2gRepliesOnly": 22,
+      "notifications/p2pEnabled": 20,
+      "notifications/textVisible": 25,
+      "statistic/statisticPresenceOfflineContactClosedCounter": 16,
+      "statistic/statisticPresenceOfflineContactOpenedCounter": 15,
+      "statistic/statisticPresenceOfflineStrangerClosedCounter": 18,
+      "statistic/statisticPresenceOfflineStrangerOpenedCounter": 17,
+      "statistic/statisticPresenceOnlineContactClosedCounter": 12,
+      "statistic/statisticPresenceOnlineContactOpenedCounter": 11,
+      "statistic/statisticPresenceOnlineStrangerClosedCounter": 14,
+      "statistic/statisticPresenceOnlineStrangerOpenedCounter": 13,
+      "userAppearance/messageFontSize": 27,
+      "userSettings/chatInvite": 2,
+      "userSettings/contentLevelAccess": 7,
+      "userSettings/familyProtection": 8,
+      "userSettings/hidden": 3,
+      "userSettings/incomingCall": 1,
+      "userSettings/phoneNumberPrivacy": 9,
+      "userSettings/pushNewContacts": 10,
+      "userSettings/safeMode": 4,
+      "userSettings/searchByPhone": 5,
+      "userSettings/showReadmark": 0,
+      "userSettings/unsafeFilesAlert": 6
+    }
+  },
+  "discriminators": {
+    "Api::OneMe::Types::BaseAttachment": {
+      "APP": "Api::OneMe::Types::AppAttachment",
+      "AUDIO": "Api::OneMe::Types::AudioAttachment",
+      "CALL": "Api::OneMe::Types::CallAttachment",
+      "CONTACT": "Api::OneMe::Types::ContactAttachment",
+      "CONTROL": "Api::OneMe::Types::ControlAttachment",
+      "FILE": "Api::OneMe::Types::FileAttachment",
+      "INLINE_KEYBOARD": "Api::OneMe::Types::InlineKeyboardAttachment",
+      "LOCATION": "Api::OneMe::Types::GeoPositionAttachment",
+      "PHOTO": "Api::OneMe::Types::PhotoAttachment",
+      "POLL": "Api::OneMe::Types::PollAttachment",
+      "REPLY_KEYBOARD": "Api::OneMe::Types::ReplyKeyboardAttachment",
+      "SHARE": "Api::OneMe::Types::ShareAttachment",
+      "STICKER": "Api::OneMe::Types::StickerAttachment",
+      "STORY_REPLY": "Api::OneMe::Types::StoryAttachment",
+      "VIDEO": "Api::OneMe::Types::VideoAttachment",
+      "WIDGET": "Api::OneMe::Types::WidgetAttachment"
+    },
+    "Api::OneMe::Types::Log::EventParams": {
+      "AUDIO_STATS": "Api::OneMe::Types::Log::AudioParams",
+      "AUDIO_TRANSCRIPTION": "Api::OneMe::Types::Log::AudioTranscription",
+      "BACKGROUND": "Api::OneMe::Types::Log::SettingsBackgoundParams",
+      "BANNER": "Api::OneMe::Types::Log::BannerParams",
+      "CHAT_MESSAGE_LINK": "Api::OneMe::Types::Log::ChatMessageLinkParams",
+      "CLICK": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::StoryLinkMeta>",
+      "DANGEROUS_FILE_ACTIONS": "Api::OneMe::Types::Log::UnsafeFilesAlertParams",
+      "DANGEROUS_URL_ACTIONS": "Api::OneMe::Types::Log::UnsafeUrlAlertParams",
+      "LOG": "Api::OneMe::Types::Log::QrAuthParams",
+      "MENU": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::VideoSpeedChangeMeta>",
+      "ORGANIZATION_INFO": "Api::OneMe::Types::Log::OrganizationInfoParams",
+      "PERF": "Api::OneMe::Types::Log::UploadParams",
+      "SEARCH_RESPONSE": "Api::OneMe::Types::Log::SearchEventParams",
+      "STORY_STATS": "Api::OneMe::Types::Log::StoryParams",
+      "TEXT_SIZE": "Api::OneMe::Types::Log::SettingsTextSizeParams",
+      "THEME": "Api::OneMe::Types::Log::SettingsThemeParams",
+      "VIDEO_STATS": "Api::OneMe::Types::Log::VideoParams"
+    },
+    "Api::OneMe::Types::Outgoing::BaseAttachment": {
+      "AUDIO": "Api::OneMe::Types::Outgoing::AudioAttachment",
+      "CONTACT": "Api::OneMe::Types::Outgoing::ContactAttachment",
+      "CONTROL": "Api::OneMe::Types::Outgoing::ControlAttachment",
+      "FILE": "Api::OneMe::Types::Outgoing::FileAttachment",
+      "LOCATION": "Api::OneMe::Types::Outgoing::GeoPositionAttachment",
+      "PHOTO": "Api::OneMe::Types::Outgoing::PhotoAttachment",
+      "POLL": "Api::OneMe::Types::Outgoing::PollAttachment",
+      "STICKER": "Api::OneMe::Types::Outgoing::StickerAttachment",
+      "STORY_REPLY": "Api::OneMe::Types::Outgoing::StoryAttachment",
+      "VIDEO": "Api::OneMe::Types::Outgoing::VideoAttachment"
+    }
+  },
   "error": {
     "error": "std::string",
     "localizedMessage": "std::string",
