@@ -1,0 +1,1956 @@
+{
+  "meta": {
+    "app_version": "26.33.0",
+    "build_number": 79506,
+    "protocol_version": 11
+  },
+  "summary": {
+    "total_packets": 130,
+    "total_events": 24,
+    "total_models": 221,
+    "total_features": 243,
+    "total_source_files": 209,
+    "total_log_templates": 434
+  },
+  "client_config": {
+    "allow_message_text_with_files": false,
+    "api_version_uint": 11,
+    "app_folder_name": "ONEME",
+    "app_settings_version": 1,
+    "auto_update_enabled": false,
+    "base_url": "max.ru",
+    "booking_bot_url": "https://max.ru/max_rooms_bot",
+    "bot_start_param": "start",
+    "chat_inactive_interval": 300000,
+    "check_connection_timeout": 30,
+    "check_for_updates_interval": 86400,
+    "check_packets_interval": 30000,
+    "chunk_size": 10485760,
+    "client_friendly_name": "MAX",
+    "client_inactive_interval": 30000,
+    "code_confirmation_chat_name": "Коды подтверждения",
+    "company_friendly_name": "Communication Platform",
+    "csn_stream_ttl_sec": 43200,
+    "dc_stream_ttl_sec": 43200,
+    "default_avatar_format": "png",
+    "default_miniapp_height": 631,
+    "default_miniapp_width": 388,
+    "faq_url": "https://help.max.ru",
+    "how_to_register_url": "https://help.max.ru/help/about/kak-zaregistrirovatsya-v-max",
+    "init_updater_interval": 600,
+    "internal_url_scheme": "max",
+    "is_local_chat_list_enabled": true,
+    "is_local_config_enabled": true,
+    "is_local_contact_list_enabled": true,
+    "is_local_folders_enabled": true,
+    "is_polls_enabled": false,
+    "is_qrcode_login_first": true,
+    "is_unreleased_languages_enabled": false,
+    "local_server_pipe_name": "oneme_local_pipe",
+    "locale_replaces_with_ru": [
+      "az",
+      "hy",
+      "be",
+      "kk",
+      "ky",
+      "mo",
+      "tg",
+      "uz",
+      "tk"
+    ],
+    "logger_severity": 1,
+    "logs_sending_max_files_count_calls": 2,
+    "logs_sending_max_files_count_client": 3,
+    "min_miniapp_height": 631,
+    "min_miniapp_width": 388,
+    "mouse_press_and_hold_interval_ms": 500,
+    "name_max_length": 64,
+    "need_mask_logs": false,
+    "override_polls_version": 0,
+    "personal_recommendations_rules_url": "https://legal.max.ru/recsysrules",
+    "ping_interval": 30000,
+    "prevalidate_public_link_on_client": false,
+    "privacy_policy_url": "https://legal.max.ru/pp",
+    "rooms_auto_update_enabled": true,
+    "rooms_friendly_name": "MAX-ROOMS",
+    "rooms_init_updater_interval": 120,
+    "rooms_update_appcast_filename": "update_rooms.xml",
+    "rooms_update_path": "",
+    "rooms_update_url": "",
+    "screen_type": "2.0x",
+    "self_recovery_url": "https://go.max.ru/selfrecovery",
+    "send_error_logs_to_crash_server": false,
+    "short_link_prefix_url": "max.ru",
+    "single_instance_id": "oneme_instance",
+    "sn_stream_ttl_sec": 43200,
+    "ssl_port": 443,
+    "ssl_url2": "api2.oneme.ru",
+    "start_app_param": "startapp",
+    "support_bot_url": "max://max.ru/support",
+    "update_appcast_filename": "update.xml",
+    "update_fallback_url": "https://download.max.ru/?version={}#desktop",
+    "update_fallback_url_self_service_mac": "jamfselfservice://content?entity=policy&id=899&action=view",
+    "update_fallback_url_self_service_win": "softwarecenter:SoftwareID=ScopeId_62870913-F37D-4CC9-9FE3-D11CFBE99683/Application_8d2f16c9-cee9-412e-b3d2-0079fdda2078",
+    "update_path": "",
+    "update_url": "https://download.max.ru",
+    "use_encrypted_connection": true,
+    "user_agent": "OneMe Desktop",
+    "user_agreement_url": "https://legal.max.ru/ps",
+    "web_app_user_gesture_timeout": 3000
+  },
+  "features": {
+    "ab-status": "Utilities::StrongTypedef<std::optional<int64_t>>",
+    "account-nickname-enabled": "std::optional<bool>",
+    "add-participants-to-gc": "std::optional<bool>",
+    "additional-links": "std::optional<bool>",
+    "additional-links-limit": "std::optional<int64_t>",
+    "audio-peaks-count": "std::optional<int32_t>",
+    "audio-write-opus-config": "std::optional<Api::OneMe::Types::OpusSupport>",
+    "blacklist": "std::optional<bool>",
+    "blocked-users": "std::optional<bool>",
+    "bot-command-list": "std::optional<bool>",
+    "bot-complaint-enabled": "std::optional<bool>",
+    "bots-channel-adding": "std::optional<bool>",
+    "business-channel-botid": "std::optional<int64_t>",
+    "calc-audio-wave": "std::optional<bool>",
+    "calc-video-wave": "std::optional<bool>",
+    "call-chat-members-load-config": "std::optional<Api::OneMe::Types::CallChatMembersLoadConfig>",
+    "call-rate": "std::optional<Api::OneMe::Types::CallRateParams>",
+    "call-record-v2": "std::optional<bool>",
+    "call-use-contact-info-with-chat-id": "std::optional<bool>",
+    "callAecEnabled": "std::optional<bool>",
+    "callAudioUnitMacConfig": "std::optional<std::string>",
+    "callDereverberationEnabled": "std::optional<bool>",
+    "callDontUseVpnForRtp": "std::optional<bool>",
+    "callEnableAudioUnitMac": "std::optional<bool>",
+    "callEnableIceRenomination": "std::optional<bool>",
+    "callInboundNisqaEnabled": "std::optional<bool>",
+    "callNoiseCancellationLevel": "std::optional<std::string>",
+    "callSSLVerifyConfig": "std::optional<std::string>",
+    "callScreenDevicePath": "std::optional<std::string>",
+    "callScreenHardwareId": "std::optional<std::string>",
+    "callScreenName": "std::optional<std::string>",
+    "callScreenOutput": "std::optional<std::string>",
+    "callSecondScreenDevicePath": "std::optional<std::string>",
+    "callSecondScreenHardwareId": "std::optional<std::string>",
+    "callSecondScreenName": "std::optional<std::string>",
+    "callSecondScreenOutput": "std::optional<std::string>",
+    "callSystemAgcEnabled": "std::optional<bool>",
+    "callTransparentAudioEnabled": "std::optional<bool>",
+    "callVideoEncodersConfig": "std::optional<std::string>",
+    "callYuvToBgrOnGpu": "std::optional<bool>",
+    "calls-accept-on-counter-call-enabled": "std::optional<bool>",
+    "calls-credentials-store-enabled": "std::optional<bool>",
+    "calls-endpoint": "std::optional<std::string>",
+    "calls-fakeboss-incoming-call-enabled": "std::optional<bool>",
+    "calls-history-new": "std::optional<bool>",
+    "calls-hold-enabled": "std::optional<bool>",
+    "calls-new-sharing-screen": "std::optional<bool>",
+    "calls-sdk-dns-opt": "std::optional<bool>",
+    "calls-use-p2p-relay": "std::optional<bool>",
+    "cdce": "std::optional<bool>",
+    "cfj": "std::optional<bool>",
+    "cfs": "std::optional<bool>",
+    "channel-cta-button": "std::optional<bool>",
+    "channel-recommendations": "std::optional<bool>",
+    "channel-recommendations-ttl": "std::optional<int64_t>",
+    "channel-statistics-botid": "std::optional<int64_t>",
+    "channel-subscriptions-recs-limit": "std::optional<int64_t>",
+    "channels-bots-org-profile": "std::optional<bool>",
+    "channels-complaint-enabled": "std::optional<bool>",
+    "channels-enabled": "std::optional<bool>",
+    "chat-bottom-bar-new": "std::optional<bool>",
+    "chat-info-subscriber-timeout": "std::optional<int64_t>",
+    "chat-invite-link-permissions-enabled": "std::optional<bool>",
+    "check-connection-timeout": "std::optional<int64_t>",
+    "choose-default-folder": "std::optional<bool>",
+    "comments-attachments": "std::optional<int64_t>",
+    "comments-counters-ttl": "std::optional<Api::OneMe::Types::CommentsCounterTtl>",
+    "comments-enabled": "std::optional<bool>",
+    "comments-profile-input": "std::optional<bool>",
+    "comments-reactions-enabled": "std::optional<bool>",
+    "confirm-send": "std::optional<bool>",
+    "contact-add-bottom-sheet": "std::optional<bool>",
+    "contact-share-enabled": "std::optional<bool>",
+    "create-channel-type-screen": "std::optional<bool>",
+    "creation-2fa-config": "std::optional<Api::OneMe::Types::Creation2FAConfig>",
+    "cse": "std::optional<bool>",
+    "delete-for-all": "std::optional<bool>",
+    "delete-msg-fys-large-chat-disabled": "std::optional<bool>",
+    "desk-audio-msg-fast-upload": "std::optional<bool>",
+    "desk-video-file-fast-upload": "std::optional<bool>",
+    "desk-video-msg-fast-upload": "std::optional<bool>",
+    "desktop-attachmnets-upload-retries": "std::optional<bool>",
+    "desktop-call-bootstrap": "std::optional<bool>",
+    "desktop-call-fullscreen": "std::optional<bool>",
+    "desktop-call-in-memory-audio-filter": "std::optional<bool>",
+    "desktop-call-new-grid": "std::optional<bool>",
+    "desktop-call-new-share": "std::optional<bool>",
+    "desktop-call-new-share-lin": "std::optional<bool>",
+    "desktop-call-new-share-mac": "std::optional<bool>",
+    "desktop-call-new-share-wayland": "std::optional<bool>",
+    "desktop-call-new-share-win": "std::optional<bool>",
+    "desktop-call-zoom": "std::optional<bool>",
+    "desktop-calls-grpc-cert": "std::optional<bool>",
+    "desktop-calls-history-clear-new": "std::optional<bool>",
+    "desktop-calls-share-instruction": "std::optional<bool>",
+    "desktop-clipboard-html-enabled": "std::optional<bool>",
+    "desktop-embed-video": "std::optional<bool>",
+    "desktop-webp-conversion": "std::optional<bool>",
+    "desktop-windows-use-native-webview": "std::optional<bool>",
+    "dev-toggles-enabled": "std::optional<bool>",
+    "edit-channel-type-screen-enabled": "std::optional<bool>",
+    "edit-comment-timeout": "std::optional<bool>",
+    "edit-timeout": "std::optional<int64_t>",
+    "enable-audio-messages-transcription": "std::optional<bool>",
+    "enable-unknown-contact-bottom-sheet": "std::optional<int64_t>",
+    "enable-video-messages-transcription": "std::optional<bool>",
+    "entity-org-action-ttl": "std::optional<int64_t>",
+    "esia-enabled": "std::optional<bool>",
+    "esia-verify-botId": "std::optional<int64_t>",
+    "failover-hosts": "std::optional<std::string>",
+    "family-protection-botid": "std::optional<int64_t>",
+    "february-23-26-theme": "std::optional<bool>",
+    "file-upload-max-size": "std::optional<int64_t>",
+    "font-size-slider": "std::optional<bool>",
+    "forwarded-post-views": "std::optional<bool>",
+    "fullscreen-chat-media-fallback-enabled": "std::optional<bool>",
+    "fullscreen-subtitle": "std::optional<bool>",
+    "gc-from-p2p": "std::optional<bool>",
+    "gc-wait-admin": "std::optional<bool>",
+    "gcce": "std::optional<bool>",
+    "gcmpe": "std::optional<bool>",
+    "gcwre": "std::optional<bool>",
+    "glow-in-p2g": "std::optional<bool>",
+    "group-call-part-limit": "std::optional<int64_t>",
+    "halo-in-p2p": "std::optional<bool>",
+    "image-quality": "std::optional<float>",
+    "image-width": "std::optional<int32_t>",
+    "incoming-call-orgs": "std::optional<bool>",
+    "informer-coloring": "std::optional<bool>",
+    "invite-header": "std::optional<std::string>",
+    "invite-link": "std::optional<std::string>",
+    "invite-long": "std::optional<std::string>",
+    "invite-short": "std::optional<std::string>",
+    "join-requests": "std::optional<bool>",
+    "lebedev-theme-enabled": "std::optional<bool>",
+    "live-streams": "std::optional<bool>",
+    "local-search-ranker": "std::optional<bool>",
+    "march-8-26-theme": "std::optional<bool>",
+    "max-added-participants": "std::optional<int32_t>",
+    "max-description-length": "std::optional<int32_t>",
+    "max-favorite-chats": "std::optional<int64_t>",
+    "max-file-urls-per-request": "std::optional<int64_t>",
+    "max-media-urls-per-request": "std::optional<int64_t>",
+    "max-msg-length": "std::optional<int32_t>",
+    "max-participants": "std::optional<int32_t>",
+    "max-photo-urls-per-request": "std::optional<int64_t>",
+    "max-theme-length": "std::optional<int32_t>",
+    "media-not-ready-retry-delay": "std::optional<int64_t>",
+    "media-proxy-enabled": "std::optional<bool>",
+    "media-thumbhash": "std::optional<bool>",
+    "moscow-theme-enabled": "std::optional<bool>",
+    "multiaccount": "std::optional<int32_t>",
+    "multipin-channel": "std::optional<bool>",
+    "multipin-chat": "std::optional<bool>",
+    "multipin-dialog": "std::optional<bool>",
+    "multipin-forall-limit": "std::optional<int64_t>",
+    "multipin-forme-limit": "std::optional<int64_t>",
+    "new-avatar-gradient-colors-enabled": "std::optional<bool>",
+    "non-contact-complaints-enabled": "std::optional<bool>",
+    "not-contact-placeholder": "std::optional<bool>",
+    "notif-typing-presence": "std::optional<bool>",
+    "notification-in-call-setting": "std::optional<bool>",
+    "notification-settings": "std::optional<bool>",
+    "official-bot-naming-enabled": "std::optional<bool>",
+    "offline-statistic-enabled": "std::optional<bool>",
+    "opus-recorder-bitrate": "std::optional<int64_t>",
+    "opus-recorder-sample-rate": "std::optional<int64_t>",
+    "org-profile": "std::optional<bool>",
+    "organization-placeholder": "std::optional<bool>",
+    "orgs-excluded-to-show": "std::optional<std::vector<int64_t>>",
+    "p2g-disable-forward": "std::optional<bool>",
+    "p2p-business-status-paid": "std::optional<Api::OneMe::Types::P2PBusinessStatusPaid>",
+    "photo-url-refresh": "std::optional<bool>",
+    "photo-url-refresh-max-media-per-request": "std::optional<int64_t>",
+    "poll-ttl": "std::optional<Api::OneMe::Types::PollTtl>",
+    "polls-in-channels": "std::optional<int64_t>",
+    "polls-in-p2g-chats": "std::optional<int64_t>",
+    "polls-in-p2p-chats": "std::optional<bool>",
+    "polls-v2": "std::optional<bool>",
+    "presence-stop-typing": "std::optional<bool>",
+    "presence-ttl": "std::optional<int64_t>",
+    "presence-view-port": "std::optional<bool>",
+    "raise-call-window-on-focus": "std::optional<bool>",
+    "reactions-menu": "std::optional<std::vector<std::string>>",
+    "reactions-settings-enabled": "std::optional<bool>",
+    "readmark-validation-disabled": "std::optional<bool>",
+    "recent-search-enabled": "std::optional<bool>",
+    "render-polls": "std::optional<bool>",
+    "retry-disabled": "std::optional<bool>",
+    "retry-transcribe-attempt": "std::optional<int64_t>",
+    "retry-transcribe-timeout": "std::optional<int64_t>",
+    "rooms-call-invite-miniapp-qr-code": "std::optional<bool>",
+    "rooms-miniapp-qr-code": "std::optional<bool>",
+    "saved-messages-aliases": "std::optional<std::vector<std::string>>",
+    "scheduled-faves-enabled": "std::optional<bool>",
+    "scheduled-messages-enabled": "std::optional<bool>",
+    "scheduled-posts-enabled": "std::optional<bool>",
+    "search-webapps-showcase": "std::optional<Api::OneMe::Types::ShowWebappSearchCase>",
+    "self-service-calls-fix": "std::optional<bool>",
+    "server-side-complains-enabled": "std::optional<bool>",
+    "settings-business": "std::optional<std::string>",
+    "settings-entry-banners": "std::optional<std::vector<Api::OneMe::Types::WebAppEntry>>",
+    "show-fast-forward-button": "std::optional<bool>",
+    "show-you-subscribed": "std::optional<bool>",
+    "spell-check-lin": "std::optional<bool>",
+    "spell-check-mac": "std::optional<bool>",
+    "spell-check-win": "std::optional<bool>",
+    "stickers-botid": "std::optional<int64_t>",
+    "stories": "std::optional<bool>",
+    "stories-chats": "std::optional<bool>",
+    "stories-config": "std::optional<Api::OneMe::Types::StoriesConfig>",
+    "stories-feed-polling": "std::optional<bool>",
+    "stories-force-update": "std::optional<bool>",
+    "stories-history": "std::optional<bool>",
+    "stories-max": "std::optional<bool>",
+    "stories-profile": "std::optional<bool>",
+    "treat-zero-as-now-for-delayed-message-edit": "std::optional<bool>",
+    "unique-favorites": "std::optional<bool>",
+    "unsafe-files-alert": "std::optional<bool>",
+    "update-auto-check-enabled": "std::optional<bool>",
+    "update-path-mac": "std::optional<std::string>",
+    "update-path-win": "std::optional<std::string>",
+    "update-proxy-enabled": "std::optional<bool>",
+    "update-time-slot": "std::optional<Api::OneMe::Types::UpdateTimeSlot>",
+    "update-url": "std::optional<std::string>",
+    "update-version-mac": "std::optional<std::string>",
+    "update-version-win": "std::optional<std::string>",
+    "update-xml-name": "std::optional<std::string>",
+    "user-debug-report": "std::optional<int64_t>",
+    "video-msg-channels-enabled": "std::optional<bool>",
+    "video-msg-config": "std::optional<Api::OneMe::Types::VideoMessageConfig>",
+    "video-msg-enabled": "std::optional<bool>",
+    "video-msg-h264-yuv420p-enabled": "std::optional<Api::OneMe::Types::PlatformEnabled>",
+    "video-speed": "std::optional<bool>",
+    "views-count-enabled": "std::optional<bool>",
+    "warning-links": "std::optional<bool>",
+    "webapp-ds-keys-count": "std::optional<int64_t>",
+    "webapp-entry-from-chats-and-search-enabled": "std::optional<bool>",
+    "webapp-phone-hash": "std::optional<bool>",
+    "webapp-ss-keys-count": "std::optional<int64_t>",
+    "welcome-sticker-ids": "std::optional<std::vector<int64_t>>",
+    "wide-snippet-preview-width": "std::optional<int64_t>",
+    "y-map": "std::optional<Api::OneMe::Types::YMapConfig>"
+  },
+  "enums": {
+    "CallProblems": {
+      "AUDIO_CALL_INTERRUPTION": 2,
+      "AUDIO_ECHO": 5,
+      "AUDIO_FREEZES": 1,
+      "AUDIO_QUALITY": 4,
+      "USERS_FREEZES": 10,
+      "VIDEO_CALL_INTERRUPTION": 9,
+      "VIDEO_FREEZES": 6,
+      "VIDEO_QUALITY": 7,
+      "VIDEO_SYNC": 8,
+      "VOICE_COMMUNICATION_PROBLEM": 3
+    },
+    "ServerErrorCodes": {
+      "call.blocked": 6,
+      "edit.not.allowed": 11,
+      "limit.reached": 7,
+      "not.admin": 12,
+      "not.chat.participant": 3,
+      "privacy.violation": 5,
+      "user.blocked": 9,
+      "user.restricted.call": 8,
+      "wait.for.admin": 4
+    },
+    "UserSettings": {
+      "notifications/channelCommentsLevel": 24,
+      "notifications/channelsEnabled": 23,
+      "notifications/muteInCalls": 26,
+      "notifications/notificationSilentMode": 19,
+      "notifications/p2gEnabled": 21,
+      "notifications/p2gRepliesOnly": 22,
+      "notifications/p2pEnabled": 20,
+      "notifications/textVisible": 25,
+      "statistic/statisticPresenceOfflineContactClosedCounter": 16,
+      "statistic/statisticPresenceOfflineContactOpenedCounter": 15,
+      "statistic/statisticPresenceOfflineStrangerClosedCounter": 18,
+      "statistic/statisticPresenceOfflineStrangerOpenedCounter": 17,
+      "statistic/statisticPresenceOnlineContactClosedCounter": 12,
+      "statistic/statisticPresenceOnlineContactOpenedCounter": 11,
+      "statistic/statisticPresenceOnlineStrangerClosedCounter": 14,
+      "statistic/statisticPresenceOnlineStrangerOpenedCounter": 13,
+      "userAppearance/messageFontSize": 27,
+      "userSettings/chatInvite": 2,
+      "userSettings/contentLevelAccess": 7,
+      "userSettings/familyProtection": 8,
+      "userSettings/hidden": 3,
+      "userSettings/incomingCall": 1,
+      "userSettings/phoneNumberPrivacy": 9,
+      "userSettings/pushNewContacts": 10,
+      "userSettings/safeMode": 4,
+      "userSettings/searchByPhone": 5,
+      "userSettings/showReadmark": 0,
+      "userSettings/unsafeFilesAlert": 6
+    }
+  },
+  "discriminators": {
+    "Api::OneMe::Types::BaseAttachment": {
+      "APP": "Api::OneMe::Types::AppAttachment",
+      "AUDIO": "Api::OneMe::Types::AudioAttachment",
+      "CALL": "Api::OneMe::Types::CallAttachment",
+      "CONTACT": "Api::OneMe::Types::ContactAttachment",
+      "CONTROL": "Api::OneMe::Types::ControlAttachment",
+      "FILE": "Api::OneMe::Types::FileAttachment",
+      "INLINE_KEYBOARD": "Api::OneMe::Types::InlineKeyboardAttachment",
+      "LOCATION": "Api::OneMe::Types::GeoPositionAttachment",
+      "PHOTO": "Api::OneMe::Types::PhotoAttachment",
+      "POLL": "Api::OneMe::Types::PollAttachment",
+      "REPLY_KEYBOARD": "Api::OneMe::Types::ReplyKeyboardAttachment",
+      "SHARE": "Api::OneMe::Types::ShareAttachment",
+      "STICKER": "Api::OneMe::Types::StickerAttachment",
+      "STORY_REPLY": "Api::OneMe::Types::StoryAttachment",
+      "VIDEO": "Api::OneMe::Types::VideoAttachment",
+      "WIDGET": "Api::OneMe::Types::WidgetAttachment"
+    },
+    "Api::OneMe::Types::Log::EventParams": {
+      "AUDIO_STATS": "Api::OneMe::Types::Log::AudioParams",
+      "AUDIO_TRANSCRIPTION": "Api::OneMe::Types::Log::AudioTranscription",
+      "BACKGROUND": "Api::OneMe::Types::Log::SettingsBackgoundParams",
+      "BANNER": "Api::OneMe::Types::Log::BannerParams",
+      "CHAT_MESSAGE_LINK": "Api::OneMe::Types::Log::ChatMessageLinkParams",
+      "CLICK": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::StoryLinkMeta>",
+      "DANGEROUS_FILE_ACTIONS": "Api::OneMe::Types::Log::UnsafeFilesAlertParams",
+      "DANGEROUS_URL_ACTIONS": "Api::OneMe::Types::Log::UnsafeUrlAlertParams",
+      "LOG": "Api::OneMe::Types::Log::QrAuthParams",
+      "MENU": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::VideoSpeedChangeMeta>",
+      "ORGANIZATION_INFO": "Api::OneMe::Types::Log::OrganizationInfoParams",
+      "PERF": "Api::OneMe::Types::Log::UploadParams",
+      "SEARCH_RESPONSE": "Api::OneMe::Types::Log::SearchEventParams",
+      "STORY_STATS": "Api::OneMe::Types::Log::StoryParams",
+      "TEXT_SIZE": "Api::OneMe::Types::Log::SettingsTextSizeParams",
+      "THEME": "Api::OneMe::Types::Log::SettingsThemeParams",
+      "VIDEO_STATS": "Api::OneMe::Types::Log::VideoParams"
+    },
+    "Api::OneMe::Types::Outgoing::BaseAttachment": {
+      "AUDIO": "Api::OneMe::Types::Outgoing::AudioAttachment",
+      "CONTACT": "Api::OneMe::Types::Outgoing::ContactAttachment",
+      "CONTROL": "Api::OneMe::Types::Outgoing::ControlAttachment",
+      "FILE": "Api::OneMe::Types::Outgoing::FileAttachment",
+      "LOCATION": "Api::OneMe::Types::Outgoing::GeoPositionAttachment",
+      "PHOTO": "Api::OneMe::Types::Outgoing::PhotoAttachment",
+      "POLL": "Api::OneMe::Types::Outgoing::PollAttachment",
+      "STICKER": "Api::OneMe::Types::Outgoing::StickerAttachment",
+      "STORY_REPLY": "Api::OneMe::Types::Outgoing::StoryAttachment",
+      "VIDEO": "Api::OneMe::Types::Outgoing::VideoAttachment"
+    }
+  },
+  "packets_catalog": [
+    {
+      "opcode": 5,
+      "name": "Log"
+    },
+    {
+      "opcode": 6,
+      "name": "SessionInit",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "tryInitSession",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 16,
+      "name": "Profile",
+      "handler": {
+        "class": "Core::Profile::ProfileInteractor",
+        "method": "doUpdateProfile",
+        "source": "components/core/src/business/profile/profile_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 17,
+      "name": "AuthRequest",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendAuthRequest",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 18,
+      "name": "Auth",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendAuth",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 19,
+      "name": "Login"
+    },
+    {
+      "opcode": 20,
+      "name": "EmptyParameters"
+    },
+    {
+      "opcode": 22,
+      "name": "Config"
+    },
+    {
+      "opcode": 23,
+      "name": "AuthConfirm",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendAuthConfirm",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 25,
+      "name": "EmptyParameters",
+      "handler": {
+        "class": "Core::Avatar::PresetsAvatarInteractor",
+        "method": "doRequestPresetsAvatar",
+        "source": "components/core/src/business/avatar/preset_avatar_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 26,
+      "name": "Common"
+    },
+    {
+      "opcode": 27,
+      "name": "Update",
+      "handler": {
+        "class": "Core::Assets::Interactor",
+        "method": "sendAssetsUpdate",
+        "source": "components/core/src/business/assets/assets_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 28,
+      "name": "Common"
+    },
+    {
+      "opcode": 29,
+      "name": "Add"
+    },
+    {
+      "opcode": 32,
+      "name": "ContactInfo",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestContacts",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 34,
+      "name": "ContactUpdate",
+      "handler": {
+        "class": "Core::Contacts::Interactor",
+        "method": "doModifyContact",
+        "source": "components/core/src/business/contacts/contacts_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 35,
+      "name": "Presence",
+      "handler": {
+        "class": "Core::Presence::Interactor",
+        "method": "requestPresences",
+        "source": "components/core/src/business/contacts/presence_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 36,
+      "name": "ContactList"
+    },
+    {
+      "opcode": 37,
+      "name": "Contact"
+    },
+    {
+      "opcode": 39,
+      "name": "ContactPhotos",
+      "handler": {
+        "class": "Core::Contacts::PhotoInteractor",
+        "method": "doRequestPhotos",
+        "source": "components/core/src/business/contacts/contacts_photo_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 41,
+      "name": "ContactCreate"
+    },
+    {
+      "opcode": 43,
+      "name": "RemoveContactPhoto",
+      "handler": {
+        "class": "Core::Contacts::PhotoInteractor",
+        "method": "doRemovePhoto",
+        "source": "components/core/src/business/contacts/contacts_photo_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 46,
+      "name": "ContactByPhone",
+      "handler": {
+        "class": "Core::Contacts::Interactor",
+        "method": "doGetContactByPhone",
+        "source": "components/core/src/business/contacts/contacts_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 48,
+      "name": "ChatInfo"
+    },
+    {
+      "opcode": 49,
+      "name": "ChatHistory"
+    },
+    {
+      "opcode": 50,
+      "name": "ChatMark",
+      "handler": {
+        "class": "Core::ChatActions::MarkMessageAsReadedInteractor",
+        "method": "doSendPacket",
+        "source": "components/core/src/business/chat_actions/mark_readed_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 51,
+      "name": "ChatMedia",
+      "handler": {
+        "class": "Core::ChatMedia::ChatMediaInteractor",
+        "method": "doRequestChatMedia",
+        "source": "components/core/src/business/chat_media/chat_media_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 52,
+      "name": "ChatDelete",
+      "handler": {
+        "class": "Core::Chats::ControlInteractor",
+        "method": "doRemoveChat",
+        "source": "components/core/src/business/chats/chat_control_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 53,
+      "name": "ChatList"
+    },
+    {
+      "opcode": 54,
+      "name": "ChatClear",
+      "handler": {
+        "class": "Core::Chats::ControlInteractor",
+        "method": "doClearHistory",
+        "source": "components/core/src/business/chats/chat_control_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 55,
+      "name": "ChatUpdate",
+      "handler": {
+        "class": "Core::ChatActions::ChatUpdateInteractor",
+        "method": "doUpdateParams",
+        "source": "components/core/src/business/chat_actions/chat_update_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 56,
+      "name": "CheckLink"
+    },
+    {
+      "opcode": 57,
+      "name": "Join"
+    },
+    {
+      "opcode": 58,
+      "name": "ChatLeave",
+      "handler": {
+        "class": "Core::Chats::ControlInteractor",
+        "method": "doLeaveChat",
+        "source": "components/core/src/business/chats/chat_control_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 59,
+      "name": "ChatMembers",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestChatMembers",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 60,
+      "name": "Public"
+    },
+    {
+      "opcode": 61,
+      "name": "PersonalConfig",
+      "handler": {
+        "class": "Core::Chats::ControlInteractor",
+        "method": "doHideNonContactBanner",
+        "source": "components/core/src/business/chats/chat_control_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 62,
+      "name": "LiveStreamInfo",
+      "handler": {
+        "class": "Core::LiveStreams::LiveStreamsInteractor",
+        "method": "doSendPacket",
+        "source": "components/core/src/business/live_streams/live_streams_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 64,
+      "name": "Send",
+      "handler": {
+        "class": "Core::MessageSend::`anonymous-namespace'",
+        "method": "doAwaitSendMessagePacket",
+        "source": "components/core/src/business/message_sender/message_send_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 65,
+      "name": "Send",
+      "handler": {
+        "class": "Core::Typing::Interactor",
+        "method": "doSend",
+        "source": "components/core/src/business/typing/typing_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 66,
+      "name": "Delete",
+      "handler": {
+        "class": "Core::Messages::ModifyInteractor",
+        "method": "doRemoveMessages",
+        "source": "components/core/src/business/messages/message_modify_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 67,
+      "name": "Edit"
+    },
+    {
+      "opcode": 68,
+      "name": "Chat"
+    },
+    {
+      "opcode": 69,
+      "name": "VideoChatEdit"
+    },
+    {
+      "opcode": 71,
+      "name": "MsgGet"
+    },
+    {
+      "opcode": 72,
+      "name": "Touch"
+    },
+    {
+      "opcode": 73,
+      "name": "Message",
+      "handler": {
+        "class": "Core::Messages::Search::Interactor",
+        "method": "requestSearch",
+        "source": "components/core/src/business/messages_search/messages_search_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 74,
+      "name": "MsgGetStat",
+      "handler": {
+        "class": "Core::MsgStat::MsgStatSender",
+        "method": "doSendViewed",
+        "source": "components/core/src/business/msg_stat/msg_stat_sender.cpp"
+      }
+    },
+    {
+      "opcode": 75,
+      "name": "ChatSubscribe",
+      "handler": {
+        "class": "Core::ChatActions::PushesSubscribtionInteractor",
+        "method": "doConfirmSubscription",
+        "source": "components/core/src/business/chat_actions/chat_pushes_subscription_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 76,
+      "name": "VideoChatStart"
+    },
+    {
+      "opcode": 77,
+      "name": "ChatMembersUpdate",
+      "handler": {
+        "class": "Core::Chats::ChatMembersInteractor",
+        "method": "doAddToBlackList",
+        "source": "components/core/src/business/chats/chat_members_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 78,
+      "name": "VideoChatStartActive",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestFastStartParams",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 79,
+      "name": "VideoChatHistory",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestCallsHistory",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 80,
+      "name": "PhotoUpload",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestPhotoUploadUrl",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 82,
+      "name": "VideoUpload",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestAudioUploadUrl",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 83,
+      "name": "VideoPlay",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestVideoPlayUrl",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 84,
+      "name": "VideoChatCreateJoinLink",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestTransitionToGroupCall",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 86,
+      "name": "ChatPinSetVisibility",
+      "handler": {
+        "class": "Core::ChatActions::PinMessageInteractor",
+        "method": "doSetVisible",
+        "source": "components/core/src/business/chat_actions/pin_message_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 87,
+      "name": "FileUpload",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestFileUploadUrl",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 88,
+      "name": "FileDownload",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestFileDownloadInfo",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 89,
+      "name": "LinkInfo"
+    },
+    {
+      "opcode": 91,
+      "name": "GetCommentsUpdates"
+    },
+    {
+      "opcode": 94,
+      "name": "DeleteUserMessages",
+      "handler": {
+        "class": "Core::Messages::ModifyInteractor",
+        "method": "doRemoveAllSenderComments",
+        "source": "components/core/src/business/messages/message_modify_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 96,
+      "name": "EmptyParameters"
+    },
+    {
+      "opcode": 97,
+      "name": "EmptyParameters"
+    },
+    {
+      "opcode": 101,
+      "name": "LoginRestorePassword",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendPasswordRestoreRequest",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 104,
+      "name": "Details2FA"
+    },
+    {
+      "opcode": 105,
+      "name": "ExternalCallback",
+      "handler": {
+        "class": "Core::ExternalCallback::Interactor",
+        "method": "doSetExternalCallback",
+        "source": "components/core/src/business/external_callback/external_callback_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 106,
+      "name": "WebAppRequestPhoneHash",
+      "handler": {
+        "class": "Core::WebApp::Interactor",
+        "method": "doGetWebAppPhoneHash",
+        "source": "components/core/src/business/web_app/web_app_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 107,
+      "name": "ValidatePassword"
+    },
+    {
+      "opcode": 108,
+      "name": "ValidateHint"
+    },
+    {
+      "opcode": 109,
+      "name": "VerifyEmail",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendEmailVerifyRequest",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 110,
+      "name": "CheckEmail",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendEmailCheckCode",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 111,
+      "name": "Set2FA"
+    },
+    {
+      "opcode": 112,
+      "name": "CreateTrack"
+    },
+    {
+      "opcode": 113,
+      "name": "CheckPassword"
+    },
+    {
+      "opcode": 115,
+      "name": "LoginCheckPassword",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doSendPassword",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 116,
+      "name": "LoginProfileDelete"
+    },
+    {
+      "opcode": 118,
+      "name": "SendCallback",
+      "handler": {
+        "class": "Core::Buttons::Interactor",
+        "method": "doSendCallback",
+        "source": "components/core/src/business/buttons/buttons_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 119,
+      "name": "Suspend"
+    },
+    {
+      "opcode": 144,
+      "name": "ChatCommands"
+    },
+    {
+      "opcode": 145,
+      "name": "BotInfo"
+    },
+    {
+      "opcode": 158,
+      "name": "CallsToken"
+    },
+    {
+      "opcode": 160,
+      "name": "WebAppInitData",
+      "handler": {
+        "class": "Core::WebApp::Interactor",
+        "method": "doGetWebAppUrl",
+        "source": "components/core/src/business/web_app/web_app_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 161,
+      "name": "Complain"
+    },
+    {
+      "opcode": 162,
+      "name": "ComplainReasonsGet"
+    },
+    {
+      "opcode": 163,
+      "name": "Get",
+      "handler": {
+        "class": "Core::Calls::CallsHistoryInteractor",
+        "method": "doRequestHistory",
+        "source": "components/core/src/business/calls/calls_history_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 164,
+      "name": "Clear",
+      "handler": {
+        "class": "Core::Calls::CallsHistoryInteractor",
+        "method": "doRemoveItems",
+        "source": "components/core/src/business/calls/calls_history_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 166,
+      "name": "VideoChatJoin",
+      "handler": {
+        "class": "Core::Calls::CallsInteractor",
+        "method": "doRequestFastJoinParams",
+        "source": "components/core/src/business/calls/calls_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 178,
+      "name": "MsgReact",
+      "handler": {
+        "class": "Core::Reactions::Interactor",
+        "method": "doSetReaction",
+        "source": "components/core/src/business/reactions/reactions_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 179,
+      "name": "CancelReaction",
+      "handler": {
+        "class": "Core::Reactions::Interactor",
+        "method": "doCancelReaction",
+        "source": "components/core/src/business/reactions/reactions_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 180,
+      "name": "GetReactions"
+    },
+    {
+      "opcode": 181,
+      "name": "GetDetailedReactions",
+      "handler": {
+        "class": "Core::Reactions::Interactor",
+        "method": "doRequestDetailsReactions",
+        "source": "components/core/src/business/reactions/reactions_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 198,
+      "name": "CommonChatList",
+      "handler": {
+        "class": "Core::CommonChatList::Interactor",
+        "method": "doRequestCommonChatsInfo",
+        "source": "components/core/src/business/common_chat_list/common_chat_list_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 199,
+      "name": "ProfileDelete",
+      "handler": {
+        "class": "Core::Profile::ProfileInteractor",
+        "method": "doDeleteProfile",
+        "source": "components/core/src/business/profile/profile_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 200,
+      "name": "EmptyParameters",
+      "handler": {
+        "class": "Core::Profile::ProfileInteractor",
+        "method": "doRequestDeleteState",
+        "source": "components/core/src/business/profile/profile_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 202,
+      "name": "TranscribeMedia",
+      "handler": {
+        "class": "Core::ChatMedia::Transcription::Interactor",
+        "method": "doRequestTranscription",
+        "source": "components/core/src/business/chat_media/transcription_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 203,
+      "name": "PhotoUrlRefresh"
+    },
+    {
+      "opcode": 208,
+      "name": "StoriesList"
+    },
+    {
+      "opcode": 209,
+      "name": "StoriesListByOwnerId"
+    },
+    {
+      "opcode": 210,
+      "name": "StoriesGetByOwnerId"
+    },
+    {
+      "opcode": 211,
+      "name": "StoriesGetStats"
+    },
+    {
+      "opcode": 212,
+      "name": "StoriesGetDetailedStats"
+    },
+    {
+      "opcode": 213,
+      "name": "StoriesReact"
+    },
+    {
+      "opcode": 214,
+      "name": "StoriesMark"
+    },
+    {
+      "opcode": 217,
+      "name": "StoriesEdit"
+    },
+    {
+      "opcode": 218,
+      "name": "StoriesDelete"
+    },
+    {
+      "opcode": 219,
+      "name": "StoriesHistoryGetByOwnerId"
+    },
+    {
+      "opcode": 220,
+      "name": "StoriesGetByStoryId"
+    },
+    {
+      "opcode": 256,
+      "name": "OrgInfo"
+    },
+    {
+      "opcode": 257,
+      "name": "SetChatReactions"
+    },
+    {
+      "opcode": 258,
+      "name": "GetChatReactions"
+    },
+    {
+      "opcode": 259,
+      "name": "Remove"
+    },
+    {
+      "opcode": 261,
+      "name": "ListModify"
+    },
+    {
+      "opcode": 272,
+      "name": "Get",
+      "handler": {
+        "class": "Core::Folders::FoldersInteractor",
+        "method": "doRequestFolders",
+        "source": "components/core/src/business/folders/folders_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 274,
+      "name": "Update",
+      "handler": {
+        "class": "Core::Folders::FoldersInteractor",
+        "method": "doUpdateFolder",
+        "source": "components/core/src/business/folders/folders_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 275,
+      "name": "Reorder",
+      "handler": {
+        "class": "Core::Folders::FoldersInteractor",
+        "method": "doReorderFolders",
+        "source": "components/core/src/business/folders/folders_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 276,
+      "name": "Delete",
+      "handler": {
+        "class": "Core::Folders::FoldersInteractor",
+        "method": "doDeleteFolder",
+        "source": "components/core/src/business/folders/folders_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 288,
+      "name": "EmptyParameters",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doCreateQr",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 289,
+      "name": "AuthCheck",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doAuthCheck",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 291,
+      "name": "AuthByTrack",
+      "handler": {
+        "class": "Core::Auth::OneMeAuthSession",
+        "method": "doAuthByTrack",
+        "source": "components/core/src/oneme_auth/oneme_auth_session.cpp"
+      }
+    },
+    {
+      "opcode": 294,
+      "name": "CheckCall"
+    },
+    {
+      "opcode": 300,
+      "name": "ChatSuggest",
+      "handler": {
+        "class": "Core::Suggest::Chat::Interactor",
+        "method": "doRequestChatSuggest",
+        "source": "components/core/src/business/suggest/common/interactor.cpp"
+      }
+    },
+    {
+      "opcode": 301,
+      "name": "AudioPlay",
+      "handler": {
+        "class": "Core::Attachment::AttachmentUrlInteractor",
+        "method": "doRequestAudioPlayUrl",
+        "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 302,
+      "name": "BannersGet",
+      "handler": {
+        "class": "Core::Banners::Interactor",
+        "method": "doBannerUpdate",
+        "source": "components/core/src/business/banners/banners_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 304,
+      "name": "SendVote"
+    },
+    {
+      "opcode": 305,
+      "name": "VotersListByAnswer"
+    },
+    {
+      "opcode": 306,
+      "name": "GetPollUpdates"
+    },
+    {
+      "opcode": 307,
+      "name": "EmptyParameters"
+    },
+    {
+      "opcode": 308,
+      "name": "EntityOrgInfo"
+    }
+  ],
+  "source_files": [
+    "components/core/src/api_types_converters/assets/animoji_converter.cpp",
+    "components/core/src/api_types_converters/assets/asset_update_converter.cpp",
+    "components/core/src/api_types_converters/chat/chat_member_converter.cpp",
+    "components/core/src/api_types_converters/delayed/delayed_message_converter.cpp",
+    "components/core/src/api_types_converters/folder/folder_converter.cpp",
+    "components/core/src/api_types_converters/folder/folder_widget_converter.cpp",
+    "components/core/src/api_types_converters/live_stream/live_stream_converter.cpp",
+    "components/core/src/api_types_converters/message/attachment_converter.cpp",
+    "components/core/src/api_types_converters/message/message_converter.cpp",
+    "components/core/src/api_types_converters/message/message_elements_converter.cpp",
+    "components/core/src/api_types_converters/message/outgoing_attachments_converter.cpp",
+    "components/core/src/api_types_converters/organization_converter.cpp",
+    "components/core/src/api_types_converters/recommendations_converter.cpp",
+    "components/core/src/api_types_converters/statistic/banner_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/chat_message_link_converter.cpp",
+    "components/core/src/api_types_converters/statistic/clickable_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/contact_rename_banner.cpp",
+    "components/core/src/api_types_converters/statistic/context_menu_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/informer_events_converter.cpp",
+    "components/core/src/api_types_converters/statistic/invite_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/nav_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/permission_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/registration_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/stickers_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/unknown_contact_interaction_converter.cpp",
+    "components/core/src/api_types_converters/statistic/unsafe_files_alert_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/unsafe_url_alert_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/webapp_actions_event_converter.cpp",
+    "components/core/src/api_types_converters/statistic/webapp_bridge_event_converter.cpp",
+    "components/core/src/api_types_converters/stories_converter.cpp",
+    "components/core/src/business/accounts/account_manager.cpp",
+    "components/core/src/business/animoji/animoji_assets_provider.cpp",
+    "components/core/src/business/animoji/animoji_provider.cpp",
+    "components/core/src/business/animoji/animoji_set_provider.cpp",
+    "components/core/src/business/app_state/app_state_provider.cpp",
+    "components/core/src/business/assets/api_sticker_set_sorter.cpp",
+    "components/core/src/business/assets/assets_interactor.cpp",
+    "components/core/src/business/attachment/attachment_url_interactor.cpp",
+    "components/core/src/business/attachment/attachment_url_updater.cpp",
+    "components/core/src/business/attachment_uploader/attachment_uploader.cpp",
+    "components/core/src/business/avatar/preset_avatar_interactor.cpp",
+    "components/core/src/business/banners/banners_interactor.cpp",
+    "components/core/src/business/bots/bots_interactor.cpp",
+    "components/core/src/business/buttons/buttons_interactor.cpp",
+    "components/core/src/business/calls/calls_history_interactor.cpp",
+    "components/core/src/business/calls/calls_interactor.cpp",
+    "components/core/src/business/channel_join_requests/channel_join_requests_provider.cpp",
+    "components/core/src/business/chat_actions/chat_pushes_subscription_confirmer.cpp",
+    "components/core/src/business/chat_actions/chat_pushes_subscription_interactor.cpp",
+    "components/core/src/business/chat_actions/chat_update_interactor.cpp",
+    "components/core/src/business/chat_actions/mark_readed_interactor.cpp",
+    "components/core/src/business/chat_actions/pin_message_interactor.cpp",
+    "components/core/src/business/chat_history/chat_history_interactor.cpp",
+    "components/core/src/business/chat_history/chat_history_provider.cpp",
+    "components/core/src/business/chat_info/chat_info_provider.cpp",
+    "components/core/src/business/chat_info/chat_info_subscriber.cpp",
+    "components/core/src/business/chat_list/chat_list_interactor.cpp",
+    "components/core/src/business/chat_list/chat_list_provider.cpp",
+    "components/core/src/business/chat_media/chat_media_interactor.cpp",
+    "components/core/src/business/chat_media/chat_media_item_converter.cpp",
+    "components/core/src/business/chat_media/transcription_interactor.cpp",
+    "components/core/src/business/chats/chat_avatar_setter.cpp",
+    "components/core/src/business/chats/chat_control_interactor.cpp",
+    "components/core/src/business/chats/chat_last_read_provider.cpp",
+    "components/core/src/business/chats/chat_members_interactor.cpp",
+    "components/core/src/business/comments/comments_provider.cpp",
+    "components/core/src/business/common_chat_list/common_chat_list_interactor.cpp",
+    "components/core/src/business/complaint/complaint_interactor.cpp",
+    "components/core/src/business/complaint/complaint_reasons_interactor.cpp",
+    "components/core/src/business/complaint/complaint_reasons_provider.cpp",
+    "components/core/src/business/config/config_interactor.cpp",
+    "components/core/src/business/config/mute_interval_watcher.cpp",
+    "components/core/src/business/contact_list/contacts_list_provider.cpp",
+    "components/core/src/business/contacts/blocked_contacts_interactor.cpp",
+    "components/core/src/business/contacts/contacts_interactor.cpp",
+    "components/core/src/business/contacts/contacts_photo_interactor.cpp",
+    "components/core/src/business/contacts/presence_interactor.cpp",
+    "components/core/src/business/delayed/delayed_messages_provider.cpp",
+    "components/core/src/business/drafts/message_draft_provider.cpp",
+    "components/core/src/business/event_processing/api_event_adapter.cpp",
+    "components/core/src/business/event_processing/event_processor.cpp",
+    "components/core/src/business/external_callback/external_callback_interactor.cpp",
+    "components/core/src/business/file_downloader/background_filesystem_worker.cpp",
+    "components/core/src/business/file_downloader/download_files_reader.cpp",
+    "components/core/src/business/file_downloader/file_downloader.cpp",
+    "components/core/src/business/file_downloader/utils.h",
+    "components/core/src/business/file_downloader/worker.cpp",
+    "components/core/src/business/file_downloader/worker_factory.cpp",
+    "components/core/src/business/folders/folders_interactor.cpp",
+    "components/core/src/business/folders/folders_storage_provider.cpp",
+    "components/core/src/business/folders_chats/folders_chats_provider.cpp",
+    "components/core/src/business/folders_counters/folders_counter_provider.cpp",
+    "components/core/src/business/gender/gender_reader.cpp",
+    "components/core/src/business/link_handling/chat_join_interactor.cpp",
+    "components/core/src/business/link_handling/link_info_interactor.cpp",
+    "components/core/src/business/link_handling/link_info_provider.cpp",
+    "components/core/src/business/live_streams/live_streams_interactor.cpp",
+    "components/core/src/business/lottie/lottie_downloader.cpp",
+    "components/core/src/business/message_sender/message_send_interactor.cpp",
+    "components/core/src/business/messages/message_modify_interactor.cpp",
+    "components/core/src/business/messages/message_requester.cpp",
+    "components/core/src/business/messages_search/messages_search_interactor.cpp",
+    "components/core/src/business/msg_stat/msg_stat_sender.cpp",
+    "components/core/src/business/packet_sender/tcp_packet_sender.cpp",
+    "components/core/src/business/pendings/attachment_pendings_provider.cpp",
+    "components/core/src/business/pendings/message_pending_interactor.cpp",
+    "components/core/src/business/pendings/message_pending_provider.cpp",
+    "components/core/src/business/pendings/message_pending_resend_scheduler.cpp",
+    "components/core/src/business/pendings/pending_message_splitter.cpp",
+    "components/core/src/business/pinned_messages/provider.cpp",
+    "components/core/src/business/polls/polling_interval_reader.cpp",
+    "components/core/src/business/polls/polls_provider.cpp",
+    "components/core/src/business/profile/profile_avatar_setter.cpp",
+    "components/core/src/business/profile/profile_interactor.cpp",
+    "components/core/src/business/providers/admins_permissions/admins_permissions_provider.cpp",
+    "components/core/src/business/providers/avatar/chat_avatar_provider.cpp",
+    "components/core/src/business/providers/avatar/contact_avatar_provider.cpp",
+    "components/core/src/business/providers/call_candidates/call_candidates_provider.cpp",
+    "components/core/src/business/providers/chat_notifications/chat_notifications_provider.cpp",
+    "components/core/src/business/providers/contact_country/contact_country_provider.cpp",
+    "components/core/src/business/providers/contact_description/contact_description_provider.cpp",
+    "components/core/src/business/providers/contact_dialog_started/contact_dialog_started_provider.cpp",
+    "components/core/src/business/providers/contact_flags/contact_flags_provider.cpp",
+    "components/core/src/business/providers/contact_menu_button/contact_menu_button_provider.cpp",
+    "components/core/src/business/providers/contact_organizations/contact_organizations_provider.cpp",
+    "components/core/src/business/providers/contact_registration_time/contact_registration_time_provider.cpp",
+    "components/core/src/business/providers/contact_status/contact_status_provider.cpp",
+    "components/core/src/business/providers/display_name/chat_display_name_provider.cpp",
+    "components/core/src/business/providers/display_name/contact_display_name_provider.cpp",
+    "components/core/src/business/providers/entity_organization/entity_organization_provider.cpp",
+    "components/core/src/business/providers/link/contact_link_provider.cpp",
+    "components/core/src/business/providers/message/message_provider.cpp",
+    "components/core/src/business/providers/participants/participants_provider.cpp",
+    "components/core/src/business/providers/phone_number/phone_number_provider.cpp",
+    "components/core/src/business/providers/presence/presence_provider.cpp",
+    "components/core/src/business/providers/reactions/reactions_provider.cpp",
+    "components/core/src/business/providers/search/section_searchers/interactors/chat_search_interactor.cpp",
+    "components/core/src/business/providers/search/section_searchers/interactors/contact_search_interactor.cpp",
+    "components/core/src/business/providers/search/section_searchers/interactors/public_search_interactor.cpp",
+    "components/core/src/business/providers/search/section_searchers/local_search_provider.cpp",
+    "components/core/src/business/providers/search/section_searchers/recent_local_search_provider.cpp",
+    "components/core/src/business/providers/single_chat/single_chat_provider.cpp",
+    "components/core/src/business/providers/typing/typing_provider.cpp",
+    "components/core/src/business/providers/web_app/contact_web_app_provider.cpp",
+    "components/core/src/business/reactions/chat/chat_reactions_assets_provider.cpp",
+    "components/core/src/business/reactions/chat/chat_reactions_interactor.cpp",
+    "components/core/src/business/reactions/reactions_assets_provider.cpp",
+    "components/core/src/business/reactions/reactions_interactor.cpp",
+    "components/core/src/business/retry_packet_sender/oneme_awaitable_retry_packet_sender.cpp",
+    "components/core/src/business/self_info/self_info_reader.cpp",
+    "components/core/src/business/session/account_session_controller.cpp",
+    "components/core/src/business/session/remote_sessions_interactor.cpp",
+    "components/core/src/business/statistic/events_sender.cpp",
+    "components/core/src/business/statistic/log_event_storage_converter.cpp",
+    "components/core/src/business/statistic/presence_statistic_provider.cpp",
+    "components/core/src/business/statistic/statistic_controller.cpp",
+    "components/core/src/business/stickers/sticker_set_provider.cpp",
+    "components/core/src/business/stickers/stickers_assets_provider.cpp",
+    "components/core/src/business/stickers/stickers_provider.cpp",
+    "components/core/src/business/stories/stories_interactor.cpp",
+    "components/core/src/business/stories/stories_provider.cpp",
+    "components/core/src/business/stories/stories_stats_provider.cpp",
+    "components/core/src/business/suggest/channel/recommendations_provider.cpp",
+    "components/core/src/business/suggest/chat/provider.cpp",
+    "components/core/src/business/suggest/common/impl/channel_provider.cpp",
+    "components/core/src/business/suggest/common/interactor.cpp",
+    "components/core/src/business/sync_parameters/sync_parameters_interactor.cpp",
+    "components/core/src/business/typing/typing_interactor.cpp",
+    "components/core/src/business/typing/typing_processor.cpp",
+    "components/core/src/business/user_appearance/user_appearance_interactor.cpp",
+    "components/core/src/business/user_settings/user_settings_provider.cpp",
+    "components/core/src/business/users_info/users_info_provider.cpp",
+    "components/core/src/business/users_info/users_info_requester.cpp",
+    "components/core/src/business/web_app/web_app_interactor.cpp",
+    "components/core/src/business/web_app/web_app_storage_interactor.cpp",
+    "components/core/src/oneme_auth/oneme_auth_session.cpp",
+    "components/core/src/oneme_auth/session_id_reader.cpp",
+    "oneme_components/components/core/file_loader/src/loader_impl.cpp",
+    "oneme_components/components/core/http_packet_sender/src/server_flood_protector_proxy.cpp",
+    "oneme_components/components/core/server_settings/src/server_settings_provider.cpp",
+    "oneme_components/shared/api/packets/src/base_packet.cpp",
+    "oneme_components/shared/api/packets/src/download_file.cpp",
+    "oneme_components/shared/api/packets/src/oneme_upload_file.cpp",
+    "oneme_components/shared/packets/src/http/i_packet.cpp",
+    "oneme_components/shared/packets/src/http/value_provider.cpp",
+    "oneme_components/utils/coroutine/src/logger_exception_handler.cpp",
+    "oneme_components/utils/serialization/common/include/serialization/common/serializers.h",
+    "oneme_components/utils/serialization/msgpack_serializer/src/msgpack_extension_serializers.cpp",
+    "oneme_components/utils/serialization/msgpack_serializer/src/serializable_class_serializer.cpp",
+    "oneme_components/utils/utilities/include/utilities/callback_guard.h",
+    "oneme_components/utils/utilities/include/utilities/functional_task.h",
+    "oneme_components/utils/utilities/include/utilities/observer_storage.h",
+    "oneme_components/utils/utilities/src/cancellation_token.cpp",
+    "oneme_components/utils/utilities/src/filesystem/filesystem_accessor.cpp",
+    "oneme_components/utils/utilities/src/filesystem/utils.cpp",
+    "oneme_components/utils/utilities/src/platform/platform_windows.cpp",
+    "oneme_components/utils/utilities/src/scheduler/scheduler.cpp",
+    "oneme_components/utils/utilities/src/thread_pool.cpp",
+    "oneme_components/utils/utilities/src/timers/scheduler_based_timer.cpp",
+    "shared/api/oneme/packets/include/api/oneme/packets/common_event.h",
+    "shared/api/oneme/packets/include/api/oneme/packets/common_packet.h",
+    "shared/api/oneme/packets/src/base_packet.cpp",
+    "shared/api/oneme/packets/src/events/notification_message_delayed.cpp",
+    "shared/api/oneme/types/src/attachment.cpp",
+    "shared/api/oneme/types/src/log_params.cpp",
+    "shared/api/oneme/types/src/outgoing_attachment.cpp",
+    "shared/api/oneme/types/src/polymorphic_impl.h",
+    "utils/ffmpeg_process/src/video_frame_reader.cpp",
+    "utils/media_utils/src/size_reader.cpp"
+  ],
+  "log_templates": [
+    "\tadded {} chats",
+    "\tnew statusFilter={}",
+    "\tnew typeFilter={}",
+    "\tremoved {} chats",
+    "!co_await postPacket",
+    ": response content error: ",
+    ": response json error: ",
+    ": server error: ",
+    "AAC codec selected in settings but response hasn't this value",
+    "Add contact failed!",
+    "Add contact name for {}: '{}'",
+    "Added to recent, total: {}",
+    "Admins do not exist for chatid {}",
+    "An attempt to request detailed statistics for a prohibited owner {}.",
+    "An attempt to request next page of detailed statistics for a prohibited owner {}.",
+    "An attempt to request statistics for a prohibited owner {}.",
+    "An attempt to reset detailed statistics for a prohibited owner {}.",
+    "Attachment data is null",
+    "Attachment id={} wasn't uploaded",
+    "Attachmet notification has no attachmentId",
+    "Audio message upload storage changed to: {}",
+    "Audio message with attachment id={} wasn't uploaded",
+    "Auth send error: {}",
+    "Auth: unknown token types",
+    "AuthByTrack send error({}): {}",
+    "AuthByTrack: no profile in auth response",
+    "AuthByTrack: unknown response types",
+    "AuthConfirm send error: {}",
+    "AuthConfirm: no profile in auth response",
+    "AuthConfirm: no profile in confirm response",
+    "AuthRequest send error({}): {}",
+    "Both chatId and contactId are invalid",
+    "Chat is empty",
+    "Chat list load failed: {}",
+    "Chat list save failed: {}",
+    "Chat not found: {}",
+    "Chat save failed: {}",
+    "CheckEmail send error({}): {}",
+    "ClickableLink story layer has no payload",
+    "Code: 0x{:02x}, Seq: {}",
+    "Code: 0x{:02x}, Seq: {}, Error: ({}: {}, {})",
+    "Code: 0x{:02x}, Seq: {}, Parameters: {}",
+    "Code: 0x{:02x}, Seq: {}, Response: {}",
+    "Config loaded from storage",
+    "Config saved to storage",
+    "Contact not found: {}",
+    "ContactInfo request failed!",
+    "Could not close sessions",
+    "Could not get blocked contacts list",
+    "Could not get chat members for chat {}, error: {}",
+    "Could not get chat reactions list",
+    "Could not get host name",
+    "Could not get sessions list",
+    "Could not parse response for packet with code 0x{:02x}, error: {}, succesfully parsed part: {}",
+    "Could not read session id from storage, statistic sending disabled, exception - {}",
+    "Could not reset chat reactions list",
+    "Could not search chat members for chat {} (query '{}'), error: {}",
+    "Could not set chat reactions list",
+    "Couldn't mark the story {} {}",
+    "Create filtered folder with name.size={}, count included chats={}, typeFilters={}, statusFilters={}, options={}",
+    "DEBUG fetchMessages chatId={}",
+    "DEBUG pin chatId={}, messageId={}",
+    "DEBUG unpin chatId={}, messageId={}",
+    "DEBUG unpinAll chatId={}",
+    "Delete folder with id={}",
+    "Do not request complaints reasons from backend, feature disabled",
+    "Download failed",
+    "DownloadFile packet redirected to:",
+    "Downloaded file has wrong size:  expected size = {}, downloaded size = {} (file id: {})",
+    "Downloaded file has wrong size: expected size = {}, downloaded size = {} (url: {}, path: {})",
+    "Downloading paused",
+    "Empty callback",
+    "Empty callback at requestSearch",
+    "Error code cannot be properly converted to int: {}",
+    "Escaped string too small",
+    "Failed save message id: {}",
+    "Failed to add to recent: {}",
+    "Failed to apply experiments changes: {}",
+    "Failed to apply recent search setting: {}",
+    "Failed to apply server settings changes: {}",
+    "Failed to check existance {}, with message {}",
+    "Failed to cleanup history: {}",
+    "Failed to clear chat history: {}",
+    "Failed to clear recent: {}",
+    "Failed to complain: {}",
+    "Failed to convert LogEvent to storage event: {}",
+    "Failed to convert storage event to LogEvent: {}",
+    "Failed to create EventParams for type='{}', event='{}'",
+    "Failed to create new folder: error code={}, error={}",
+    "Failed to create worker for id: {}",
+    "Failed to delete folder: id={} sync={}, error code={}, error={}",
+    "Failed to delete message({}): {}",
+    "Failed to edit message: {}",
+    "Failed to filter by recent: {}",
+    "Failed to filter recent: {}",
+    "Failed to get bot info: {}",
+    "Failed to get chat bot commands: {}",
+    "Failed to get phone hash",
+    "Failed to get web app url",
+    "Failed to init session, error: {}",
+    "Failed to load all chats: {}",
+    "Failed to load chat history: {}",
+    "Failed to load chat: {}",
+    "Failed to load chats: {}",
+    "Failed to load config: {}",
+    "Failed to load folders: {}",
+    "Failed to load message; id: {}",
+    "Failed to load next stories history page for owner {}",
+    "Failed to load parameters: {}",
+    "Failed to load recent search from storage: {}",
+    "Failed to load stories history for owner {}",
+    "Failed to login(errorCode:{}), session aborted",
+    "Failed to mark chat {} as readed up to message {}, error: {}",
+    "Failed to ping, error: {}",
+    "Failed to ping, state: {} error: {}",
+    "Failed to reactions: {}",
+    "Failed to read live streams for chat {}, error: {}",
+    "Failed to remove active task for id:{}",
+    "Failed to remove from recent: {}",
+    "Failed to remove messages from storage: {}",
+    "Failed to remove photo: {}, {}",
+    "Failed to reorder folders: sync={}, error code={}, error={}",
+    "Failed to request banners suggest error code={}, error={}",
+    "Failed to request chat media: {}",
+    "Failed to request chat suggest error code={}, error={}",
+    "Failed to request chats and contacts: {}",
+    "Failed to request common chats: {}, {}",
+    "Failed to request contact presence: {}, {}",
+    "Failed to request folders: sync={}, error code={}, error={}",
+    "Failed to request info for download file: {}",
+    "Failed to request media ({}, {}) transcription: {}",
+    "Failed to request messages by time: {}",
+    "Failed to request messages: {}",
+    "Failed to request photos: {}, {}",
+    "Failed to request presets avatar: {}, {}",
+    "Failed to request profile delete state: {}, {}",
+    "Failed to request url for audio attachment: {}",
+    "Failed to request url for upload audio files: {}",
+    "Failed to request url for upload files: {}",
+    "Failed to request url for upload photo files: {}",
+    "Failed to request url for upload video files: {}",
+    "Failed to request url for upload video message files: {}",
+    "Failed to request url for video attachment: {}",
+    "Failed to request {} upload urls: offset {}, requested {}, got 0",
+    "Failed to run session: {}",
+    "Failed to save chat: {}",
+    "Failed to save config: {}",
+    "Failed to save folders: {}",
+    "Failed to save messages: {}",
+    "Failed to save parameters: {}",
+    "Failed to save reactions: {}",
+    "Failed to save request chat: {}",
+    "Failed to search '{}': {}",
+    "Failed to send callback: {}",
+    "Failed to send message: {}",
+    "Failed to send typing: {}",
+    "Failed to set avatar, error={}",
+    "Failed to set external callback",
+    "Failed to suspend bot: {}",
+    "Failed to update chat description: {}",
+    "Failed to update chat history for: {}",
+    "Failed to update chat settings, error: {}, message {}",
+    "Failed to update message: {}",
+    "Failed to update messages: {}",
+    "Failed to update profile: {}, {}",
+    "Failed to update read mark unread: {}",
+    "Failed to update stats for chat {}: {}, {}",
+    "Failed to update user settings",
+    "Failed to updateChatHistory for chat {}: {}",
+    "Failed to upload avatar ",
+    "Failed to upload avatar: {}",
+    "Failed to {} profile: {}, {}",
+    "Finish incomingCall",
+    "Flush failed: {}",
+    "Folders loaded from storage, sync={}",
+    "Folders saved to storage, sync={}",
+    "Incoming call accepted on the other device",
+    "IncomingCall",
+    "Incorrect event type: {}",
+    "Incorrect type of session id in settings storage",
+    "Incorrect type of setting value",
+    "Invalid arguments: required appId or url, not both. Fallback use appId.",
+    "Invalid arguments: required appId or url.",
+    "Invalid entity-org-action-ttl setting type",
+    "Invalid file upload batch: {} files",
+    "Invalid folder id `{}` in order ids. Request folders with sync=0",
+    "Invalid folders order size. Request folders with sync=0",
+    "Invalid media upload batch: {} items",
+    "Invalid organization link: required appId or url.",
+    "Invalid photo upload batch: {} photos",
+    "Invalid photoId. In doc is required.",
+    "Invalid response data size",
+    "Invalid response. Error handler required.",
+    "Load from storage",
+    "Load messages: empty; chatId: {}; msgId: {}; time: {}; forward: {}; backward: {}",
+    "Load messages: local size: {}; messages: [{},{}]; chatId: {}; msgId: {}; time {}; forward: {}; backward: {}",
+    "Load reactions failed: {}",
+    "Load {} name: {}",
+    "Loaded recent search from storage, total: {}",
+    "Logic error: a message cannot have more than one audio attachment. Ignoring",
+    "Logic error: a message cannot have more than one video message attachment. Ignoring",
+    "LoginRestorePassword send error({}): {}",
+    "LoginRestorePassword: no profile in response",
+    "MP3 codec selected in settings but response hasn't this value",
+    "Map рeader is null",
+    "Mark the story {} for owner {} beyond the known amount",
+    "MaxMediaUrlsPerRequest changed: {}",
+    "Media (chatId {} messageId {} mediaId {}) transcription failed: {}",
+    "Media attachment is not of the right type or is missing",
+    "Member value is null, use default value",
+    "Message search failed",
+    "Message was not sent: attachment is processing on server {}",
+    "Msgpack serializer",
+    "New folder with id={}",
+    "New session has already been starting",
+    "No StoriesPreview for {} was found when creating a list of stories.",
+    "No action to update calls history",
+    "No api value for Dialog, falling back to ",
+    "No data to update calls history",
+    "No default server setting {}",
+    "No pending task in the list for id: {}",
+    "No such owner {} has been found.",
+    "No uint64_t value for key: {}",
+    "Not expected Seq, expected: {}, actual: {}",
+    "Not found folder with id={} for update",
+    "Not found mute state for chat {}",
+    "Notify remove items",
+    "Opus codec selected in settings but response hasn't this value",
+    "Packet with seq: {} is canceled at the moment of response",
+    "Parse empty sequence",
+    "Parsing error, member: {}, error: {}",
+    "Partial {} upload urls: offset {}, requested {}, got {}",
+    "Participants do not exist for chatid {}",
+    "PasswordValidate send error: {}",
+    "PasswordValidate: no profile in auth response",
+    "Pending message '{}' cannot be sent: maximum retries exceeded",
+    "Pending message '{}' will be sent in {} sec",
+    "Preview and Peer are in an inconsistent state. Explicitly requesting the Preview update.",
+    "Recent search history cleared",
+    "Registration event type converter: empty value",
+    "Remove history ids",
+    "Remove media attachment id={} from message id={}",
+    "Removed from recent, remaining: {}",
+    "Reorder folders with new order.size={}",
+    "Request contact name for {}",
+    "Request folders sync={}",
+    "Requested {} chats from {}; Loaded: {}",
+    "Restart session on login network error",
+    "Retry packet",
+    "Retry packet with seq: {}",
+    "SelfId not found: {}",
+    "Serialize null data",
+    "Server error: {}",
+    "Server sync {} < {} local. Skip updates",
+    "Set folders [{}], removed [{}]",
+    "Settings not initialized!",
+    "Start UpdatePolling",
+    "Statistic event not sent, empty session id",
+    "Statistic event not sent, event is null",
+    "Statistic type converter: empty source id",
+    "Stop UpdatePolling",
+    "Stop ViewportPolling",
+    "Success",
+    "Successful ping!",
+    "Successful ping! State: {}",
+    "Sync not match, make full update",
+    "Temp file: {} exists, with size: {}",
+    "The order has not changed",
+    "The presence was not found for {} in chat {}",
+    "The reaction was not applied {} {}",
+    "The response hasn't any supported value",
+    "This owner's {} story {} was not found.",
+    "This peer owner {} has not been found.",
+    "This preview owner {} has not been found.",
+    "Too many ({}) messages after save for message. Use front",
+    "Too many ({}) messages in response for message",
+    "Try to read user setting {} before it was set",
+    "Try to remove calls history items",
+    "Try to request calls history",
+    "Try to update calls history",
+    "Trying to set empty callback",
+    "Unexpected chat value type {}, falling back to {}",
+    "Unexpected media type: {}",
+    "Unknown link type '{}'",
+    "Unknown media attachment type",
+    "Unknown operation({})",
+    "Unknown statistic event params: type='{}' event='{}'",
+    "UnknownCallerAlertStatisticEventConverter",
+    "Unsupported attachment type '{}'",
+    "Unsupported story layer type = {}",
+    "Update folder with id={}",
+    "VerifyEmail send error({}): {}",
+    "Video message upload storage changed to: {}",
+    "Video message with attachment id={} wasn't uploaded",
+    "VideoChatCreateJoinLink request failed!",
+    "VideoChatHistory request failed!",
+    "VideoChatJoin request failed!",
+    "VideoChatStartActive request failed!",
+    "Wrong readmark",
+    "action is empty",
+    "addToBlackList: invalid sender id type",
+    "animoji requester is null",
+    "attach upload error: {}",
+    "attachment is null",
+    "authCheck send error({}): {}",
+    "authCheck: response is empty",
+    "authorizer is null",
+    "av_read_frame returned EOF after seek",
+    "avatar does doesn't exist for contactid {}",
+    "avcodec_send_packet error: {}",
+    "breakNotResendablePackets",
+    "chatId: {}, from: {}, forwardTime: {}, count {}",
+    "commentReactionsRequester is null",
+    "contact link doesn't exist for contactId {}",
+    "contact phone doesn't exist for contactId {}",
+    "createQr send error({}): {}",
+    "createQr: Response is invalid",
+    "display name doesn't exist for contactId {}",
+    "display name not exist for chatid {}",
+    "doChangeConfig",
+    "doRequestMessages: chatId: {}, from: {}, backward: {}, forward {}",
+    "emoji is empty",
+    "error: {}",
+    "error: {}, code: {}",
+    "failed to allocate destination frame: {}x{}",
+    "failed to clear chat history",
+    "failed to create software scaling context",
+    "failed to get last messageId",
+    "failed to hide",
+    "failed to leave chat",
+    "failed to load message; id: {}",
+    "failed to remove chat",
+    "failed to request sticker sets",
+    "failed to send assets ('{}') update packet",
+    "filter for folder '{}' changed: type={}, status={}",
+    "folder {} favorites changed: [{}]",
+    "folder {} includes changed",
+    "folder {} includes changed added: [{}], removed: [{}]",
+    "folder {} organizations changed: [{}]",
+    "history attach is null",
+    "historyInteractor is null",
+    "invalid decoded frame: {}x{}, format {}",
+    "invalid draft target on save",
+    "invalid link type: index: ",
+    "invalid update type: {}",
+    "lastRead does not exist for chatId {}",
+    "loadFromStorage failed with {}",
+    "message is missing",
+    "network connection established!",
+    "new folder with id={} title={}",
+    "new sets always requests",
+    "new sets request marker is empty",
+    "no last message for chat",
+    "not found folder with id={}",
+    "onAttachNotification error: {}",
+    "onAttachNotification: empty attachment ids",
+    "onChat: chat {} added to chat_list",
+    "onChat: chat {} removed from chat_list",
+    "onFolderUpdates sync={}, folders.size={}",
+    "onFoldersReorder sync={}, order.size={}",
+    "onMessagesDeleteRange: not implemented yet for comments",
+    "packet with seq {} lost",
+    "polling timer event",
+    "presence does not exist for contactid {}",
+    "processCacheChats: chats {} added to chat_list",
+    "processCacheChats: postponed server chats {} added to chat_list",
+    "processServerChats's been called before initialized; saving to process later",
+    "processServerChats: chats {} added to chat_list",
+    "received: chatId: {}, messages: [{},{}], from: {}; backward: {}, forward {}",
+    "received: chatId: {}, messages: empty, from: {}; backward: {}, forward {}",
+    "remove folder with id={}",
+    "removeAllUserComments: invalid sender id type",
+    "removeFromBlackList: invalid sender id type",
+    "requestChatSuggest {}",
+    "requestContacts: callback is empty!",
+    "requestContacts: userIds is empty!",
+    "requester is null",
+    "resendPacketsOnSessionEstablished",
+    "restart session disabled!",
+    "restart session!",
+    "run session!",
+    "setCallState: {}",
+    "setState: {}",
+    "sets update always requests",
+    "some error !",
+    "start polling",
+    "sticker requester is null",
+    "stickerSet requester is null",
+    "stickerSets and stickerSetIds has different size",
+    "stop polling",
+    "stop session!",
+    "stored contacts is empty",
+    "target chatId and userId is invalid",
+    "target message not found in loaded messages; perform network request",
+    "tcp connection state change called twice with state:",
+    "try to clear calls history packet failed with {}",
+    "try to request calls history packet failed with {}",
+    "tryGetFavoriteStickerSetUpdate error: {}",
+    "unknown attach type: {}",
+    "unknown banner show type: {}",
+    "unknown banner size: {}",
+    "unknown banner type: {}",
+    "unknown click type: {}",
+    "unknown element type: {}",
+    "unknown entry point type: {}",
+    "unknown error: {}",
+    "unknown event type: ",
+    "unknown event type: {}",
+    "unknown forward content type",
+    "unknown link type: {}",
+    "unknown pending id after await: {}",
+    "unknown pending id before await: {}",
+    "unknown pending id: {}",
+    "unknown permission status: ",
+    "unknown permission type: ",
+    "unknown screen type: ",
+    "unknown update type: {}",
+    "unsupported poll version = '{}'",
+    "update requester is null",
+    "updateChats: chats {} update chat_list",
+    "upload error code={}: '{}'",
+    "upload error: File too large",
+    "upload error: Packet send failed",
+    "upload error: {}",
+    "upload file url is empty",
+    "upload media url is empty",
+    "upload photo tokens is empty",
+    "upload photo url is empty",
+    "url:(",
+    "userIds is empty()",
+    "waiting for network connection!",
+    "{} error: {}",
+    "{}, use fallback interval={} msec",
+    "~ThreadPool: {}"
+  ]
+}
