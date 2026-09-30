@@ -29,3 +29,7 @@ __pycache__/
 
 # Local scratchpad & notes
 .scratch/*
+
+# Updater local state and temporary downloads
+scripts/updater/state.json
+*.part
