@@ -15,4 +15,6 @@ anyhow = "1.0"
 memchr = "2.7"
 ureq = "3.4.2"
 roxmltree = "0.21.1"
+msi = "0.10.0"
+cab = "0.6.0"
 
