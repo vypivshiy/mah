@@ -336,6 +336,21 @@ fn test_cli_update_check_exit_codes_and_json() {
     assert_eq!(parsed["current_version"], "0.0.0");
     assert_eq!(parsed["remote_version"], "26.34.0");
 
+    // 2b. With --json output without requiring --check
+    let out2b = Command::new(bin)
+        .args(["update", "--json", "--appcast-url", &appcast_url])
+        .current_dir(temp.path())
+        .output()
+        .unwrap();
+
+    assert_eq!(out2b.status.code(), Some(10));
+    let stdout2b = String::from_utf8_lossy(&out2b.stdout);
+    let parsed2b: serde_json::Value = serde_json::from_str(stdout2b.trim()).expect("valid JSON stdout");
+    assert_eq!(parsed2b["update_available"], true);
+    assert_eq!(parsed2b["current_version"], "0.0.0");
+    assert_eq!(parsed2b["remote_version"], "26.34.0");
+    assert!(parsed2b["url"].as_str().unwrap().contains("MAX.msi"));
+
     // 3. With matching local metadata.json -> Up-to-date, exit code 0
     let meta_json = r#"{"meta":{"app_version":"26.34.0","build_number":100}}"#;
     fs::write(temp.path().join("metadata.json"), meta_json).unwrap();

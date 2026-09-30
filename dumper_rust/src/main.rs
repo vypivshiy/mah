@@ -104,8 +104,7 @@ fn run_dump(args: DumpArgs) -> Result<()> {
     let input_path = match args.target {
         Some(ref path) => {
             if !path.exists() {
-                eprintln!("Error: Target binary not found: {:?}", path);
-                std::process::exit(1);
+                anyhow::bail!("Target binary not found: {:?}", path);
             }
             path.clone()
         }
@@ -114,8 +113,7 @@ fn run_dump(args: DumpArgs) -> Result<()> {
             if default_path.exists() {
                 default_path
             } else {
-                eprintln!("Error: 'CM_FP_Unspecified.core.dll' not found in current directory. Run 'dumper_rust unpack' first or specify target: 'dumper_rust dump <path.dll>'");
-                std::process::exit(1);
+                anyhow::bail!("'CM_FP_Unspecified.core.dll' not found in current directory. Run 'dumper_rust unpack' first or specify target: 'dumper_rust dump <path.dll>'");
             }
         }
     };
@@ -262,7 +260,7 @@ fn run_dump(args: DumpArgs) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
+fn main() {
     let cli = Cli::parse();
 
     match cli.command {
@@ -271,19 +269,23 @@ fn main() -> Result<()> {
             std::process::exit(code);
         }
         Some(Commands::Unpack(unpack_args)) => {
-            match dumper_rust::unpacker::run_unpack(&unpack_args) {
-                Ok(_) => Ok(()),
-                Err(err) => {
-                    eprintln!("{}", err);
-                    std::process::exit(err.exit_code());
-                }
+            if let Err(err) = dumper_rust::unpacker::run_unpack(&unpack_args) {
+                eprintln!("Error: {err}");
+                std::process::exit(1);
             }
         }
-        Some(Commands::Dump(dump_args)) => run_dump(dump_args),
+        Some(Commands::Dump(dump_args)) => {
+            if let Err(err) = run_dump(dump_args) {
+                eprintln!("Error: {err:#}");
+                std::process::exit(1);
+            }
+        }
         None => {
-            Cli::command().print_help()?;
+            if let Err(err) = Cli::command().print_help() {
+                eprintln!("Error: {err}");
+                std::process::exit(1);
+            }
             println!();
-            Ok(())
         }
     }
 }

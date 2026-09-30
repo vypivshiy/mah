@@ -197,14 +197,13 @@ fn test_synthetic_msi_default_extraction() {
 
     let res = unpack(&args).expect("unpack should succeed");
     assert_eq!(res.cabinet_name, "media1.cab");
-    assert_eq!(res.extracted.len(), 3, "Only the 3 target DLLs must be extracted by default");
+    assert_eq!(res.extracted.len(), 2, "Only the 2 target DLLs must be extracted by default");
 
     let mut names: Vec<String> = res.extracted.iter().map(|f| f.name.clone()).collect();
     names.sort();
     assert_eq!(
         names,
         vec![
-            "CM_FP_Messenger.max_service.config.dll".to_string(),
             "CM_FP_Unspecified.config.dll".to_string(),
             "CM_FP_Unspecified.core.dll".to_string(),
         ]
@@ -217,11 +216,8 @@ fn test_synthetic_msi_default_extraction() {
     let config_content = fs::read(out_dir.join("CM_FP_Unspecified.config.dll")).unwrap();
     assert_eq!(config_content, b"MZ config dll payload");
 
-    let service_config_content =
-        fs::read(out_dir.join("CM_FP_Messenger.max_service.config.dll")).unwrap();
-    assert_eq!(service_config_content, b"MZ service config payload");
-
-    // Verify non-matching files were NOT extracted
+    // Verify non-matching files and extra config DLLs were NOT extracted
+    assert!(!out_dir.join("CM_FP_Messenger.max_service.config.dll").exists());
     assert!(!out_dir.join("CM_FP_Messenger.max.exe").exists());
     assert!(!out_dir.join("assets/icon.png").exists());
     assert!(!out_dir.join("CM_FP_Unspecified.api_ms_win_core_file.dll").exists());
@@ -509,8 +505,8 @@ fn test_real_max_msi_if_present() {
     assert_eq!(res.cabinet_name, "media1.cab");
     assert_eq!(
         res.extracted.len(),
-        3,
-        "Expected 3 target DLLs (core.dll, 2 config.dlls)"
+        2,
+        "Expected 2 target DLLs (core.dll, config.dll)"
     );
 
     let core_dll = out_dir.join("CM_FP_Unspecified.core.dll");
@@ -519,7 +515,7 @@ fn test_real_max_msi_if_present() {
 
     assert!(core_dll.is_file(), "core.dll must exist");
     assert!(config_dll.is_file(), "config.dll must exist");
-    assert!(service_config_dll.is_file(), "service config.dll must exist");
+    assert!(!service_config_dll.exists(), "service config.dll must not be extracted by default");
 
     let core_meta = fs::metadata(&core_dll).unwrap();
     assert!(
@@ -537,5 +533,5 @@ fn test_real_max_msi_if_present() {
 
     // Verify overwrite works seamlessly on real files
     let res_overwrite = unpack(&args).expect("unpack overwrite must succeed");
-    assert_eq!(res_overwrite.extracted.len(), 3);
+    assert_eq!(res_overwrite.extracted.len(), 2);
 }

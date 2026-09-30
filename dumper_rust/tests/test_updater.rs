@@ -1,5 +1,5 @@
 use dumper_rust::updater::{
-    self, exit_codes, parse_appcast_xml, resolve_destination, resolve_local_version, AppVersion,
+    self, exit_codes, parse_appcast_xml, resolve_destination, resolve_local_version, FeedVersion,
     UpdateArgs, UpdateCheckResult,
 };
 use std::collections::HashMap;
@@ -20,6 +20,7 @@ enum RouteHandler {
     Xml { status: u16, content: String },
     Bytes { content: Vec<u8>, support_range: bool },
     TruncatedBytes { declared_len: usize, content: Vec<u8> },
+    Raw { headers: String, body: Vec<u8> },
     Error { status: u16, message: String },
 }
 
@@ -95,6 +96,16 @@ impl MockServer {
             RouteHandler::TruncatedBytes {
                 declared_len,
                 content,
+            },
+        );
+    }
+
+    fn register_raw(&self, path: &str, headers: &str, body: Vec<u8>) {
+        self.routes.lock().unwrap().insert(
+            path.to_string(),
+            RouteHandler::Raw {
+                headers: headers.to_string(),
+                body,
             },
         );
     }
@@ -243,6 +254,11 @@ fn handle_connection(mut stream: TcpStream, routes: Arc<Mutex<HashMap<String, Ro
             let _ = stream.write_all(&content);
             let _ = stream.flush();
         }
+        Some(RouteHandler::Raw { headers, body }) => {
+            let _ = stream.write_all(headers.as_bytes());
+            let _ = stream.write_all(&body);
+            let _ = stream.flush();
+        }
         Some(RouteHandler::Error { status, message }) => {
             let body = message.as_bytes();
             let response = format!(
@@ -345,28 +361,28 @@ fn make_sparkle_feed(
 }
 
 // ---------------------------------------------------------------------------
-// Unit Tests: AppVersion
+// Unit Tests: FeedVersion
 // ---------------------------------------------------------------------------
 
 #[test]
 fn test_version_parsing_and_normalization() {
-    let v1 = AppVersion::parse("26.33.0");
+    let v1 = FeedVersion::parse("26.33.0");
     assert_eq!(v1.parts, vec![26, 33, 0]);
     assert_eq!(v1.to_string(), "26.33.0");
 
-    let v2 = AppVersion::parse("26.33.0.13970");
-    assert_eq!(v2.parts, vec![26, 33, 0, 13970]);
+    let v2 = FeedVersion::parse("26.33.0.13970");
+    assert_eq!(v2.parts, vec![26, 33, 0]);
 
-    let v3 = AppVersion::parse("26.33");
+    let v3 = FeedVersion::parse("26.33");
     assert_eq!(v3.parts, vec![26, 33, 0]);
 
-    let v4 = AppVersion::parse("26.33.0.0");
+    let v4 = FeedVersion::parse("26.33.0.0");
     assert_eq!(v4.parts, vec![26, 33, 0]);
 
-    let v5 = AppVersion::parse("v26.34.0");
+    let v5 = FeedVersion::parse("v26.34.0");
     assert_eq!(v5.parts, vec![26, 34, 0]);
 
-    let v6 = AppVersion::parse("");
+    let v6 = FeedVersion::parse("");
     assert_eq!(v6.parts, vec![0, 0, 0]);
     assert_eq!(v6.to_string(), "0.0.0");
 }
@@ -374,17 +390,21 @@ fn test_version_parsing_and_normalization() {
 #[test]
 fn test_version_comparisons() {
     assert_eq!(
-        AppVersion::parse("26.33.0.0"),
-        AppVersion::parse("26.33.0")
+        FeedVersion::parse("26.33.0.0"),
+        FeedVersion::parse("26.33.0")
     );
     assert_eq!(
-        AppVersion::parse("26.33.0"),
-        AppVersion::parse("26.33")
+        FeedVersion::parse("26.33.0"),
+        FeedVersion::parse("26.33")
     );
-    assert!(AppVersion::parse("26.34.0") > AppVersion::parse("26.33.0"));
-    assert!(AppVersion::parse("26.33.0.13970") > AppVersion::parse("26.33.0"));
-    assert!(AppVersion::parse("26.33.0.13970") < AppVersion::parse("26.33.1"));
-    assert!(AppVersion::parse("26.33.0") > AppVersion::parse("0.0.0"));
+    assert_eq!(
+        FeedVersion::parse("26.33.0.13970"),
+        FeedVersion::parse("26.33.0")
+    );
+    assert!(FeedVersion::parse("26.34.0") > FeedVersion::parse("26.33.0"));
+    assert!(FeedVersion::parse("26.34.0") > FeedVersion::parse("26.33.9"));
+    assert!(FeedVersion::parse("26.33.1") > FeedVersion::parse("26.33.0.13970"));
+    assert!(FeedVersion::parse("26.33.0") > FeedVersion::parse("0.0.0"));
 }
 
 // ---------------------------------------------------------------------------
@@ -509,14 +529,14 @@ fn test_version_cascade() {
     .unwrap();
     assert_eq!(
         resolve_local_version(Some(&meta_file)),
-        AppVersion::parse("26.33.0")
+        FeedVersion::parse("26.33.0")
     );
 
     // 2. Non-existent file defaults to 0.0.0
     let missing_file = temp.path().join("missing.json");
     assert_eq!(
         resolve_local_version(Some(&missing_file)),
-        AppVersion::parse("0.0.0")
+        FeedVersion::parse("0.0.0")
     );
 
     // 3. Malformed JSON defaults to 0.0.0
@@ -524,7 +544,7 @@ fn test_version_cascade() {
     fs::write(&malformed_file, "not-json").unwrap();
     assert_eq!(
         resolve_local_version(Some(&malformed_file)),
-        AppVersion::parse("0.0.0")
+        FeedVersion::parse("0.0.0")
     );
 
     // 4. Missing meta.app_version defaults to 0.0.0
@@ -532,7 +552,7 @@ fn test_version_cascade() {
     fs::write(&no_meta_ver, r#"{"meta": {}}"#).unwrap();
     assert_eq!(
         resolve_local_version(Some(&no_meta_ver)),
-        AppVersion::parse("0.0.0")
+        FeedVersion::parse("0.0.0")
     );
 }
 
@@ -669,10 +689,27 @@ fn test_check_mode_json_output() {
 }
 
 #[test]
-fn test_json_flag_without_check_returns_exit_code_2() {
+fn test_json_flag_without_check_outputs_json() {
+    let server = MockServer::new();
+    let feed_xml = make_sparkle_feed(
+        "26.34.0",
+        &format!("{}/MAX.msi", server.base_url),
+        Some("ed_val"),
+        Some("dsa_val"),
+        Some("/qb!"),
+        true,
+    );
+    server.register_xml("/update.xml", &feed_xml);
+
+    let temp = TestDir::new("check_json_no_check_flag");
+    let meta_file = temp.path().join("metadata.json");
+    fs::write(&meta_file, r#"{"meta": {"app_version": "26.33.0"}}"#).unwrap();
+
     let args = UpdateArgs {
         check: false,
         json: true,
+        appcast_url: Some(format!("{}/update.xml", server.base_url)),
+        metadata_path: Some(meta_file),
         ..Default::default()
     };
 
@@ -680,9 +717,13 @@ fn test_json_flag_without_check_returns_exit_code_2() {
     let mut stderr = Vec::new();
     let code = updater::run_with_output(&args, &mut stdout, &mut stderr);
 
-    assert_eq!(code, exit_codes::CLI_ERROR);
-    let err_out = String::from_utf8(stderr).unwrap();
-    assert!(err_out.contains("--json requires --check"));
+    assert_eq!(code, exit_codes::UPDATE_AVAILABLE);
+    let out = String::from_utf8(stdout).unwrap();
+    let parsed: UpdateCheckResult = serde_json::from_str(out.trim()).expect("deserialize json");
+    assert!(parsed.update_available);
+    assert_eq!(parsed.current_version, "26.33.0");
+    assert_eq!(parsed.remote_version, "26.34.0");
+    assert_eq!(parsed.url, format!("{}/MAX.msi", server.base_url));
 }
 
 // ---------------------------------------------------------------------------
@@ -908,6 +949,56 @@ fn test_download_fails_on_truncated_connection() {
         err_out.contains("Connection aborted prematurely")
             || err_out.contains("Read error")
             || err_out.to_lowercase().contains("error"),
+        "actual error: {err_out}"
+    );
+}
+
+#[test]
+fn test_download_fails_on_content_range_total_mismatch() {
+    let server = MockServer::new();
+    let body = vec![b'A'; 200];
+    let headers = format!(
+        "HTTP/1.1 206 Partial Content\r\n\
+         Content-Type: application/octet-stream\r\n\
+         Content-Range: bytes 0-199/500\r\n\
+         Content-Length: 200\r\n\
+         Connection: close\r\n\r\n"
+    );
+    server.register_raw("/MAX.msi", &headers, body);
+
+    let feed_xml = make_sparkle_feed(
+        "26.34.0",
+        &format!("{}/MAX.msi", server.base_url),
+        None,
+        None,
+        None,
+        false,
+    );
+    server.register_xml("/update.xml", &feed_xml);
+
+    let temp = TestDir::new("dl_range_mismatch");
+    let dest_file = temp.path().join("mismatch.msi");
+    let part_file = temp.path().join("mismatch.msi.part");
+    let meta_file = temp.path().join("metadata.json");
+    fs::write(&meta_file, r#"{"meta": {"app_version": "26.33.0"}}"#).unwrap();
+
+    let args = UpdateArgs {
+        output: Some(dest_file.clone()),
+        appcast_url: Some(format!("{}/update.xml", server.base_url)),
+        metadata_path: Some(meta_file),
+        ..Default::default()
+    };
+
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code = updater::run_with_output(&args, &mut stdout, &mut stderr);
+
+    assert_eq!(code, exit_codes::ERROR);
+    assert!(!dest_file.exists());
+    assert!(part_file.is_file());
+    let err_out = String::from_utf8(stderr).unwrap();
+    assert!(
+        err_out.contains("Downloaded file size mismatch") || err_out.contains("mismatch"),
         "actual error: {err_out}"
     );
 }

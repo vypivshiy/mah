@@ -21,5 +21,5 @@ pub use unpacker::{
     UnpackError, UnpackResult,
 };
 pub use updater::{
-    AppVersion, ReleaseInfo, UpdateArgs, UpdateCheckResult, UpdaterError,
+    FeedVersion, ReleaseInfo, UpdateArgs, UpdateCheckResult, UpdaterError,
 };

@@ -13,7 +13,7 @@ pub const BUFFER_SIZE: usize = 64 * 1024;
 pub mod exit_codes {
     pub const SUCCESS: i32 = 0;
     pub const ERROR: i32 = 1;
-    pub const CLI_ERROR: i32 = 2;
+    pub const CLI_ERROR: i32 = 1;
     pub const UPDATE_AVAILABLE: i32 = 10;
 }
 
@@ -29,10 +29,7 @@ pub enum UpdaterError {
 
 impl UpdaterError {
     pub fn exit_code(&self) -> i32 {
-        match self {
-            UpdaterError::Cli(_) => exit_codes::CLI_ERROR,
-            _ => exit_codes::ERROR,
-        }
+        exit_codes::ERROR
     }
 }
 
@@ -57,14 +54,14 @@ impl From<io::Error> for UpdaterError {
     }
 }
 
-/// Comparable application version matching the Python updater's 4-component Windows semantics.
+/// Comparable semantic application version adhering to three-tier (major, minor, patch) semantics.
 #[derive(Debug, Clone)]
-pub struct AppVersion {
+pub struct FeedVersion {
     pub parts: Vec<u64>,
     pub raw: String,
 }
 
-impl AppVersion {
+impl FeedVersion {
     pub fn parse(s: &str) -> Self {
         let clean = s.trim();
         if clean.is_empty() {
@@ -73,9 +70,10 @@ impl AppVersion {
                 raw: "0.0.0".to_string(),
             };
         }
-        let trimmed = clean.trim_start_matches(|c| c == 'v' || c == 'V');
+        let trimmed = clean.trim_start_matches(['v', 'V']);
         let mut parts: Vec<u64> = trimmed
             .split('.')
+            .take(3)
             .map(|seg| {
                 let digits: String = seg.chars().take_while(|c| c.is_ascii_digit()).collect();
                 if digits.is_empty() {
@@ -86,11 +84,7 @@ impl AppVersion {
             })
             .collect();
 
-        // Strip redundant trailing zeros beyond 3 parts so 26.33.0.0 == 26.33.0
-        while parts.len() > 3 && parts.last() == Some(&0) {
-            parts.pop();
-        }
-        // Pad to at least 3 parts
+        // Pad to 3 tiers: major, minor, patch
         while parts.len() < 3 {
             parts.push(0);
         }
@@ -100,41 +94,61 @@ impl AppVersion {
             raw: clean.to_string(),
         }
     }
+
+    #[inline]
+    pub fn major(&self) -> u64 {
+        self.parts.first().copied().unwrap_or(0)
+    }
+
+    #[inline]
+    pub fn minor(&self) -> u64 {
+        self.parts.get(1).copied().unwrap_or(0)
+    }
+
+    #[inline]
+    pub fn patch(&self) -> u64 {
+        self.parts.get(2).copied().unwrap_or(0)
+    }
+
+    #[inline]
+    pub fn semver_tuple(&self) -> (u64, u64, u64) {
+        (self.major(), self.minor(), self.patch())
+    }
 }
 
-impl Default for AppVersion {
+impl Default for FeedVersion {
     fn default() -> Self {
         Self::parse("0.0.0")
     }
 }
 
-impl PartialEq for AppVersion {
+impl PartialEq for FeedVersion {
     fn eq(&self, other: &Self) -> bool {
-        self.parts == other.parts
+        self.semver_tuple() == other.semver_tuple()
     }
 }
 
-impl Eq for AppVersion {}
+impl Eq for FeedVersion {}
 
-impl PartialOrd for AppVersion {
+impl PartialOrd for FeedVersion {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for AppVersion {
+impl Ord for FeedVersion {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.parts.cmp(&other.parts)
+        self.semver_tuple().cmp(&other.semver_tuple())
     }
 }
 
-impl std::fmt::Display for AppVersion {
+impl std::fmt::Display for FeedVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.raw)
     }
 }
 
-impl Serialize for AppVersion {
+impl Serialize for FeedVersion {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -143,20 +157,23 @@ impl Serialize for AppVersion {
     }
 }
 
-impl<'de> Deserialize<'de> for AppVersion {
+impl<'de> Deserialize<'de> for FeedVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        Ok(AppVersion::parse(&s))
+        Ok(FeedVersion::parse(&s))
     }
 }
+
+/// Type alias for backward compatibility.
+pub type AppVersion = FeedVersion;
 
 /// Parsed release metadata from Sparkle Appcast feed.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ReleaseInfo {
-    pub version: AppVersion,
+    pub version: FeedVersion,
     pub url: String,
     pub ed_signature: Option<String>,
     pub dsa_signature: Option<String>,
@@ -195,7 +212,7 @@ pub struct UpdateArgs {
     #[arg(long)]
     pub force: bool,
 
-    /// Format check output as single-line JSON to stdout (requires --check)
+    /// Format check output as single-line JSON to stdout (implies check-only)
     #[arg(long)]
     pub json: bool,
 
@@ -311,7 +328,7 @@ pub fn parse_appcast_xml(xml: &str) -> Result<ReleaseInfo, UpdaterError> {
         });
 
         candidates.push(ReleaseInfo {
-            version: AppVersion::parse(version_str),
+            version: FeedVersion::parse(version_str),
             url,
             ed_signature: ed_sig,
             dsa_signature: dsa_sig,
@@ -348,14 +365,14 @@ pub fn fetch_feed(url: &str) -> Result<ReleaseInfo, UpdaterError> {
 }
 
 /// Read version string from a JSON metadata file with `meta.app_version` schema.
-fn read_version_from_file(path: &Path) -> Option<AppVersion> {
+fn read_version_from_file(path: &Path) -> Option<FeedVersion> {
     if !path.is_file() {
         return None;
     }
     let content = fs::read_to_string(path).ok()?;
     let value: serde_json::Value = serde_json::from_str(&content).ok()?;
     let app_version = value.get("meta")?.get("app_version")?.as_str()?;
-    Some(AppVersion::parse(app_version))
+    Some(FeedVersion::parse(app_version))
 }
 
 /// Determine local client version using version cascade:
@@ -363,7 +380,7 @@ fn read_version_from_file(path: &Path) -> Option<AppVersion> {
 /// 2. `UPDATER_METADATA_FILE` environment variable (if set and valid)
 /// 3. Default `metadata.json` file in current directory
 /// 4. Fallback default `0.0.0`
-pub fn resolve_local_version(explicit_path: Option<&Path>) -> AppVersion {
+pub fn resolve_local_version(explicit_path: Option<&Path>) -> FeedVersion {
     if let Some(path) = explicit_path {
         if let Some(v) = read_version_from_file(path) {
             return v;
@@ -380,7 +397,7 @@ pub fn resolve_local_version(explicit_path: Option<&Path>) -> AppVersion {
         return v;
     }
 
-    AppVersion::parse("0.0.0")
+    FeedVersion::parse("0.0.0")
 }
 
 /// Resolve destination path, appending default installer name if destination is a directory.
@@ -395,6 +412,17 @@ pub fn resolve_destination(output_arg: Option<&Path>) -> PathBuf {
             }
         }
         None => PathBuf::from(DEFAULT_INSTALLER_NAME),
+    }
+}
+
+/// Helper to parse total size from HTTP Content-Range header (e.g. "bytes 100-200/500" -> 500).
+fn parse_content_range_total(header_val: &str) -> Option<u64> {
+    let slash_pos = header_val.rfind('/')?;
+    let total_part = header_val[slash_pos + 1..].trim();
+    if total_part == "*" {
+        None
+    } else {
+        total_part.parse().ok()
     }
 }
 
@@ -479,7 +507,22 @@ where
         .and_then(|v| v.to_str().ok())
         .and_then(|s| s.parse().ok());
 
-    let (mut out_file, initial_bytes, expected_total) = if is_partial && existing_bytes > 0 {
+    let content_range_total: Option<u64> = if is_partial {
+        resp.headers()
+            .get("Content-Range")
+            .and_then(|v| v.to_str().ok())
+            .and_then(parse_content_range_total)
+    } else {
+        None
+    };
+
+    let expected_total = if is_partial {
+        content_range_total.or_else(|| content_length.map(|cl| existing_bytes + cl))
+    } else {
+        content_length
+    };
+
+    let (mut out_file, initial_bytes) = if is_partial && existing_bytes > 0 {
         let f = OpenOptions::new()
             .create(true)
             .append(true)
@@ -487,13 +530,12 @@ where
             .map_err(|e| {
                 UpdaterError::Io(format!("Failed to open {:?} for append: {e}", part_path))
             })?;
-        let total = content_length.map(|cl| existing_bytes + cl);
-        (f, existing_bytes, total)
+        (f, existing_bytes)
     } else {
         let f = File::create(&part_path).map_err(|e| {
             UpdaterError::Io(format!("Failed to create {:?}: {e}", part_path))
         })?;
-        (f, 0, content_length)
+        (f, 0)
     };
 
     let mut body_reader = resp.into_body().into_reader();
@@ -526,6 +568,19 @@ where
             return Err(UpdaterError::Download(format!(
                 "Connection aborted prematurely: received {} of {} bytes",
                 session_downloaded, expected_cl
+            )));
+        }
+    }
+
+    let final_file_size = fs::metadata(&part_path)
+        .map(|m| m.len())
+        .unwrap_or(initial_bytes + session_downloaded);
+
+    if let Some(expected_size) = expected_total {
+        if final_file_size != expected_size {
+            return Err(UpdaterError::Download(format!(
+                "Downloaded file size mismatch: expected {} bytes, got {} bytes",
+                expected_size, final_file_size
             )));
         }
     }
@@ -605,16 +660,12 @@ pub fn execute_update(
     stdout: &mut dyn Write,
     _stderr: &mut dyn Write,
 ) -> Result<i32, UpdaterError> {
-    if args.json && !args.check {
-        return Err(UpdaterError::Cli("--json requires --check".into()));
-    }
-
     let feed_url = args
         .appcast_url
         .as_deref()
         .unwrap_or(DEFAULT_FEED_URL);
 
-    if args.check {
+    if args.check || args.json {
         let result = check_update(feed_url, args.metadata_path.as_deref())?;
         if args.json {
             let json_str = serde_json::to_string(&result)

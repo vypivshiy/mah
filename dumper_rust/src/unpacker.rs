@@ -84,7 +84,6 @@ pub enum UnpackError {
     /// Target MSI file not found on disk
     MsiNotFound {
         path: PathBuf,
-        message: String,
     },
     /// Failed to open or parse the MSI container
     MsiOpenError {
@@ -112,17 +111,17 @@ impl std::error::Error for UnpackError {}
 impl std::fmt::Display for UnpackError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            UnpackError::MsiNotFound { path, .. } => {
+            UnpackError::MsiNotFound { path } => {
                 write!(
                     f,
-                    "Error: MSI file '{}' not found. Run 'dumper_rust update' first or specify a valid path with 'dumper_rust unpack <MSI_PATH>'.",
+                    "MSI file '{}' not found. Run 'dumper_rust update' first or specify a valid path with 'dumper_rust unpack <MSI_PATH>'.",
                     path.display()
                 )
             }
             UnpackError::MsiOpenError { path, source } => {
                 write!(
                     f,
-                    "Error: Failed to open MSI file '{}': {}",
+                    "Failed to open MSI file '{}': {}",
                     path.display(),
                     source
                 )
@@ -130,7 +129,7 @@ impl std::fmt::Display for UnpackError {
             UnpackError::CabinetNotFound { path, message } => {
                 write!(
                     f,
-                    "Error: No cabinet stream found in MSI '{}': {}",
+                    "No cabinet stream found in MSI '{}': {}",
                     path.display(),
                     message
                 )
@@ -138,15 +137,15 @@ impl std::fmt::Display for UnpackError {
             UnpackError::CabinetError { stream, source } => {
                 write!(
                     f,
-                    "Error: Failed to process cabinet stream '{}': {}",
+                    "Failed to process cabinet stream '{}': {}",
                     stream, source
                 )
             }
             UnpackError::FilterError(msg) => {
-                write!(f, "Error: Invalid filter pattern: {}", msg)
+                write!(f, "Invalid filter pattern: {}", msg)
             }
             UnpackError::Io(err) => {
-                write!(f, "Error: I/O error during extraction: {}", err)
+                write!(f, "I/O error during extraction: {}", err)
             }
         }
     }
@@ -219,13 +218,11 @@ impl FileFilter {
         }
     }
 
-    /// Default matching predicate: case-insensitive `*.core.dll` and `*.config.dll`.
+    /// Default matching predicate: specifically `CM_FP_Unspecified.core.dll` and `CM_FP_Unspecified.config.dll` (case-insensitive).
     pub fn matches_default(filename: &str) -> bool {
-        let lower = filename.to_ascii_lowercase();
-        lower.ends_with(".core.dll")
-            || lower.ends_with(".config.dll")
-            || lower == "core.dll"
-            || lower == "config.dll"
+        let clean = filename.rsplit(['/', '\\']).next().unwrap_or(filename);
+        clean.eq_ignore_ascii_case("CM_FP_Unspecified.core.dll")
+            || clean.eq_ignore_ascii_case("CM_FP_Unspecified.config.dll")
     }
 }
 
@@ -383,10 +380,6 @@ pub fn unpack(args: &UnpackArgs) -> Result<UnpackResult, UnpackError> {
     if !args.msi_path.is_file() {
         return Err(UnpackError::MsiNotFound {
             path: args.msi_path.clone(),
-            message: format!(
-                "Error: MSI file '{}' not found. Run 'dumper_rust update' first or specify a valid path with 'dumper_rust unpack <MSI_PATH>'.",
-                args.msi_path.display()
-            ),
         });
     }
 
