@@ -330,6 +330,7 @@ fn test_cli_default_invocation_produces_all_three_artifacts() {
     let out_config = temp_root.join("config.json");
 
     let status = Command::new(env!("CARGO_BIN_EXE_dumper_rust"))
+        .arg("dump")
         .arg(&core_dll)
         .arg("--config")
         .arg(&config_dll)
@@ -368,6 +369,7 @@ fn test_cli_positional_target_only_generates_default_artifacts() {
     fs::create_dir_all(&temp_root).unwrap();
 
     let status = Command::new(env!("CARGO_BIN_EXE_dumper_rust"))
+        .arg("dump")
         .arg(&core_dll)
         .current_dir(&temp_root)
         .status()
@@ -408,6 +410,7 @@ fn test_cli_no_metadata_flag_suppresses_metadata_json() {
     fs::create_dir_all(&temp_root).unwrap();
 
     let status = Command::new(env!("CARGO_BIN_EXE_dumper_rust"))
+        .arg("dump")
         .arg(&core_dll)
         .arg("--no-metadata")
         .current_dir(&temp_root)
@@ -444,6 +447,7 @@ fn test_compact_output_honors_with_rva_toggle() {
 
     // 1. Without --with-rva
     let status1 = Command::new(env!("CARGO_BIN_EXE_dumper_rust"))
+        .arg("dump")
         .arg(&core_dll)
         .arg("-c")
         .arg(&compact_no_rva)
@@ -460,6 +464,7 @@ fn test_compact_output_honors_with_rva_toggle() {
 
     // 2. With --with-rva
     let status2 = Command::new(env!("CARGO_BIN_EXE_dumper_rust"))
+        .arg("dump")
         .arg(&core_dll)
         .arg("-c")
         .arg(&compact_with_rva)

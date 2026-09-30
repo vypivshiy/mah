@@ -204,11 +204,11 @@ pub struct UpdateArgs {
     pub quiet: bool,
 
     /// Destination path for downloaded installer (defaults to MAX.msi)
-    #[arg(short, long, value_name = "PATH")]
+    #[arg(short, long, value_name = "PATH", default_value = DEFAULT_INSTALLER_NAME)]
     pub output: Option<PathBuf>,
 
     /// Override Sparkle feed URL
-    #[arg(long, value_name = "URL")]
+    #[arg(long, value_name = "URL", default_value = DEFAULT_FEED_URL)]
     pub appcast_url: Option<String>,
 
     /// Override metadata.json path for local version detection
