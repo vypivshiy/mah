@@ -1,7 +1,7 @@
 {
   "options": {
-    "app_version": "26.35.0",
-    "build_number": 80520,
+    "app_version": "26.35.2",
+    "build_number": 80824,
     "protocol_version": 11,
     "config": {
       "allow_message_text_with_files": false,
