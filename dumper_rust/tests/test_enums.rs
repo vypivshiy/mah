@@ -31,8 +31,8 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "ServerErrorCodes")
         .expect("ServerErrorCodes table must be discovered");
     assert_eq!(sec_table.form, EnumTableForm::StringKeyFirst);
-    assert_eq!(sec_table.rva_start, 0x1808690);
-    assert_eq!(sec_table.rva_end, 0x1808768);
+    assert_eq!(sec_table.rva_start, 0x18e2730);
+    assert_eq!(sec_table.rva_end, 0x18e2808);
     assert_eq!(sec_table.entries.len(), 9);
 
     // Check UserSettings
@@ -41,8 +41,8 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "UserSettings")
         .expect("UserSettings table must be discovered");
     assert_eq!(us_table.form, EnumTableForm::ValueFirst);
-    assert_eq!(us_table.rva_start, 0x18824b0);
-    assert_eq!(us_table.rva_end, 0x1882750);
+    assert_eq!(us_table.rva_start, 0x195f550);
+    assert_eq!(us_table.rva_end, 0x195f7f0);
     assert_eq!(us_table.entries.len(), 28);
 
     // Check CallProblems
@@ -51,8 +51,8 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "CallProblems")
         .expect("CallProblems table must be discovered");
     assert_eq!(cp_table.form, EnumTableForm::ValueFirst);
-    assert_eq!(cp_table.rva_start, 0x181f030);
-    assert_eq!(cp_table.rva_end, 0x181f120);
+    assert_eq!(cp_table.rva_start, 0x18f9870);
+    assert_eq!(cp_table.rva_end, 0x18f9960);
     assert_eq!(cp_table.entries.len(), 10);
 
     // 2. Extract typed catalog (category -> name -> u64)

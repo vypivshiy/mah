@@ -127,6 +127,18 @@ impl LoggerAnalyzer {
     pub fn resolve_logger_iat_va(pe: &PeImage) -> u64 {
         // Try to locate Logger::writeMessage import via goblin
         if let Ok(pe_parsed) = goblin::pe::PE::parse(pe.raw) {
+            // Prefer standard char string_view overload (does not contain _S for wchar_t)
+            for imp in &pe_parsed.imports {
+                let dll_lower = imp.dll.to_ascii_lowercase();
+                if (dll_lower == "logger.dll" || dll_lower.starts_with("logger"))
+                    && imp.name.contains("writeMessage")
+                    && !imp.name.contains("_S")
+                {
+                    // imp.offset is the RVA of the IAT entry in goblin
+                    return pe.image_base + imp.offset as u64;
+                }
+            }
+
             for imp in &pe_parsed.imports {
                 let dll_lower = imp.dll.to_ascii_lowercase();
                 if (dll_lower == "logger.dll" || dll_lower.starts_with("logger"))
