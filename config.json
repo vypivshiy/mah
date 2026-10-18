@@ -64,7 +64,7 @@
   "rooms_update_path": "",
   "rooms_update_url": "",
   "screen_type": "2.0x",
-  "self_recovery_url": "https://go.max.ru/selfrecovery",
+  "self_recovery_url": "https://go.max.ru/recovery",
   "send_error_logs_to_crash_server": false,
   "short_link_prefix_url": "max.ru",
   "single_instance_id": "oneme_instance",
