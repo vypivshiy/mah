@@ -867,6 +867,7 @@ mod tests {
 
         let make_variant = |name: &str, tag: Option<&str>| PolymorphicVariant {
             name: name.to_string(),
+            ident: name.to_string(),
             offset: None,
             fields: Vec::new(),
             all_fields: Vec::new(),
@@ -876,6 +877,7 @@ mod tests {
         let models = vec![
             PolymorphicModelEntry {
                 name: "BaseB".to_string(),
+                ident: "BaseB".to_string(),
                 root_sources: vec!["protocol_field".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {
@@ -890,6 +892,7 @@ mod tests {
             },
             PolymorphicModelEntry {
                 name: "BaseA".to_string(),
+                ident: "BaseA".to_string(),
                 root_sources: vec!["protocol_field".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {
@@ -905,6 +908,7 @@ mod tests {
             },
             PolymorphicModelEntry {
                 name: "BaseEmpty".to_string(),
+                ident: "BaseEmpty".to_string(),
                 root_sources: vec!["rtti_heuristic".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {

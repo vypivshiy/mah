@@ -10,7 +10,10 @@ use crate::model_resolver::{
 use crate::pe::PeImage;
 use crate::rtti::RttiEngine;
 use crate::scanner::ProtocolScanner;
-use crate::type_parser::extract_polymorphic_base;
+use crate::type_parser::{
+    cpp_to_ident, cpp_to_ident_uncollapsed, derive_event_operation, derive_packet_operation,
+    extract_polymorphic_base, qualify_endpoint_ident,
+};
 use anyhow::Result;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -63,6 +66,8 @@ pub struct DumperOptions {
 pub struct TypeDescriptorEntry {
     pub offset: Option<String>,
     pub name: String,
+    #[serde(default)]
+    pub ident: String,
     pub fields: Vec<ExtractedField>,
     pub warn: Option<String>,
 }
@@ -70,6 +75,10 @@ pub struct TypeDescriptorEntry {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PacketEntry {
     pub opcode: u32,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub ident: String,
     pub request: TypeDescriptorEntry,
     pub response: TypeDescriptorEntry,
 }
@@ -79,8 +88,10 @@ pub struct EventEntry {
     pub opcode: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub ident: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub base_kind: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -96,6 +107,8 @@ pub struct EventEntry {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelEntry {
     pub name: String,
+    #[serde(default)]
+    pub ident: String,
     pub offset: Option<String>,
     pub fields: Vec<ExtractedField>,
     pub warn: Option<String>,
@@ -117,6 +130,8 @@ pub struct PolymorphicBase {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PolymorphicVariant {
     pub name: String,
+    #[serde(default)]
+    pub ident: String,
     pub offset: Option<String>,
     pub fields: Vec<ExtractedField>,
     pub all_fields: Vec<ExtractedField>,
@@ -131,6 +146,8 @@ pub struct PolymorphicVariant {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PolymorphicModelEntry {
     pub name: String,
+    #[serde(default)]
+    pub ident: String,
     pub root_sources: Vec<String>,
     #[serde(default)]
     pub discriminator: Option<PolymorphicDiscriminator>,
@@ -270,10 +287,15 @@ impl Dumper {
         // 1. Packets
         let mut packets = Vec::new();
         for p in &scanner.packets {
-            let req = find_type_entry(&p.request_full_name);
-            let resp = find_type_entry(&p.response_full_name);
+            let mut req = find_type_entry(&p.request_full_name);
+            let mut resp = find_type_entry(&p.response_full_name);
+            let (op_name, op_ident) = derive_packet_operation(p.opcode, &req.name, &resp.name);
+            req.ident = qualify_endpoint_ident(&op_ident, &req.name);
+            resp.ident = qualify_endpoint_ident(&op_ident, &resp.name);
             packets.push(PacketEntry {
                 opcode: p.opcode,
+                name: op_name,
+                ident: op_ident,
                 request: req,
                 response: resp,
             });
@@ -284,14 +306,22 @@ impl Dumper {
         let mut events = Vec::new();
         for e in &scanner.events {
             if e.is_special {
-                let req = apply_special_request_fields(
+                let mut req = apply_special_request_fields(
                     find_type_entry(&e.request_full_name),
                     &e.special_request_fields,
                 );
+                let (op_name, op_ident) = derive_event_operation(
+                    e.opcode,
+                    e.special_name.as_deref(),
+                    &req.name,
+                    "",
+                );
+                req.ident = qualify_endpoint_ident(&op_ident, &req.name);
                 events.push(EventEntry {
                     opcode: e.opcode,
                     kind: Some("special_packet".to_string()),
-                    name: e.special_name.clone(),
+                    name: op_name,
+                    ident: op_ident,
                     base_kind: e.base_kind.clone(),
                     offset: req.offset.clone(),
                     request: Some(req),
@@ -299,12 +329,17 @@ impl Dumper {
                     warn: None,
                 });
             } else {
-                let req = find_type_entry(&e.request_full_name);
-                let resp = find_type_entry(&e.response_full_name);
+                let mut req = find_type_entry(&e.request_full_name);
+                let mut resp = find_type_entry(&e.response_full_name);
+                let (op_name, op_ident) =
+                    derive_event_operation(e.opcode, None, &req.name, &resp.name);
+                req.ident = qualify_endpoint_ident(&op_ident, &req.name);
+                resp.ident = qualify_endpoint_ident(&op_ident, &resp.name);
                 events.push(EventEntry {
                     opcode: e.opcode,
                     kind: None,
-                    name: None,
+                    name: op_name,
+                    ident: op_ident,
                     base_kind: None,
                     offset: None,
                     request: Some(req),
@@ -408,9 +443,11 @@ fn model_resolver_diagnostic_kind_name(kind: &ModelResolverDiagnosticKind) -> &'
 }
 
 fn type_entry_from_resolved(resolved: ResolvedModel) -> TypeDescriptorEntry {
+    let ident = cpp_to_ident(&resolved.name);
     TypeDescriptorEntry {
         offset: resolved.offset,
         name: resolved.name,
+        ident,
         fields: resolved.fields,
         warn: resolved.warn,
     }
@@ -678,6 +715,7 @@ where
 
         models.push(PolymorphicModelEntry {
             name: base_name.clone(),
+            ident: cpp_to_ident(base_name),
             root_sources: root_sources
                 .iter()
                 .map(|source| source.as_str().to_string())
@@ -691,6 +729,8 @@ where
             rtti_subclasses,
         });
     }
+
+    disambiguate_polymorphic_idents(&mut models);
 
     (models, model_catalog_names)
 }
@@ -718,81 +758,47 @@ where
         }
     }
 
+    let mut polymorphic_excluded = HashSet::new();
+    for poly in polymorphic_models {
+        polymorphic_excluded.insert(poly.name.clone());
+        for v in &poly.variants {
+            polymorphic_excluded.insert(v.name.clone());
+        }
+        for s in &poly.rtti_subclasses {
+            polymorphic_excluded.insert(s.name.clone());
+        }
+    }
+
     let mut models_map: BTreeMap<String, ModelEntry> = BTreeMap::new();
     let mut bfs_queue = Vec::new();
     let mut visited = HashSet::new();
 
-    let mut variant_names = HashSet::new();
-    for poly in polymorphic_models {
-        for v in &poly.variants {
-            variant_names.insert(v.name.clone());
-        }
-    }
-
-    let mut rtti_only_subclass_names = HashSet::new();
-    for poly in polymorphic_models {
-        for s in &poly.rtti_subclasses {
-            if !variant_names.contains(&s.name) {
-                rtti_only_subclass_names.insert(s.name.clone());
-            }
-        }
-    }
-
-    // 1. Include active protocol variants appearing in polymorphic_models.variants
-    for poly in polymorphic_models {
-        for variant in &poly.variants {
-            if packet_req_resp_names.contains(&variant.name)
-                || is_empty_model_type_name(&variant.name)
-                || variant.name.ends_with("::Polymorphic")
-                || visited.contains(&variant.name)
-            {
-                continue;
-            }
-
-            let entry = find_type_entry(&variant.name);
-
-            // Valid empty marker variants (e.g. UnsupportedAttachment) with verified initializer
-            // and non-empty base fields must have warn: None (warn: null).
-            let warn = if entry.fields.is_empty()
-                && entry.offset.is_some()
-                && !poly.base.fields.is_empty()
-            {
-                None
-            } else {
-                entry.warn
-            };
-
-            // Variant models in `models` must expose only their local fields (matching entry.fields).
-            models_map.insert(
-                variant.name.clone(),
-                ModelEntry {
-                    name: variant.name.clone(),
-                    offset: entry.offset,
-                    fields: entry.fields.clone(),
-                    warn,
-                },
-            );
-            visited.insert(variant.name.clone());
-
-            // Enqueue fields of active variants so transitively referenced models are discovered
-            for field in &entry.fields {
-                collect_model_refs_from_field(field, &mut bfs_queue);
-            }
-        }
-
-        // For protocol roots, enqueue base model so it is included in models if not visited
-        if poly.root_sources.iter().any(|s| s == "protocol_field") {
-            bfs_queue.push(poly.name.clone());
-        }
-    }
-
-    // 2. Enqueue standalone models directly referenced by Packets and Events
     let collect_refs_from_fields = |fields: &[ExtractedField], queue: &mut Vec<String>| {
         for f in fields {
             collect_model_refs_from_field(f, queue);
         }
     };
 
+    // 1. Traverse fields of polymorphic bases and active variants so standalone models
+    // reachable only through polymorphic variants (e.g. VideoCollage, Keyboard, WidgetContent, Log::*Meta)
+    // are discovered, while excluding polymorphic bases, variants, and rtti_subclasses from `models`.
+    for poly in polymorphic_models {
+        collect_refs_from_fields(&poly.base.fields, &mut bfs_queue);
+
+        for variant in &poly.variants {
+            collect_refs_from_fields(&variant.fields, &mut bfs_queue);
+            collect_refs_from_fields(&variant.all_fields, &mut bfs_queue);
+            if !packet_req_resp_names.contains(&variant.name)
+                && !is_empty_model_type_name(&variant.name)
+                && !variant.name.ends_with("::Polymorphic")
+            {
+                let entry = find_type_entry(&variant.name);
+                collect_refs_from_fields(&entry.fields, &mut bfs_queue);
+            }
+        }
+    }
+
+    // 2. Enqueue standalone models directly referenced by Packets and Events
     for p in packets {
         collect_refs_from_fields(&p.request.fields, &mut bfs_queue);
         collect_refs_from_fields(&p.response.fields, &mut bfs_queue);
@@ -816,6 +822,7 @@ where
             || model_name.ends_with("::Polymorphic")
             || is_primitive_or_builtin_type(&model_name)
             || packet_req_resp_names.contains(&model_name)
+            || polymorphic_excluded.contains(&model_name)
         {
             continue;
         }
@@ -826,17 +833,14 @@ where
 
         let entry = find_type_entry(&model_name);
 
-        // Exclude empty RTTI-only subclasses that do not appear in `variants`
-        if entry.fields.is_empty() && rtti_only_subclass_names.contains(&model_name) {
-            continue;
-        }
-
         collect_refs_from_fields(&entry.fields, &mut bfs_queue);
 
+        let ident = cpp_to_ident(&model_name);
         models_map.insert(
             model_name.clone(),
             ModelEntry {
                 name: model_name,
+                ident,
                 offset: entry.offset,
                 fields: entry.fields,
                 warn: entry.warn,
@@ -844,7 +848,114 @@ where
         );
     }
 
-    models_map.into_values().collect()
+    let mut models: Vec<ModelEntry> = models_map.into_values().collect();
+    disambiguate_model_idents(&mut models, polymorphic_models);
+    models
+}
+
+fn disambiguate_polymorphic_idents(polymorphic_models: &mut [PolymorphicModelEntry]) {
+    let mut ident_to_names: HashMap<String, BTreeSet<String>> = HashMap::new();
+    for poly in polymorphic_models.iter() {
+        ident_to_names
+            .entry(poly.ident.clone())
+            .or_default()
+            .insert(poly.name.clone());
+        for v in &poly.variants {
+            ident_to_names
+                .entry(v.ident.clone())
+                .or_default()
+                .insert(v.name.clone());
+        }
+        for s in &poly.rtti_subclasses {
+            ident_to_names
+                .entry(s.ident.clone())
+                .or_default()
+                .insert(s.name.clone());
+        }
+    }
+
+    let colliding_idents: HashSet<String> = ident_to_names
+        .into_iter()
+        .filter_map(|(ident, names)| if names.len() > 1 { Some(ident) } else { None })
+        .collect();
+
+    if colliding_idents.is_empty() {
+        return;
+    }
+
+    for poly in polymorphic_models.iter_mut() {
+        if colliding_idents.contains(&poly.ident) {
+            let uncollapsed = cpp_to_ident_uncollapsed(&poly.name);
+            if !uncollapsed.is_empty() {
+                poly.ident = uncollapsed;
+            }
+        }
+        for v in &mut poly.variants {
+            if colliding_idents.contains(&v.ident) {
+                let uncollapsed = cpp_to_ident_uncollapsed(&v.name);
+                if !uncollapsed.is_empty() {
+                    v.ident = uncollapsed;
+                }
+            }
+        }
+        for s in &mut poly.rtti_subclasses {
+            if colliding_idents.contains(&s.ident) {
+                let uncollapsed = cpp_to_ident_uncollapsed(&s.name);
+                if !uncollapsed.is_empty() {
+                    s.ident = uncollapsed;
+                }
+            }
+        }
+    }
+}
+
+fn disambiguate_model_idents(
+    models: &mut [ModelEntry],
+    polymorphic_models: &[PolymorphicModelEntry],
+) {
+    let mut ident_to_names: HashMap<String, BTreeSet<String>> = HashMap::new();
+    for poly in polymorphic_models {
+        ident_to_names
+            .entry(poly.ident.clone())
+            .or_default()
+            .insert(poly.name.clone());
+        for v in &poly.variants {
+            ident_to_names
+                .entry(v.ident.clone())
+                .or_default()
+                .insert(v.name.clone());
+        }
+        for s in &poly.rtti_subclasses {
+            ident_to_names
+                .entry(s.ident.clone())
+                .or_default()
+                .insert(s.name.clone());
+        }
+    }
+    for m in models.iter() {
+        ident_to_names
+            .entry(m.ident.clone())
+            .or_default()
+            .insert(m.name.clone());
+    }
+
+    let colliding_idents: HashSet<String> = ident_to_names
+        .into_iter()
+        .filter_map(|(ident, names)| if names.len() > 1 { Some(ident) } else { None })
+        .collect();
+
+    if colliding_idents.is_empty() {
+        return;
+    }
+
+    for m in models.iter_mut() {
+        if colliding_idents.contains(&m.ident) {
+            let uncollapsed = cpp_to_ident_uncollapsed(&m.name);
+            if !uncollapsed.is_empty() {
+                m.ident = uncollapsed;
+            }
+        }
+    }
 }
 
 fn polymorphic_variant_from_entry(
@@ -854,8 +965,10 @@ fn polymorphic_variant_from_entry(
     tag: Option<String>,
 ) -> PolymorphicVariant {
     let fields = entry.fields;
+    let ident = cpp_to_ident(&name);
     PolymorphicVariant {
         name,
+        ident,
         offset: entry.offset,
         all_fields: flattened_polymorphic_fields(base_fields, &fields),
         fields,
@@ -939,6 +1052,7 @@ mod tests {
         TypeDescriptorEntry {
             offset: Some(offset.to_string()),
             name: name.to_string(),
+            ident: cpp_to_ident(name),
             fields,
             warn: None,
         }
@@ -1213,6 +1327,7 @@ mod tests {
         let local_field = field("caption", "std::string");
         let group = PolymorphicModelEntry {
             name: "Api::OneMe::Types::BaseAttachment".to_string(),
+            ident: "BaseAttachment".to_string(),
             root_sources: vec!["protocol_field".to_string()],
             discriminator: Some(PolymorphicDiscriminator {
                 field: "_type".to_string(),
@@ -1225,6 +1340,7 @@ mod tests {
             variants: vec![
                 PolymorphicVariant {
                     name: "Api::OneMe::Types::PhotoAttachment".to_string(),
+                    ident: "PhotoAttachment".to_string(),
                     offset: Some("0x2000".to_string()),
                     fields: vec![local_field.clone()],
                     all_fields: vec![base_field.clone(), local_field.clone()],
@@ -1232,6 +1348,7 @@ mod tests {
                 },
                 PolymorphicVariant {
                     name: "Api::OneMe::Types::UnknownAttachment".to_string(),
+                    ident: "UnknownAttachment".to_string(),
                     offset: Some("0x2100".to_string()),
                     fields: vec![],
                     all_fields: vec![base_field.clone()],
@@ -1240,6 +1357,7 @@ mod tests {
             ],
             rtti_subclasses: vec![PolymorphicVariant {
                 name: "Api::OneMe::Types::PhotoAttachment".to_string(),
+                ident: "PhotoAttachment".to_string(),
                 offset: Some("0x2000".to_string()),
                 fields: vec![local_field],
                 all_fields: vec![base_field.clone(), field("caption", "std::string")],
@@ -1344,6 +1462,7 @@ mod tests {
         let entry = TypeDescriptorEntry {
             offset: None,
             name: "Api::OneMe::Packets::Ping::Payload".to_string(),
+            ident: "PingPayload".to_string(),
             fields: Vec::new(),
             warn: Some("no data found".to_string()),
         };
@@ -1364,6 +1483,7 @@ mod tests {
         let entry = TypeDescriptorEntry {
             offset: Some("0x1234".to_string()),
             name: "Api::OneMe::Packets::Ping::Payload".to_string(),
+            ident: "PingPayload".to_string(),
             fields: existing_fields.clone(),
             warn: None,
         };
@@ -1388,6 +1508,8 @@ mod tests {
 
         let packet = PacketEntry {
             opcode: 5,
+            name: "Api::OneMe::Packets::Log::Event".to_string(),
+            ident: "LogEvent".to_string(),
             request: entry(
                 packet_req,
                 "0x1000",
@@ -1505,6 +1627,8 @@ mod tests {
 
         let packet = PacketEntry {
             opcode: 5,
+            name: "Api::OneMe::Packets::Log::Event".to_string(),
+            ident: "LogEvent".to_string(),
             request: entry(
                 packet_req,
                 "0x1000",
@@ -1576,7 +1700,8 @@ mod tests {
         let event = EventEntry {
             opcode: 100,
             kind: None,
-            name: None,
+            name: "Api::OneMe::Events::Telemetry".to_string(),
+            ident: "Telemetry".to_string(),
             base_kind: None,
             offset: None,
             request: Some(entry(
@@ -1628,6 +1753,8 @@ mod tests {
 
         let packet = PacketEntry {
             opcode: 10,
+            name: "Api::OneMe::Packets::Test".to_string(),
+            ident: "Test".to_string(),
             request: entry(
                 "Api::OneMe::Packets::Test::Request",
                 "0x3000",
@@ -1669,16 +1796,25 @@ mod tests {
     }
 
     #[test]
-    fn model_catalog_includes_real_variants_from_polymorphic_models() {
+    fn model_catalog_excludes_polymorphic_bases_variants_and_rtti_subclasses_even_when_referenced() {
         let base_attach = "Api::OneMe::Types::BaseAttachment";
         let photo_attach = "Api::OneMe::Types::PhotoAttachment";
-        let app_attach = "Api::OneMe::Types::AppAttachment";
+        let file_attach = "Api::OneMe::Types::FileAttachment";
         let event_params = "Api::OneMe::Types::Log::EventParams";
-        let call_params = "Api::OneMe::Types::Log::CallEventParams";
+        let story_link_meta = "Api::OneMe::Types::Log::StoryLinkMeta";
+        let click_story_link =
+            "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::StoryLinkMeta>";
+        let callout_meta = "Api::OneMe::Types::Log::CalloutScreenMeta";
+        let click_callout =
+            "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>";
+        let unknown_params = "Api::OneMe::Types::Log::UnknownContactInteractionParams";
+        let ab_status = "Api::OneMe::Types::Log::AbStatusParams";
+        let msg_model = "Api::OneMe::Types::Message";
 
         let poly_models = vec![
             PolymorphicModelEntry {
                 name: base_attach.to_string(),
+                ident: "BaseAttachment".to_string(),
                 root_sources: vec!["protocol_field".to_string()],
                 discriminator: Some(PolymorphicDiscriminator {
                     field: "_type".to_string(),
@@ -1691,103 +1827,78 @@ mod tests {
                 variants: vec![
                     PolymorphicVariant {
                         name: photo_attach.to_string(),
+                        ident: "PhotoAttachment".to_string(),
                         offset: Some("0x200".to_string()),
-                        fields: vec![field("photoId", "int64_t"), field("width", "int32_t")],
+                        fields: vec![field("photoId", "int64_t")],
                         all_fields: vec![
                             field("_type", "std::string"),
                             field("photoId", "int64_t"),
-                            field("width", "int32_t"),
                         ],
                         tag: Some("PHOTO".to_string()),
                     },
                     PolymorphicVariant {
-                        name: app_attach.to_string(),
+                        name: file_attach.to_string(),
+                        ident: "FileAttachment".to_string(),
                         offset: Some("0x300".to_string()),
-                        fields: vec![field("appId", "int64_t"), field("name", "std::string")],
+                        fields: vec![field("preview", &format!("std::optional<{photo_attach}>"))],
                         all_fields: vec![
                             field("_type", "std::string"),
-                            field("appId", "int64_t"),
-                            field("name", "std::string"),
+                            field("preview", &format!("std::optional<{photo_attach}>")),
                         ],
-                        tag: Some("APP".to_string()),
+                        tag: Some("FILE".to_string()),
                     },
                 ],
                 rtti_subclasses: vec![],
             },
             PolymorphicModelEntry {
                 name: event_params.to_string(),
+                ident: "LogEventParams".to_string(),
                 root_sources: vec!["protocol_field".to_string(), "rtti_heuristic".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {
                     offset: Some("0x400".to_string()),
                     fields: vec![field("common", "std::string")],
                 },
-                variants: vec![PolymorphicVariant {
-                    name: call_params.to_string(),
-                    offset: Some("0x500".to_string()),
-                    fields: vec![field("callDuration", "int64_t")],
-                    all_fields: vec![
-                        field("common", "std::string"),
-                        field("callDuration", "int64_t"),
-                    ],
-                    tag: None,
-                }],
+                variants: vec![
+                    PolymorphicVariant {
+                        name: story_link_meta.to_string(),
+                        ident: "LogStoryLinkMeta".to_string(),
+                        offset: Some("0x500".to_string()),
+                        fields: vec![field("storyId", "int64_t")],
+                        all_fields: vec![
+                            field("common", "std::string"),
+                            field("storyId", "int64_t"),
+                        ],
+                        tag: None,
+                    },
+                    PolymorphicVariant {
+                        name: click_story_link.to_string(),
+                        ident: "LogClickParamsLogStoryLinkMeta".to_string(),
+                        offset: Some("0x510".to_string()),
+                        fields: vec![field("source_meta", story_link_meta)],
+                        all_fields: vec![
+                            field("common", "std::string"),
+                            field("source_meta", story_link_meta),
+                        ],
+                        tag: Some("CLICK".to_string()),
+                    },
+                    PolymorphicVariant {
+                        name: click_callout.to_string(),
+                        ident: "LogClickParamsLogCalloutScreenMeta".to_string(),
+                        offset: Some("0x520".to_string()),
+                        fields: vec![field("source_meta", callout_meta)],
+                        all_fields: vec![
+                            field("common", "std::string"),
+                            field("source_meta", callout_meta),
+                        ],
+                        tag: Some("CLICK".to_string()),
+                    },
+                ],
                 rtti_subclasses: vec![],
             },
-        ];
-
-        let entries = vec![
-            entry(base_attach, "0x100", vec![field("_type", "std::string")]),
-            entry(
-                photo_attach,
-                "0x200",
-                vec![field("photoId", "int64_t"), field("width", "int32_t")],
-            ),
-            entry(
-                app_attach,
-                "0x300",
-                vec![field("appId", "int64_t"), field("name", "std::string")],
-            ),
-            entry(event_params, "0x400", vec![field("common", "std::string")]),
-            entry(call_params, "0x500", vec![field("callDuration", "int64_t")]),
-        ];
-
-        let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
-        let model_names: Vec<&str> = models.iter().map(|m| m.name.as_str()).collect();
-
-        assert!(
-            model_names.contains(&photo_attach),
-            "PhotoAttachment must be present in models"
-        );
-        assert!(
-            model_names.contains(&app_attach),
-            "AppAttachment must be present in models"
-        );
-        assert!(
-            model_names.contains(&call_params),
-            "CallEventParams must be present in models"
-        );
-        assert!(
-            model_names.contains(&base_attach),
-            "BaseAttachment protocol root base must be present in models"
-        );
-        assert!(
-            model_names.contains(&event_params),
-            "EventParams protocol root base must be present in models"
-        );
-    }
-
-    #[test]
-    fn model_catalog_excludes_empty_rtti_subclasses() {
-        let unknown_params = "Api::OneMe::Types::Log::UnknownContactInteractionParams";
-        let ab_status = "Api::OneMe::Types::Log::AbStatusParams";
-        let banner_params = "Api::OneMe::Types::Log::BannerParams";
-        let photo_attach = "Api::OneMe::Types::PhotoAttachment";
-        let base_attach = "Api::OneMe::Types::BaseAttachment";
-
-        let poly_models = vec![
             PolymorphicModelEntry {
                 name: unknown_params.to_string(),
+                ident: "LogUnknownContactInteractionParams".to_string(),
                 root_sources: vec!["rtti_heuristic".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {
@@ -1795,281 +1906,133 @@ mod tests {
                     fields: vec![],
                 },
                 variants: vec![],
-                rtti_subclasses: vec![
-                    PolymorphicVariant {
-                        name: ab_status.to_string(),
-                        offset: Some("0x610".to_string()),
-                        fields: vec![],
-                        all_fields: vec![],
-                        tag: None,
-                    },
-                    PolymorphicVariant {
-                        name: banner_params.to_string(),
-                        offset: Some("0x620".to_string()),
-                        fields: vec![],
-                        all_fields: vec![],
-                        tag: None,
-                    },
-                ],
-            },
-            PolymorphicModelEntry {
-                name: base_attach.to_string(),
-                root_sources: vec!["protocol_field".to_string()],
-                discriminator: None,
-                base: PolymorphicBase {
-                    offset: Some("0x100".to_string()),
-                    fields: vec![field("_type", "std::string")],
-                },
-                variants: vec![PolymorphicVariant {
-                    name: photo_attach.to_string(),
-                    offset: Some("0x200".to_string()),
-                    fields: vec![field("url", "std::string")],
-                    all_fields: vec![field("_type", "std::string"), field("url", "std::string")],
+                rtti_subclasses: vec![PolymorphicVariant {
+                    name: ab_status.to_string(),
+                    ident: "LogAbStatusParams".to_string(),
+                    offset: Some("0x610".to_string()),
+                    fields: vec![],
+                    all_fields: vec![],
                     tag: None,
                 }],
-                rtti_subclasses: vec![],
             },
         ];
 
+        let packet = PacketEntry {
+            opcode: 1,
+            name: "Api::OneMe::Packets::Msg::Get".to_string(),
+            ident: "MsgGet".to_string(),
+            request: entry(
+                "Api::OneMe::Packets::Msg::Get::Parameters",
+                "0x10",
+                vec![field("msg", msg_model)],
+            ),
+            response: entry("Api::OneMe::Packets::Msg::Get::Response", "0x20", vec![]),
+        };
+
         let entries = vec![
+            entry(base_attach, "0x100", vec![field("_type", "std::string")]),
+            entry(photo_attach, "0x200", vec![field("photoId", "int64_t")]),
+            entry(
+                file_attach,
+                "0x300",
+                vec![field("preview", &format!("std::optional<{photo_attach}>"))],
+            ),
+            entry(event_params, "0x400", vec![field("common", "std::string")]),
+            entry(story_link_meta, "0x500", vec![field("storyId", "int64_t")]),
+            entry(
+                click_story_link,
+                "0x510",
+                vec![field("source_meta", story_link_meta)],
+            ),
+            entry(
+                click_callout,
+                "0x520",
+                vec![field("source_meta", callout_meta)],
+            ),
+            entry(
+                callout_meta,
+                "0x530",
+                vec![field("actionId", "int32_t")],
+            ),
             entry(unknown_params, "0x600", vec![]),
             entry(ab_status, "0x610", vec![]),
-            entry(banner_params, "0x620", vec![]),
-            entry(base_attach, "0x100", vec![field("_type", "std::string")]),
-            entry(photo_attach, "0x200", vec![field("url", "std::string")]),
+            entry(
+                msg_model,
+                "0x700",
+                vec![field(
+                    "attaches",
+                    &format!("std::vector<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                )],
+            ),
         ];
 
-        let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
+        let models = build_test_model_catalog(vec![packet], vec![], poly_models, entries);
         let model_names: Vec<&str> = models.iter().map(|m| m.name.as_str()).collect();
 
-        assert!(
-            !model_names.contains(&ab_status),
-            "Empty RTTI-only subclass AbStatusParams must be excluded from models"
-        );
-        assert!(
-            !model_names.contains(&banner_params),
-            "Empty RTTI-only subclass BannerParams must be excluded from models"
-        );
-        assert!(
-            !model_names.contains(&unknown_params),
-            "Heuristic-only base UnknownContactInteractionParams without protocol usage must be excluded from models"
-        );
-        assert!(
-            model_names.contains(&photo_attach),
-            "Active variant PhotoAttachment must be included in models"
-        );
+        // Polymorphic bases, active variants, and rtti_subclasses must be excluded from `models`
+        assert!(!model_names.contains(&base_attach));
+        assert!(!model_names.contains(&photo_attach));
+        assert!(!model_names.contains(&file_attach));
+        assert!(!model_names.contains(&event_params));
+        assert!(!model_names.contains(&story_link_meta));
+        assert!(!model_names.contains(&click_story_link));
+        assert!(!model_names.contains(&click_callout));
+        assert!(!model_names.contains(&unknown_params));
+        assert!(!model_names.contains(&ab_status));
+
+        // Standalone models referenced by packets or polymorphic variants must be included
+        assert!(model_names.contains(&msg_model));
+        assert!(model_names.contains(&callout_meta));
+
+        let callout = models.iter().find(|m| m.name == callout_meta).unwrap();
+        assert_eq!(callout.ident, "LogCalloutScreenMeta");
     }
 
     #[test]
-    fn model_catalog_variant_entries_expose_local_fields_only() {
-        let base_attach = "Api::OneMe::Types::BaseAttachment";
-        let photo_attach = "Api::OneMe::Types::PhotoAttachment";
+    fn model_catalog_and_polymorphic_models_disambiguate_colliding_idents() {
+        let base = "Api::OneMe::Types::Log::EventParams";
+        let log_event_params = "Api::OneMe::Types::Log::LogEventParams";
+        let custom_short = "Api::OneMe::Types::Foo::Bar";
+        let custom_dup = "Api::OneMe::Types::Foo::FooBar";
 
-        let poly_models = vec![PolymorphicModelEntry {
-            name: base_attach.to_string(),
-            root_sources: vec!["protocol_field".to_string()],
-            discriminator: Some(PolymorphicDiscriminator {
-                field: "_type".to_string(),
-                r#type: "std::string".to_string(),
-            }),
-            base: PolymorphicBase {
-                offset: Some("0x100".to_string()),
-                fields: vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                ],
-            },
-            variants: vec![PolymorphicVariant {
-                name: photo_attach.to_string(),
-                offset: Some("0x200".to_string()),
-                fields: vec![
-                    field("photoId", "int64_t"),
-                    field("baseUrl", "std::string"),
-                    field("width", "int32_t"),
-                    field("height", "int32_t"),
-                ],
-                all_fields: vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                    field("photoId", "int64_t"),
-                    field("baseUrl", "std::string"),
-                    field("width", "int32_t"),
-                    field("height", "int32_t"),
-                ],
-                tag: Some("PHOTO".to_string()),
-            }],
-            rtti_subclasses: vec![],
-        }];
-
-        let entries = vec![
-            entry(
-                base_attach,
-                "0x100",
-                vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                ],
-            ),
-            entry(
-                photo_attach,
-                "0x200",
-                vec![
-                    field("photoId", "int64_t"),
-                    field("baseUrl", "std::string"),
-                    field("width", "int32_t"),
-                    field("height", "int32_t"),
-                ],
-            ),
-        ];
-
-        let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
-        let photo_model = models
-            .iter()
-            .find(|m| m.name == photo_attach)
-            .expect("PhotoAttachment must be present in models");
-
-        let photo_field_names: Vec<&str> =
-            photo_model.fields.iter().map(|f| f.name.as_str()).collect();
-        assert_eq!(
-            photo_field_names,
-            vec!["photoId", "baseUrl", "width", "height"],
-            "PhotoAttachment in models must contain only local fields"
-        );
-        assert!(
-            !photo_field_names.contains(&"_type"),
-            "_type base field must not be in local fields of PhotoAttachment in models"
-        );
-        assert!(
-            !photo_field_names.contains(&"deleted"),
-            "deleted base field must not be in local fields of PhotoAttachment in models"
-        );
-    }
-
-    #[test]
-    fn model_catalog_suppresses_warn_on_valid_empty_marker_variant() {
-        let base_attach = "Api::OneMe::Types::BaseAttachment";
-        let unsupported = "Api::OneMe::Types::UnsupportedAttachment";
-
-        let poly_models = vec![PolymorphicModelEntry {
-            name: base_attach.to_string(),
-            root_sources: vec!["protocol_field".to_string()],
-            discriminator: Some(PolymorphicDiscriminator {
-                field: "_type".to_string(),
-                r#type: "std::string".to_string(),
-            }),
-            base: PolymorphicBase {
-                offset: Some("0x100".to_string()),
-                fields: vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                ],
-            },
-            variants: vec![PolymorphicVariant {
-                name: unsupported.to_string(),
-                offset: Some("0x531d90".to_string()),
-                fields: vec![],
-                all_fields: vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                ],
-                tag: Some("UNSUPPORTED".to_string()),
-            }],
-            rtti_subclasses: vec![],
-        }];
-
-        let entries = vec![
-            entry(
-                base_attach,
-                "0x100",
-                vec![
-                    field("_type", "std::string"),
-                    field("deleted", "std::optional<bool>"),
-                ],
-            ),
-            TypeDescriptorEntry {
-                name: unsupported.to_string(),
-                offset: Some("0x531d90".to_string()),
-                fields: vec![],
-                warn: Some("no data found".to_string()),
-            },
-        ];
-
-        let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
-        let unsupported_model = models
-            .iter()
-            .find(|m| m.name == unsupported)
-            .expect("UnsupportedAttachment must be present in models");
-
-        assert_eq!(unsupported_model.offset.as_deref(), Some("0x531d90"));
-        assert!(unsupported_model.fields.is_empty());
-        assert_eq!(
-            unsupported_model.warn, None,
-            "warn must be suppressed (None / null) for verified empty marker variant with base fields"
-        );
-    }
-
-    #[test]
-    fn model_catalog_preserves_warn_when_unverified_or_base_has_no_fields() {
-        let base_empty = "Api::OneMe::Types::EmptyBase";
-        let derived_unverified = "Api::OneMe::Types::UnverifiedDerived";
-        let derived_empty_base = "Api::OneMe::Types::EmptyBaseDerived";
-
-        let poly_models = vec![PolymorphicModelEntry {
-            name: base_empty.to_string(),
-            root_sources: vec!["protocol_field".to_string()],
-            discriminator: None,
-            base: PolymorphicBase {
-                offset: Some("0x100".to_string()),
-                fields: vec![],
-            },
-            variants: vec![
-                PolymorphicVariant {
-                    name: derived_unverified.to_string(),
-                    offset: None,
-                    fields: vec![],
-                    all_fields: vec![],
-                    tag: None,
-                },
-                PolymorphicVariant {
-                    name: derived_empty_base.to_string(),
-                    offset: Some("0x200".to_string()),
-                    fields: vec![],
-                    all_fields: vec![],
-                    tag: None,
-                },
+        let (poly_models, _) = build_test_polymorphic_models(
+            roots(base, &["protocol_field"]),
+            hierarchy(base, &[log_event_params]),
+            vec![
+                entry(base, "0x100", vec![field("common", "int32_t")]),
+                entry(log_event_params, "0x200", vec![field("extra", "int32_t")]),
             ],
-            rtti_subclasses: vec![],
-        }];
+        );
+
+        assert_eq!(poly_models[0].ident, "LogEventParams");
+        assert_eq!(poly_models[0].variants[0].ident, "LogLogEventParams");
+        assert_eq!(poly_models[0].rtti_subclasses[0].ident, "LogLogEventParams");
+
+        let packet = PacketEntry {
+            opcode: 1,
+            name: "Api::OneMe::Packets::Test".to_string(),
+            ident: "Test".to_string(),
+            request: entry(
+                "Api::OneMe::Packets::Test::Parameters",
+                "0x10",
+                vec![field("a", custom_short), field("b", custom_dup)],
+            ),
+            response: entry("Api::OneMe::Packets::Test::Response", "0x20", vec![]),
+        };
 
         let entries = vec![
-            entry(base_empty, "0x100", vec![]),
-            TypeDescriptorEntry {
-                name: derived_unverified.to_string(),
-                offset: None,
-                fields: vec![],
-                warn: Some("no data found".to_string()),
-            },
-            TypeDescriptorEntry {
-                name: derived_empty_base.to_string(),
-                offset: Some("0x200".to_string()),
-                fields: vec![],
-                warn: Some("no data found".to_string()),
-            },
+            entry(base, "0x100", vec![field("common", "int32_t")]),
+            entry(log_event_params, "0x200", vec![field("extra", "int32_t")]),
+            entry(custom_short, "0x300", vec![field("x", "int32_t")]),
+            entry(custom_dup, "0x400", vec![field("y", "int32_t")]),
         ];
 
-        let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
+        let models = build_test_model_catalog(vec![packet], vec![], poly_models, entries);
+        let short_model = models.iter().find(|m| m.name == custom_short).unwrap();
+        let dup_model = models.iter().find(|m| m.name == custom_dup).unwrap();
 
-        let unverified = models
-            .iter()
-            .find(|m| m.name == derived_unverified)
-            .unwrap();
-        assert_eq!(unverified.warn, Some("no data found".to_string()));
-
-        let empty_base_var = models
-            .iter()
-            .find(|m| m.name == derived_empty_base)
-            .unwrap();
-        assert_eq!(empty_base_var.warn, Some("no data found".to_string()));
+        assert_eq!(short_model.ident, "FooBar");
+        assert_eq!(dup_model.ident, "FooFooBar");
     }
 
     #[test]
@@ -2080,6 +2043,7 @@ mod tests {
 
         let poly_models = vec![PolymorphicModelEntry {
             name: base_attach.to_string(),
+            ident: "BaseAttachment".to_string(),
             root_sources: vec!["protocol_field".to_string()],
             discriminator: None,
             base: PolymorphicBase {
@@ -2088,6 +2052,7 @@ mod tests {
             },
             variants: vec![PolymorphicVariant {
                 name: video_attach.to_string(),
+                ident: "VideoAttachment".to_string(),
                 offset: Some("0x200".to_string()),
                 fields: vec![field("collage", video_collage)],
                 all_fields: vec![
@@ -2116,9 +2081,11 @@ mod tests {
         ];
 
         let models = build_test_model_catalog(vec![], vec![], poly_models, entries);
+        assert_eq!(models.len(), 1);
         let vc_model = models.iter().find(|m| m.name == video_collage).expect(
             "VideoCollage must be transitively discovered via VideoAttachment variant fields",
         );
+        assert_eq!(vc_model.ident, "VideoCollage");
 
         let vc_fields: Vec<&str> = vc_model.fields.iter().map(|f| f.name.as_str()).collect();
         assert_eq!(
@@ -2137,6 +2104,8 @@ mod tests {
 
         let packet = PacketEntry {
             opcode: 1,
+            name: "Api::OneMe::Packets::Msg::Send".to_string(),
+            ident: "MsgSend".to_string(),
             request: entry(packet_req, "0x10", vec![field("msg", msg_model)]),
             response: entry(packet_resp, "0x20", vec![]),
         };
@@ -2144,7 +2113,8 @@ mod tests {
         let event = EventEntry {
             opcode: 2,
             kind: None,
-            name: None,
+            name: "Api::OneMe::Events::Notify".to_string(),
+            ident: "Notify".to_string(),
             base_kind: None,
             offset: None,
             request: Some(entry(

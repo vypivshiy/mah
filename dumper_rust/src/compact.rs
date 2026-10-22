@@ -62,9 +62,9 @@ fn write_events(out: &mut String, events: &[EventEntry], with_rva: bool) {
         writeln!(out, "event opcode={}", event.opcode).unwrap();
         if let Some(kind) = &event.kind {
             writeln!(out, "  kind: {kind}").unwrap();
-        }
-        if let Some(name) = &event.name {
-            writeln!(out, "  name: {name}").unwrap();
+            if !event.name.is_empty() {
+                writeln!(out, "  name: {}", event.name).unwrap();
+            }
         }
         if let Some(base_kind) = &event.base_kind {
             writeln!(out, "  base_kind: {base_kind}").unwrap();

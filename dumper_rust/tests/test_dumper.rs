@@ -72,8 +72,12 @@ fn test_dumper_full_pipeline_structural_invariants() {
             "Duplicate packet opcode: {}",
             opcode
         );
+        assert!(!p.name.is_empty());
+        assert!(!p.ident.is_empty());
         assert!(!p.request.name.is_empty());
+        assert!(!p.request.ident.is_empty());
         assert!(!p.response.name.is_empty());
+        assert!(!p.response.ident.is_empty());
     }
 
     // 3. Events invariants (exactly 24 events)
@@ -87,6 +91,8 @@ fn test_dumper_full_pipeline_structural_invariants() {
             "Duplicate event opcode: {}",
             opcode
         );
+        assert!(!e.name.is_empty());
+        assert!(!e.ident.is_empty());
     }
     assert!(
         result
@@ -152,14 +158,45 @@ fn test_dumper_full_pipeline_structural_invariants() {
         );
     }
 
-    // 5. Models invariants (BFS discovery) & Transitive discovery of VideoCollage
+    // 5. Models invariants (BFS discovery, separation from polymorphic_models, & VideoCollage)
     assert!(!result.models.is_empty());
+
+    let mut poly_all_names = HashSet::new();
+    for pm in &result.polymorphic_models {
+        assert!(!pm.ident.is_empty());
+        poly_all_names.insert(pm.name.as_str());
+        for v in &pm.variants {
+            assert!(!v.ident.is_empty());
+            poly_all_names.insert(v.name.as_str());
+        }
+        for s in &pm.rtti_subclasses {
+            assert!(!s.ident.is_empty());
+            poly_all_names.insert(s.name.as_str());
+        }
+    }
+
+    let mut model_idents = HashSet::new();
+    for m in &result.models {
+        assert!(!m.ident.is_empty(), "Model {} must have non-empty ident", m.name);
+        assert!(
+            !poly_all_names.contains(m.name.as_str()),
+            "Polymorphic type {} must not be duplicated in models",
+            m.name
+        );
+        assert!(
+            model_idents.insert(m.ident.as_str()),
+            "Duplicate model ident '{}' for {}",
+            m.ident,
+            m.name
+        );
+    }
 
     let video_collage = result
         .models
         .iter()
         .find(|m| m.name == "Api::OneMe::Types::VideoCollage")
         .expect("VideoCollage must be transitively discovered in models");
+    assert_eq!(video_collage.ident, "VideoCollage");
     let vc_field_names: Vec<&str> = video_collage
         .fields
         .iter()
@@ -397,10 +434,21 @@ fn test_compare_with_binja() {
         );
     }
 
-    let rust_model_map: HashMap<&str, &serde_json::Value> = rust_models
+    let mut rust_model_map: HashMap<&str, &serde_json::Value> = rust_models
         .iter()
         .filter_map(|m| m.get("name").and_then(|n| n.as_str()).map(|n| (n, m)))
         .collect();
+    if let Some(poly_models) = rust_data.get("polymorphic_models").and_then(|v| v.as_array()) {
+        for pm in poly_models {
+            if let Some(variants) = pm.get("variants").and_then(|v| v.as_array()) {
+                for v in variants {
+                    if let Some(name) = v.get("name").and_then(|n| n.as_str()) {
+                        rust_model_map.entry(name).or_insert(v);
+                    }
+                }
+            }
+        }
+    }
 
     // Verify Attachment models have complete field sets
     let photo = rust_model_map["Api::OneMe::Types::PhotoAttachment"];
@@ -543,6 +591,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
     let poly_models = vec![
         PolymorphicModelEntry {
             name: base_attach.to_string(),
+            ident: "BaseAttachment".to_string(),
             root_sources: vec!["protocol_field".to_string()],
             discriminator: Some(PolymorphicDiscriminator {
                 field: "_type".to_string(),
@@ -558,6 +607,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
             variants: vec![
                 PolymorphicVariant {
                     name: photo_attach.to_string(),
+                    ident: "PhotoAttachment".to_string(),
                     offset: Some("0x200".to_string()),
                     fields: vec![
                         make_field("photoId", "int64_t"),
@@ -577,6 +627,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
                 },
                 PolymorphicVariant {
                     name: video_attach.to_string(),
+                    ident: "VideoAttachment".to_string(),
                     offset: Some("0x210".to_string()),
                     fields: vec![make_field("collage", video_collage)],
                     all_fields: vec![
@@ -588,6 +639,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
                 },
                 PolymorphicVariant {
                     name: unsupported.to_string(),
+                    ident: "UnsupportedAttachment".to_string(),
                     offset: Some("0x531d90".to_string()),
                     fields: vec![],
                     all_fields: vec![
@@ -601,6 +653,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         },
         PolymorphicModelEntry {
             name: event_params.to_string(),
+            ident: "LogEventParams".to_string(),
             root_sources: vec!["protocol_field".to_string(), "rtti_heuristic".to_string()],
             discriminator: None,
             base: PolymorphicBase {
@@ -609,6 +662,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
             },
             variants: vec![PolymorphicVariant {
                 name: call_params.to_string(),
+                ident: "LogCallEventParams".to_string(),
                 offset: Some("0x400".to_string()),
                 fields: vec![make_field("callDuration", "int64_t")],
                 all_fields: vec![make_field("common", "std::string"), make_field("callDuration", "int64_t")],
@@ -618,6 +672,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         },
         PolymorphicModelEntry {
             name: unknown_params.to_string(),
+            ident: "LogUnknownContactInteractionParams".to_string(),
             root_sources: vec!["rtti_heuristic".to_string()],
             discriminator: None,
             base: PolymorphicBase {
@@ -628,6 +683,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
             rtti_subclasses: vec![
                 PolymorphicVariant {
                     name: ab_status.to_string(),
+                    ident: "LogAbStatusParams".to_string(),
                     offset: Some("0x510".to_string()),
                     fields: vec![],
                     all_fields: vec![],
@@ -635,6 +691,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
                 },
                 PolymorphicVariant {
                     name: banner_params.to_string(),
+                    ident: "LogBannerParams".to_string(),
                     offset: Some("0x520".to_string()),
                     fields: vec![],
                     all_fields: vec![],
@@ -647,6 +704,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
     let entries: HashMap<String, TypeDescriptorEntry> = vec![
         TypeDescriptorEntry {
             name: base_attach.to_string(),
+            ident: "BaseAttachment".to_string(),
             offset: Some("0x100".to_string()),
             fields: vec![
                 make_field("_type", "std::string"),
@@ -656,6 +714,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         },
         TypeDescriptorEntry {
             name: photo_attach.to_string(),
+            ident: "PhotoAttachment".to_string(),
             offset: Some("0x200".to_string()),
             fields: vec![
                 make_field("photoId", "int64_t"),
@@ -667,18 +726,21 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         },
         TypeDescriptorEntry {
             name: video_attach.to_string(),
+            ident: "VideoAttachment".to_string(),
             offset: Some("0x210".to_string()),
             fields: vec![make_field("collage", video_collage)],
             warn: None,
         },
         TypeDescriptorEntry {
             name: unsupported.to_string(),
+            ident: "UnsupportedAttachment".to_string(),
             offset: Some("0x531d90".to_string()),
             fields: vec![],
             warn: Some("no data found".to_string()),
         },
         TypeDescriptorEntry {
             name: video_collage.to_string(),
+            ident: "VideoCollage".to_string(),
             offset: Some("0x220".to_string()),
             fields: vec![
                 make_field("url", "std::string"),
@@ -691,30 +753,35 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         },
         TypeDescriptorEntry {
             name: event_params.to_string(),
+            ident: "LogEventParams".to_string(),
             offset: Some("0x300".to_string()),
             fields: vec![make_field("common", "std::string")],
             warn: None,
         },
         TypeDescriptorEntry {
             name: call_params.to_string(),
+            ident: "LogCallEventParams".to_string(),
             offset: Some("0x400".to_string()),
             fields: vec![make_field("callDuration", "int64_t")],
             warn: None,
         },
         TypeDescriptorEntry {
             name: unknown_params.to_string(),
+            ident: "LogUnknownContactInteractionParams".to_string(),
             offset: Some("0x500".to_string()),
             fields: vec![],
             warn: Some("no data found".to_string()),
         },
         TypeDescriptorEntry {
             name: ab_status.to_string(),
+            ident: "LogAbStatusParams".to_string(),
             offset: Some("0x510".to_string()),
             fields: vec![],
             warn: Some("no data found".to_string()),
         },
         TypeDescriptorEntry {
             name: banner_params.to_string(),
+            ident: "LogBannerParams".to_string(),
             offset: Some("0x520".to_string()),
             fields: vec![],
             warn: Some("no data found".to_string()),
@@ -734,47 +801,21 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
     let models = build_model_catalog(&[], &[], &poly_models, &mut resolve);
     let model_names: Vec<&str> = models.iter().map(|m| m.name.as_str()).collect();
 
-    // 1. Inclusion of real variants from polymorphic_models.variants
-    assert!(model_names.contains(&photo_attach));
-    assert!(model_names.contains(&video_attach));
-    assert!(model_names.contains(&call_params));
-    assert!(model_names.contains(&unsupported));
+    // 1. Exclusion of all polymorphic bases, active variants, and RTTI subclasses from `models`
+    assert!(!model_names.contains(&base_attach));
+    assert!(!model_names.contains(&photo_attach));
+    assert!(!model_names.contains(&video_attach));
+    assert!(!model_names.contains(&event_params));
+    assert!(!model_names.contains(&call_params));
+    assert!(!model_names.contains(&unsupported));
+    assert!(!model_names.contains(&ab_status));
+    assert!(!model_names.contains(&banner_params));
+    assert!(!model_names.contains(&unknown_params));
 
-    // 2. Exclusion of empty RTTI subclasses from models
-    assert!(
-        !model_names.contains(&ab_status),
-        "AbStatusParams must be excluded from models"
-    );
-    assert!(
-        !model_names.contains(&banner_params),
-        "BannerParams must be excluded from models"
-    );
-    assert!(
-        !model_names.contains(&unknown_params),
-        "UnknownContactInteractionParams without protocol usage must be excluded from models"
-    );
-
-    // 3. Correctness of local fields on variant entries in models
-    let photo = models.iter().find(|m| m.name == photo_attach).unwrap();
-    let photo_field_names: Vec<&str> = photo.fields.iter().map(|f| f.name.as_str()).collect();
-    assert_eq!(
-        photo_field_names,
-        vec!["photoId", "baseUrl", "width", "height"]
-    );
-    assert!(!photo_field_names.contains(&"_type"));
-    assert!(!photo_field_names.contains(&"deleted"));
-
-    // 4. Suppression of warn on marker classes like UnsupportedAttachment
-    let unsupp = models.iter().find(|m| m.name == unsupported).unwrap();
-    assert_eq!(unsupp.offset.as_deref(), Some("0x531d90"));
-    assert!(unsupp.fields.is_empty());
-    assert_eq!(
-        unsupp.warn, None,
-        "warn must be None (null in JSON) on UnsupportedAttachment"
-    );
-
-    // 5. Transitive standalone model discovery from variant field
+    // 2. Transitive standalone model discovery from variant field
+    assert_eq!(models.len(), 1);
     let vc = models.iter().find(|m| m.name == video_collage).unwrap();
+    assert_eq!(vc.ident, "VideoCollage");
     let vc_field_names: Vec<&str> = vc.fields.iter().map(|f| f.name.as_str()).collect();
     assert_eq!(
         vc_field_names,

@@ -4,7 +4,7 @@ use dumper_rust::dumper::{
     PolymorphicModelEntry, PolymorphicVariant, TypeDescriptorEntry,
 };
 use dumper_rust::extractor::ExtractedField;
-use dumper_rust::type_parser::decompose_type;
+use dumper_rust::type_parser::{cpp_to_ident, decompose_type};
 
 fn field(name: &str, type_name: &str, required: bool) -> ExtractedField {
     ExtractedField {
@@ -23,6 +23,7 @@ fn type_entry(
     TypeDescriptorEntry {
         offset: Some(offset.to_string()),
         name: name.to_string(),
+        ident: cpp_to_ident(name),
         fields,
         warn: warn.map(str::to_string),
     }
@@ -36,6 +37,7 @@ fn model_entry(
 ) -> ModelEntry {
     ModelEntry {
         name: name.to_string(),
+        ident: cpp_to_ident(name),
         offset: Some(offset.to_string()),
         fields,
         warn: warn.map(str::to_string),
@@ -51,6 +53,7 @@ fn variant(
 ) -> PolymorphicVariant {
     PolymorphicVariant {
         name: name.to_string(),
+        ident: cpp_to_ident(name),
         offset: Some(offset.to_string()),
         fields,
         all_fields,
@@ -107,11 +110,15 @@ fn synthetic_dump() -> DumpResult {
         packets: vec![
             dumper_rust::dumper::PacketEntry {
                 opcode: 20,
+                name: "Api::OneMe::Packets::Zeta".to_string(),
+                ident: "Zeta".to_string(),
                 request: zeta_request,
                 response: zeta_response,
             },
             dumper_rust::dumper::PacketEntry {
                 opcode: 10,
+                name: "Api::OneMe::Packets::Alpha".to_string(),
+                ident: "Alpha".to_string(),
                 request: alpha_request,
                 response: alpha_response,
             },
@@ -120,7 +127,8 @@ fn synthetic_dump() -> DumpResult {
             EventEntry {
                 opcode: 9,
                 kind: Some("special_packet".to_string()),
-                name: Some("Api::OneMe::Packets::Ping".to_string()),
+                name: "Api::OneMe::Packets::Ping".to_string(),
+                ident: "Ping".to_string(),
                 base_kind: Some("Api::OneMe::Packets::BaseEvent".to_string()),
                 offset: Some("0x40".to_string()),
                 request: Some(type_entry(
@@ -135,7 +143,8 @@ fn synthetic_dump() -> DumpResult {
             EventEntry {
                 opcode: 2,
                 kind: None,
-                name: None,
+                name: "Api::OneMe::Events::Beta".to_string(),
+                ident: "Beta".to_string(),
                 base_kind: None,
                 offset: None,
                 request: Some(type_entry(
@@ -170,6 +179,7 @@ fn synthetic_dump() -> DumpResult {
         polymorphic_models: vec![
             PolymorphicModelEntry {
                 name: "Api::OneMe::Types::ZetaBase".to_string(),
+                ident: "ZetaBase".to_string(),
                 root_sources: vec!["rtti_heuristic".to_string()],
                 discriminator: None,
                 base: PolymorphicBase {
@@ -181,6 +191,7 @@ fn synthetic_dump() -> DumpResult {
             },
             PolymorphicModelEntry {
                 name: "Api::OneMe::Types::AlphaBase".to_string(),
+                ident: "AlphaBase".to_string(),
                 root_sources: vec!["rtti_heuristic".to_string(), "protocol_field".to_string()],
                 discriminator: Some(PolymorphicDiscriminator {
                     field: "_type".to_string(),
@@ -305,6 +316,7 @@ fn compact_formatter_omits_discriminator_line_when_none() {
     let mut dump = synthetic_dump();
     dump.polymorphic_models = vec![PolymorphicModelEntry {
         name: "Api::OneMe::Types::Log::EventParams".to_string(),
+        ident: "LogEventParams".to_string(),
         root_sources: vec!["protocol_field".to_string()],
         discriminator: None,
         base: PolymorphicBase {
