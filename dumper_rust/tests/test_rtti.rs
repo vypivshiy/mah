@@ -1,5 +1,5 @@
 use dumper_rust::pe::PeImage;
-use dumper_rust::rtti::{extract_smember_metadata, RttiEngine};
+use dumper_rust::rtti::{clean_demangled_rtti_name, extract_smember_metadata, RttiEngine};
 use dumper_rust::type_parser::decompose_type;
 use std::fs;
 
@@ -136,6 +136,34 @@ fn test_demangle_sample() {
 }
 
 #[test]
+fn test_clean_demangled_rtti_name_strips_nested_template_qualifiers() {
+    let raw = "struct Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>::`RTTI Type Descriptor'";
+    assert_eq!(
+        clean_demangled_rtti_name(raw),
+        "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+    );
+
+    let nested_smember = serializable_member_rtti(
+        "struct Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>",
+        "struct Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>",
+    );
+    let cleaned_smember = clean_demangled_rtti_name(&nested_smember);
+    assert!(!cleaned_smember.contains("struct "));
+    assert!(!cleaned_smember.contains("class "));
+
+    let metadata = extract_smember_metadata(&cleaned_smember, "")
+        .expect("expected SerializableMember metadata after nested qualifier stripping");
+    assert_eq!(
+        metadata.value_type,
+        "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+    );
+    assert_eq!(
+        metadata.owner_type.as_deref(),
+        Some("Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>")
+    );
+}
+
+#[test]
 fn test_rtti_engine_build() {
     let dll_path = match resolve_core_dll() {
         Some(path) => path,
@@ -194,4 +222,15 @@ fn test_rtti_engine_build() {
     assert!(rtti
         .type_to_vtable
         .contains_key("Api::OneMe::Packets::SessionInit::Payload"));
+    assert!(rtti.type_to_vtable.contains_key(
+        "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+    ));
+    for type_name in rtti.type_to_vtable.keys() {
+        if type_name.starts_with("Api::OneMe::") {
+            assert!(
+                !type_name.contains("struct ") && !type_name.contains("class "),
+                "RTTI type name still contains raw C++ qualifier: {type_name}"
+            );
+        }
+    }
 }

@@ -3,18 +3,36 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DecomposedType {
     pub full: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub name: Option<String>,
+    #[serde(default)]
+    pub ident: Option<String>,
     pub optional: bool,
     pub array: bool,
+    #[serde(default)]
+    pub bytes: bool,
     pub map: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub map_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub map_value: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub map_key_type: Option<Box<DecomposedType>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub map_value_type: Option<Box<DecomposedType>>,
     pub polymorphic: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub polymorphic_base: Option<String>,
 }
 
-const QUALIFIERS: &[&str] = &["class ", "struct ", "enum ", "const ", "volatile "];
+const QUALIFIERS: &[&str] = &[
+    "class ",
+    "struct ",
+    "enum ",
+    "union ",
+    "const ",
+    "volatile ",
+];
 
 pub fn strip_qualifiers(mut s: &str) -> &str {
     s = s.trim();
@@ -30,6 +48,47 @@ pub fn strip_qualifiers(mut s: &str) -> &str {
         }
     }
     s
+}
+
+pub fn strip_all_qualifiers(s: &str) -> String {
+    let s = s.trim();
+    let mut out = String::with_capacity(s.len());
+    let mut i = 0;
+    let bytes = s.as_bytes();
+    while i < s.len() {
+        let at_token_boundary = match out.chars().last() {
+            None => true,
+            Some(prev) => !prev.is_ascii_alphanumeric() && prev != '_' && prev != ':',
+        };
+        if at_token_boundary {
+            let mut stripped_any = false;
+            loop {
+                let rest = &s[i..];
+                let mut matched = false;
+                for pfx in QUALIFIERS {
+                    if rest.starts_with(pfx) {
+                        i += pfx.len();
+                        while i < bytes.len() && bytes[i] == b' ' {
+                            i += 1;
+                        }
+                        matched = true;
+                        stripped_any = true;
+                        break;
+                    }
+                }
+                if !matched {
+                    break;
+                }
+            }
+            if stripped_any {
+                continue;
+            }
+        }
+        let ch = s[i..].chars().next().unwrap();
+        out.push(ch);
+        i += ch.len_utf8();
+    }
+    out
 }
 
 pub fn extract_template_args(s: &str) -> Vec<String> {
@@ -106,7 +165,8 @@ pub fn normalize_primitive(s: &str) -> &str {
 }
 
 pub fn normalize_type(raw: &str) -> String {
-    let s = strip_qualifiers(raw);
+    let cleaned = strip_all_qualifiers(raw);
+    let s = strip_qualifiers(&cleaned);
     if s.is_empty() {
         return String::new();
     }
@@ -155,6 +215,10 @@ pub fn normalize_type(raw: &str) -> String {
     let norm_args: Vec<String> = args.iter().map(|a| normalize_type(a)).collect();
 
     match tpl_name {
+        "Utilities::StrongTypedef" => norm_args
+            .first()
+            .cloned()
+            .unwrap_or_else(|| tpl_name.to_string()),
         "std::optional" | "std::vector" | "std::shared_ptr" | "std::unique_ptr" => {
             if let Some(first) = norm_args.first() {
                 format!("{}<{}>", tpl_name, first)
@@ -182,6 +246,278 @@ pub fn normalize_type(raw: &str) -> String {
     }
 }
 
+pub fn is_primitive_or_builtin_type(name: &str) -> bool {
+    matches!(
+        name,
+        "bool"
+            | "char"
+            | "signed char"
+            | "unsigned char"
+            | "int8_t"
+            | "uint8_t"
+            | "int16_t"
+            | "uint16_t"
+            | "int32_t"
+            | "uint32_t"
+            | "int64_t"
+            | "uint64_t"
+            | "int"
+            | "unsigned int"
+            | "short"
+            | "unsigned short"
+            | "__int64"
+            | "unsigned __int64"
+            | "long long"
+            | "unsigned long long"
+            | "float"
+            | "double"
+            | "void"
+            | "size_t"
+            | "ptrdiff_t"
+            | "std::string"
+            | "std::string_view"
+            | "std::byte"
+    ) || name.starts_with("std::")
+}
+
+pub fn is_empty_endpoint_type(name: &str) -> bool {
+    let trimmed = strip_qualifiers(name);
+    if trimmed.is_empty() {
+        return true;
+    }
+    let kind = trimmed.rsplit("::").next().unwrap_or(trimmed);
+    matches!(
+        kind,
+        "EmptyResponse" | "EmptyParameters" | "NoParameters" | "EmptyData"
+    )
+}
+
+const NAMESPACE_PREFIXES: &[&str] = &[
+    "Api::OneMe::Packets::Events::",
+    "Api::OneMe::Packets::",
+    "Api::OneMe::Events::",
+    "Api::OneMe::Types::",
+    "Api::OneMe::",
+    "Auth::OneMe::",
+];
+
+fn segment_to_pascal_case(seg: &str) -> String {
+    let seg = seg.trim();
+    if seg.is_empty() {
+        return String::new();
+    }
+    if seg.contains('_') || seg.contains('-') {
+        seg.split(['_', '-'])
+            .filter(|part| !part.is_empty())
+            .map(|part| {
+                let mut chars = part.chars();
+                match chars.next() {
+                    Some(first) => {
+                        let mut out = String::with_capacity(part.len());
+                        out.push(first.to_ascii_uppercase());
+                        out.push_str(chars.as_str());
+                        out
+                    }
+                    None => String::new(),
+                }
+            })
+            .collect()
+    } else {
+        let mut chars = seg.chars();
+        match chars.next() {
+            Some(first) if first.is_ascii_lowercase() => {
+                let mut out = String::with_capacity(seg.len());
+                out.push(first.to_ascii_uppercase());
+                out.push_str(chars.as_str());
+                out
+            }
+            _ => seg.to_string(),
+        }
+    }
+}
+
+fn cpp_to_ident_impl(cpp_name: &str, collapse_duplicates: bool) -> String {
+    let cleaned = strip_all_qualifiers(cpp_name);
+    let s = strip_qualifiers(&cleaned);
+    if s.is_empty() {
+        return String::new();
+    }
+
+    if s == "Api::OneMe::Types::Log::LogEventParams" {
+        return "LogLogEventParams".to_string();
+    }
+
+    if let Some(idx) = s.find('<') {
+        let base = &s[..idx];
+        let rest = &s[idx + 1..];
+        let mut depth = 0;
+        let mut close = None;
+        for (i, c) in rest.char_indices() {
+            match c {
+                '<' => depth += 1,
+                '>' => {
+                    if depth == 0 {
+                        close = Some(i);
+                        break;
+                    }
+                    depth -= 1;
+                }
+                _ => {}
+            }
+        }
+        if let Some(close_idx) = close {
+            let inner = &rest[..close_idx];
+            let args = extract_template_args(inner);
+            let base_ident = cpp_to_ident_impl(base, collapse_duplicates);
+            let args_ident: String = args
+                .iter()
+                .map(|a| cpp_to_ident_impl(a, collapse_duplicates))
+                .collect();
+            let tail = rest[close_idx + 1..].trim().trim_start_matches("::");
+            let tail_ident = if tail.is_empty() {
+                String::new()
+            } else {
+                cpp_to_ident_impl(tail, collapse_duplicates)
+            };
+            return format!("{base_ident}{args_ident}{tail_ident}");
+        }
+    }
+
+    let mut body = s;
+    for pfx in NAMESPACE_PREFIXES {
+        if let Some(stripped) = body.strip_prefix(pfx) {
+            body = stripped;
+            break;
+        }
+    }
+
+    let raw_segments: Vec<String> = body
+        .split("::")
+        .map(|seg| seg.trim())
+        .filter(|seg| !seg.is_empty() && *seg != "OneMe")
+        .map(segment_to_pascal_case)
+        .filter(|seg| !seg.is_empty())
+        .collect();
+
+    if !collapse_duplicates {
+        return raw_segments.join("");
+    }
+
+    let mut collapsed: Vec<String> = Vec::with_capacity(raw_segments.len());
+    for seg in raw_segments {
+        if let Some(prev) = collapsed.last_mut() {
+            if seg == *prev {
+                continue;
+            }
+            if seg.starts_with(prev.as_str()) {
+                if let Some(next_ch) = seg[prev.len()..].chars().next() {
+                    if next_ch.is_ascii_uppercase() || next_ch.is_ascii_digit() {
+                        *prev = seg;
+                        continue;
+                    }
+                }
+            }
+        }
+        collapsed.push(seg);
+    }
+
+    collapsed.join("")
+}
+
+pub fn cpp_to_ident(cpp_name: &str) -> String {
+    cpp_to_ident_impl(cpp_name, true)
+}
+
+pub fn cpp_to_ident_uncollapsed(cpp_name: &str) -> String {
+    cpp_to_ident_impl(cpp_name, false)
+}
+
+fn strip_operation_suffixes(cpp_name: &str) -> String {
+    let cleaned = strip_all_qualifiers(cpp_name);
+    let mut s = strip_qualifiers(&cleaned);
+    for suffix in &["::Parameters", "::Payload", "::Response", "::Request"] {
+        if let Some(stripped) = s.strip_suffix(suffix) {
+            s = stripped;
+            break;
+        }
+    }
+    for sub_suffix in &["::Common", "::StickerSet", "::AnimojiSet"] {
+        if let Some(stripped) = s.strip_suffix(sub_suffix) {
+            s = stripped;
+            break;
+        }
+    }
+    s.to_string()
+}
+
+pub fn derive_packet_operation(opcode: u32, req_name: &str, resp_name: &str) -> (String, String) {
+    let source = if !is_empty_endpoint_type(req_name) {
+        Some(req_name)
+    } else if !is_empty_endpoint_type(resp_name) {
+        Some(resp_name)
+    } else {
+        None
+    };
+
+    if let Some(src) = source {
+        let op_name = strip_operation_suffixes(src);
+        let op_ident = cpp_to_ident(&op_name);
+        (op_name, op_ident)
+    } else {
+        (
+            format!("Api::OneMe::Packets::Opcode{opcode}"),
+            format!("Opcode{opcode}"),
+        )
+    }
+}
+
+pub fn derive_event_operation(
+    opcode: u32,
+    existing_name: Option<&str>,
+    req_name: &str,
+    resp_name: &str,
+) -> (String, String) {
+    if let Some(n) = existing_name {
+        let cleaned = strip_all_qualifiers(n);
+        let trimmed = strip_qualifiers(&cleaned);
+        if !trimmed.is_empty() {
+            return (trimmed.to_string(), cpp_to_ident(trimmed));
+        }
+    }
+
+    let source = if !is_empty_endpoint_type(resp_name) {
+        Some(resp_name)
+    } else if !is_empty_endpoint_type(req_name) {
+        Some(req_name)
+    } else {
+        None
+    };
+
+    if let Some(src) = source {
+        let op_name = strip_operation_suffixes(src);
+        let op_ident = cpp_to_ident(&op_name);
+        (op_name, op_ident)
+    } else {
+        (
+            format!("Api::OneMe::Packets::Events::Opcode{opcode}"),
+            format!("Opcode{opcode}"),
+        )
+    }
+}
+
+pub fn qualify_endpoint_ident(parent_ident: &str, endpoint_cpp_name: &str) -> String {
+    let desc_ident = cpp_to_ident(endpoint_cpp_name);
+    if matches!(
+        desc_ident.as_str(),
+        "Parameters" | "Payload" | "Response" | "Request"
+    ) && !parent_ident.is_empty()
+    {
+        format!("{parent_ident}{desc_ident}")
+    } else {
+        desc_ident
+    }
+}
+
 pub fn extract_polymorphic_base(s: &str) -> Option<String> {
     let idx = s.find("Polymorphic<")?;
     let inner = &s[idx + "Polymorphic<".len()..];
@@ -197,11 +533,15 @@ pub fn decompose_type(raw_type: &str) -> DecomposedType {
     let mut result = DecomposedType {
         full: full.clone(),
         name: Some(full.clone()),
+        ident: None,
         optional: false,
         array: false,
+        bytes: false,
         map: false,
         map_key: None,
         map_value: None,
+        map_key_type: None,
+        map_value_type: None,
         polymorphic: poly_base.is_some(),
         polymorphic_base: poly_base.clone(),
     };
@@ -256,10 +596,15 @@ pub fn decompose_type(raw_type: &str) -> DecomposedType {
             if let Some(inner) = extract_inner_template(stripped, pfx) {
                 let args = extract_template_args(&inner);
                 if args.len() >= 2 {
+                    let key_norm = normalize_type(&args[0]);
+                    let val_norm = normalize_type(&args[1]);
                     result.map = true;
-                    result.map_key = Some(normalize_type(&args[0]));
-                    result.map_value = Some(normalize_type(&args[1]));
+                    result.map_key = Some(key_norm.clone());
+                    result.map_value = Some(val_norm.clone());
+                    result.map_key_type = Some(Box::new(decompose_type(&key_norm)));
+                    result.map_value_type = Some(Box::new(decompose_type(&val_norm)));
                     result.name = None;
+                    result.ident = None;
                     return result;
                 }
             }
@@ -273,6 +618,16 @@ pub fn decompose_type(raw_type: &str) -> DecomposedType {
     } else {
         let norm = normalize_type(&current);
         result.name = if norm.is_empty() { None } else { Some(norm) };
+    }
+
+    result.bytes = result.array && matches!(result.name.as_deref(), Some("std::byte" | "char"));
+    if let Some(ref leaf) = result.name {
+        if !is_primitive_or_builtin_type(leaf) && !is_empty_endpoint_type(leaf) {
+            let id = cpp_to_ident(leaf);
+            if !id.is_empty() {
+                result.ident = Some(id);
+            }
+        }
     }
 
     result

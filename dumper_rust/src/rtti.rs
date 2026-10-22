@@ -1,5 +1,5 @@
 use crate::pe::PeImage;
-use crate::type_parser::extract_template_args;
+use crate::type_parser::{extract_template_args, strip_all_qualifiers};
 use anyhow::Result;
 use std::collections::HashMap;
 
@@ -267,13 +267,6 @@ pub fn clean_demangled_rtti_name(s: &str) -> String {
     if let Some(pos) = clean.rfind("::`RTTI Type Descriptor'") {
         clean = &clean[..pos];
     }
-    // Strip leading struct/class/union/enum
-    for prefix in &["class ", "struct ", "union ", "enum "] {
-        if clean.starts_with(prefix) {
-            clean = &clean[prefix.len()..];
-            break;
-        }
-    }
     // Normalize basic_string (both with and without leading class qualifier)
     let clean_str = clean.replace(
         "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >",
@@ -287,8 +280,17 @@ pub fn clean_demangled_rtti_name(s: &str) -> String {
         "class std::basic_string_view<char,struct std::char_traits<char> >",
         "std::string_view",
     );
-    clean_str.replace(
+    let clean_str = clean_str.replace(
         "std::basic_string_view<char,struct std::char_traits<char> >",
+        "std::string_view",
+    );
+    let stripped = strip_all_qualifiers(&clean_str);
+    let stripped = stripped.replace(
+        "std::basic_string<char,std::char_traits<char>,std::allocator<char> >",
+        "std::string",
+    );
+    stripped.replace(
+        "std::basic_string_view<char,std::char_traits<char> >",
         "std::string_view",
     )
 }

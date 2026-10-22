@@ -1,4 +1,7 @@
-use dumper_rust::type_parser::{decompose_type, normalize_type};
+use dumper_rust::type_parser::{
+    cpp_to_ident, cpp_to_ident_uncollapsed, decompose_type, derive_event_operation,
+    derive_packet_operation, normalize_type, qualify_endpoint_ident,
+};
 
 #[test]
 fn test_normalize_basic_types() {
@@ -170,4 +173,254 @@ fn test_canonical_primitive_type_normalization() {
     let d8 = decompose_type("unsigned char");
     assert_eq!(d8.name.as_deref(), Some("uint8_t"));
     assert_eq!(d8.full, "uint8_t");
+}
+
+#[test]
+fn test_nested_qualifier_stripping() {
+    assert_eq!(
+        normalize_type("ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>"),
+        "ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+    );
+    assert_eq!(
+        normalize_type(
+            "struct Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>"
+        ),
+        "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+    );
+    assert_eq!(
+        normalize_type(
+            "const volatile class std::optional<const struct Api::OneMe::Types::Outer<enum Api::OneMe::Types::Kind, union Api::OneMe::Types::RawUnion>>"
+        ),
+        "std::optional<Api::OneMe::Types::Outer<Api::OneMe::Types::Kind, Api::OneMe::Types::RawUnion>>"
+    );
+}
+
+#[test]
+fn test_strong_typedef_unwrapping() {
+    let raw = "struct Utilities::StrongTypedef<class std::optional<__int64>,struct Api::OneMe::Types::ServerSettings::AbStatusTag,0>";
+    assert_eq!(normalize_type(raw), "std::optional<int64_t>");
+
+    let d = decompose_type(raw);
+    assert_eq!(d.full, "std::optional<int64_t>");
+    assert_eq!(d.name.as_deref(), Some("int64_t"));
+    assert_eq!(d.ident, None);
+    assert!(d.optional);
+    assert!(!d.array);
+    assert!(!d.bytes);
+    assert!(!d.map);
+}
+
+#[test]
+fn test_bytes_flag_detection() {
+    let byte_vec = decompose_type("class std::vector<enum std::byte>");
+    assert_eq!(byte_vec.full, "std::vector<std::byte>");
+    assert_eq!(byte_vec.name.as_deref(), Some("std::byte"));
+    assert_eq!(byte_vec.ident, None);
+    assert!(byte_vec.array);
+    assert!(byte_vec.bytes);
+
+    let char_vec = decompose_type("std::optional<std::vector<signed char>>");
+    assert_eq!(char_vec.full, "std::optional<std::vector<char>>");
+    assert_eq!(char_vec.name.as_deref(), Some("char"));
+    assert_eq!(char_vec.ident, None);
+    assert!(char_vec.optional);
+    assert!(char_vec.array);
+    assert!(char_vec.bytes);
+
+    let scalar_char = decompose_type("char");
+    assert!(!scalar_char.array);
+    assert!(!scalar_char.bytes);
+
+    let int_vec = decompose_type("std::vector<int32_t>");
+    assert!(int_vec.array);
+    assert!(!int_vec.bytes);
+}
+
+#[test]
+fn test_cpp_to_ident_rules_and_collisions() {
+    // Prefix stripping & duplicate category prefix collapsing
+    assert_eq!(cpp_to_ident("Api::OneMe::Types::Message"), "Message");
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Types::Contact::ContactInfo"),
+        "ContactInfo"
+    );
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Types::Stories::StoriesList"),
+        "StoriesList"
+    );
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Packets::Auth::OneMe::TokenAttributes"),
+        "AuthTokenAttributes"
+    );
+    assert_eq!(
+        cpp_to_ident("Auth::OneMe::TokenAttributes"),
+        "TokenAttributes"
+    );
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Packets::Events::SessionInit::Response"),
+        "SessionInitResponse"
+    );
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Events::Telemetry::Request"),
+        "TelemetryRequest"
+    );
+
+    // Deterministic collision resolution: EventParams vs LogEventParams
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Types::Log::EventParams"),
+        "LogEventParams"
+    );
+    assert_eq!(
+        cpp_to_ident("Api::OneMe::Types::Log::LogEventParams"),
+        "LogLogEventParams"
+    );
+    assert_eq!(
+        cpp_to_ident_uncollapsed("Api::OneMe::Types::Log::LogEventParams"),
+        "LogLogEventParams"
+    );
+
+    // Template concatenation with inner struct qualifier
+    assert_eq!(
+        cpp_to_ident(
+            "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::CalloutScreenMeta>"
+        ),
+        "LogClickParamsLogCalloutScreenMeta"
+    );
+}
+
+#[test]
+fn test_operation_and_endpoint_ident_helpers() {
+    let (op_name, op_ident) = derive_packet_operation(
+        19,
+        "Api::OneMe::Packets::Auth::OneMe::Auth::Parameters",
+        "Api::OneMe::Packets::Auth::OneMe::Auth::Response",
+    );
+    assert_eq!(op_name, "Api::OneMe::Packets::Auth::OneMe::Auth");
+    assert_eq!(op_ident, "Auth");
+
+    let (asset_name, asset_ident) = derive_packet_operation(
+        26,
+        "Api::OneMe::Packets::Assets::GetAsset::Common::Parameters",
+        "Api::OneMe::Packets::Assets::GetAsset::StickerSet::Response",
+    );
+    assert_eq!(asset_name, "Api::OneMe::Packets::Assets::GetAsset");
+    assert_eq!(asset_ident, "AssetsGetAsset");
+
+    let (empty_name, empty_ident) = derive_packet_operation(
+        20,
+        "Api::OneMe::Packets::EmptyParameters",
+        "Api::OneMe::Packets::EmptyResponse",
+    );
+    assert_eq!(empty_name, "Api::OneMe::Packets::Opcode20");
+    assert_eq!(empty_ident, "Opcode20");
+
+    let (ev_name, ev_ident) = derive_event_operation(
+        1,
+        Some("Api::OneMe::Packets::Ping"),
+        "Api::OneMe::Packets::Ping::Payload",
+        "",
+    );
+    assert_eq!(ev_name, "Api::OneMe::Packets::Ping");
+    assert_eq!(ev_ident, "Ping");
+
+    assert_eq!(
+        qualify_endpoint_ident("Ping", "Api::OneMe::Packets::EmptyParameters"),
+        "EmptyParameters"
+    );
+    assert_eq!(
+        qualify_endpoint_ident("Ping", "Api::OneMe::Packets::Payload"),
+        "PingPayload"
+    );
+}
+
+#[test]
+fn test_recursive_map_decomposition_and_ident_population() {
+    let raw =
+        "std::optional<std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Message>>>";
+    let d = decompose_type(raw);
+
+    assert_eq!(
+        d.full,
+        "std::optional<std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Message>>>"
+    );
+    assert_eq!(d.name, None);
+    assert_eq!(d.ident, None);
+    assert!(d.optional);
+    assert!(!d.array);
+    assert!(!d.bytes);
+    assert!(d.map);
+    assert_eq!(d.map_key.as_deref(), Some("int64_t"));
+    assert_eq!(
+        d.map_value.as_deref(),
+        Some("std::vector<Api::OneMe::Types::Message>")
+    );
+
+    let key_type = d.map_key_type.as_ref().expect("map_key_type must be Some");
+    assert_eq!(key_type.full, "int64_t");
+    assert_eq!(key_type.name.as_deref(), Some("int64_t"));
+    assert_eq!(key_type.ident, None);
+    assert!(!key_type.optional);
+    assert!(!key_type.array);
+    assert!(!key_type.bytes);
+    assert!(!key_type.map);
+    assert!(!key_type.polymorphic);
+
+    let val_type = d
+        .map_value_type
+        .as_ref()
+        .expect("map_value_type must be Some");
+    assert_eq!(val_type.full, "std::vector<Api::OneMe::Types::Message>");
+    assert_eq!(val_type.name.as_deref(), Some("Api::OneMe::Types::Message"));
+    assert_eq!(val_type.ident.as_deref(), Some("Message"));
+    assert!(!val_type.optional);
+    assert!(val_type.array);
+    assert!(!val_type.bytes);
+    assert!(!val_type.map);
+    assert!(!val_type.polymorphic);
+
+    let poly_d = decompose_type(
+        "std::optional<Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>",
+    );
+    assert_eq!(
+        poly_d.name.as_deref(),
+        Some("Api::OneMe::Types::BaseAttachment")
+    );
+    assert_eq!(poly_d.ident.as_deref(), Some("BaseAttachment"));
+
+    let json_val = serde_json::to_value(&d).expect("DecomposedType must serialize to JSON");
+    assert_eq!(
+        json_val,
+        serde_json::json!({
+            "full": "std::optional<std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Message>>>",
+            "name": null,
+            "ident": null,
+            "optional": true,
+            "array": false,
+            "bytes": false,
+            "map": true,
+            "map_key": "int64_t",
+            "map_value": "std::vector<Api::OneMe::Types::Message>",
+            "map_key_type": {
+                "full": "int64_t",
+                "name": "int64_t",
+                "ident": null,
+                "optional": false,
+                "array": false,
+                "bytes": false,
+                "map": false,
+                "polymorphic": false
+            },
+            "map_value_type": {
+                "full": "std::vector<Api::OneMe::Types::Message>",
+                "name": "Api::OneMe::Types::Message",
+                "ident": "Message",
+                "optional": false,
+                "array": true,
+                "bytes": false,
+                "map": false,
+                "polymorphic": false
+            },
+            "polymorphic": false
+        })
+    );
 }
