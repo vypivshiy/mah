@@ -58,6 +58,12 @@ fn test_dumper_full_pipeline_structural_invariants() {
     );
     assert!(result.options.build > 0, "Build number must be positive");
 
+    let is_valid_ident = |ident: &str| -> bool {
+        !ident.is_empty()
+            && ident.chars().next().unwrap().is_ascii_uppercase()
+            && ident.chars().all(|c| c.is_ascii_alphanumeric())
+    };
+
     // 2. Packets invariants (at least 128 packets)
     assert!(
         result.packets.len() >= 128,
@@ -65,6 +71,7 @@ fn test_dumper_full_pipeline_structural_invariants() {
         result.packets.len()
     );
     let mut packet_opcodes = HashSet::new();
+    let mut packet_ident_to_name: HashMap<&str, &str> = HashMap::new();
     for p in &result.packets {
         let opcode = p.opcode;
         assert!(opcode > 0, "Opcode must be positive");
@@ -74,16 +81,61 @@ fn test_dumper_full_pipeline_structural_invariants() {
             opcode
         );
         assert!(!p.name.is_empty());
-        assert!(!p.ident.is_empty());
+        assert!(
+            is_valid_ident(&p.ident),
+            "Packet {} ({}) has invalid ident '{}'",
+            opcode,
+            p.name,
+            p.ident
+        );
+        assert!(
+            packet_ident_to_name.insert(&p.ident, &p.name).is_none(),
+            "Duplicate packet ident '{}' on opcode {} ({})",
+            p.ident,
+            opcode,
+            p.name
+        );
         assert!(!p.request.name.is_empty());
-        assert!(!p.request.ident.is_empty());
+        assert!(
+            is_valid_ident(&p.request.ident),
+            "Packet {} request {} has invalid ident '{}'",
+            opcode,
+            p.request.name,
+            p.request.ident
+        );
         assert!(!p.response.name.is_empty());
-        assert!(!p.response.ident.is_empty());
+        assert!(
+            is_valid_ident(&p.response.ident),
+            "Packet {} response {} has invalid ident '{}'",
+            opcode,
+            p.response.name,
+            p.response.ident
+        );
     }
+
+    // Verify empty-parameter packet fallback and counterpart derivation
+    let pkt_20 = result
+        .packets
+        .iter()
+        .find(|p| p.opcode == 20)
+        .expect("Opcode 20 must exist");
+    assert_eq!(pkt_20.ident, "Opcode20");
+    assert_eq!(pkt_20.request.ident, "EmptyParameters");
+    assert_eq!(pkt_20.response.ident, "EmptyResponse");
+
+    let pkt_25 = result
+        .packets
+        .iter()
+        .find(|p| p.opcode == 25)
+        .expect("Opcode 25 must exist");
+    assert_eq!(pkt_25.ident, "AvatarPresetAvatar");
+    assert_eq!(pkt_25.request.ident, "EmptyParameters");
+    assert_eq!(pkt_25.response.ident, "AvatarPresetAvatarResponse");
 
     // 3. Events invariants (exactly 24 events)
     assert_eq!(result.events.len(), 24, "Must discover exactly 24 events");
     let mut event_opcodes = HashSet::new();
+    let mut event_idents = HashSet::new();
     for e in &result.events {
         let opcode = e.opcode;
         assert!(opcode > 0, "Event opcode must be positive");
@@ -93,7 +145,39 @@ fn test_dumper_full_pipeline_structural_invariants() {
             opcode
         );
         assert!(!e.name.is_empty());
-        assert!(!e.ident.is_empty());
+        assert!(
+            is_valid_ident(&e.ident),
+            "Event {} ({}) has invalid ident '{}'",
+            opcode,
+            e.name,
+            e.ident
+        );
+        assert!(
+            event_idents.insert(e.ident.as_str()),
+            "Duplicate event ident '{}' on opcode {}",
+            e.ident,
+            opcode
+        );
+        if let Some(req) = &e.request {
+            assert!(!req.name.is_empty());
+            assert!(
+                is_valid_ident(&req.ident),
+                "Event {} request {} has invalid ident '{}'",
+                opcode,
+                req.name,
+                req.ident
+            );
+        }
+        if let Some(resp) = &e.response {
+            assert!(!resp.name.is_empty());
+            assert!(
+                is_valid_ident(&resp.ident),
+                "Event {} response {} has invalid ident '{}'",
+                opcode,
+                resp.name,
+                resp.ident
+            );
+        }
     }
     assert!(
         result
@@ -159,26 +243,54 @@ fn test_dumper_full_pipeline_structural_invariants() {
         );
     }
 
-    // 5. Models invariants (BFS discovery, separation from polymorphic_models, & VideoCollage)
+    // 5. Models & Polymorphic models invariants:
+    //    - BFS discovery, disjoint separation between `models` and `polymorphic_models`
+    //    - Valid, collision-free `ident` across all models, polymorphic bases, variants, and subclasses
+    //    - Specific disambiguations (`LogEventParams` vs `LogLogEventParams`, `LogClickParamsLogCalloutScreenMeta`)
+    //    - Standalone models referenced by variants (`VideoCollage`, `Crop`, `Keyboard`, `StoryOwner`, `WidgetContent`)
     assert!(!result.models.is_empty());
 
     let mut poly_all_names = HashSet::new();
+    let mut all_type_ident_to_name: HashMap<String, String> = HashMap::new();
+    let mut record_type_ident = |ident: &str, name: &str| {
+        assert!(
+            is_valid_ident(ident),
+            "Type '{}' has invalid ident '{}'",
+            name,
+            ident
+        );
+        assert!(
+            !name.contains("struct ") && !name.contains("Utilities::StrongTypedef"),
+            "Type name '{}' contains unnormalized qualifier",
+            name
+        );
+        if let Some(existing_name) = all_type_ident_to_name.get(ident) {
+            assert_eq!(
+                existing_name, name,
+                "Type ident collision: '{}' maps to both '{}' and '{}'",
+                ident, existing_name, name
+            );
+        } else {
+            all_type_ident_to_name.insert(ident.to_string(), name.to_string());
+        }
+    };
+
     for pm in &result.polymorphic_models {
-        assert!(!pm.ident.is_empty());
+        record_type_ident(&pm.ident, &pm.name);
         poly_all_names.insert(pm.name.as_str());
         for v in &pm.variants {
-            assert!(!v.ident.is_empty());
+            record_type_ident(&v.ident, &v.name);
             poly_all_names.insert(v.name.as_str());
         }
         for s in &pm.rtti_subclasses {
-            assert!(!s.ident.is_empty());
+            record_type_ident(&s.ident, &s.name);
             poly_all_names.insert(s.name.as_str());
         }
     }
 
     let mut model_idents = HashSet::new();
     for m in &result.models {
-        assert!(!m.ident.is_empty(), "Model {} must have non-empty ident", m.name);
+        record_type_ident(&m.ident, &m.name);
         assert!(
             !poly_all_names.contains(m.name.as_str()),
             "Polymorphic type {} must not be duplicated in models",
@@ -192,12 +304,59 @@ fn test_dumper_full_pipeline_structural_invariants() {
         );
     }
 
+    let log_event_pm = result
+        .polymorphic_models
+        .iter()
+        .find(|pm| pm.name == "Api::OneMe::Types::Log::EventParams")
+        .expect("Log::EventParams polymorphic model must exist");
+    assert_eq!(log_event_pm.ident, "LogEventParams");
+
+    let log_log_event_var = log_event_pm
+        .variants
+        .iter()
+        .find(|v| v.name == "Api::OneMe::Types::Log::LogEventParams")
+        .expect("Log::LogEventParams variant must exist");
+    assert_eq!(log_log_event_var.ident, "LogLogEventParams");
+
+    let callout_click_var = log_event_pm
+        .variants
+        .iter()
+        .find(|v| {
+            v.name
+                == "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::CalloutScreenMeta>"
+        })
+        .expect("ClickParams<CalloutScreenMeta> variant must exist with stripped 'struct '");
+    assert_eq!(
+        callout_click_var.ident,
+        "LogClickParamsLogCalloutScreenMeta"
+    );
+
+    for (expected_name, expected_ident) in [
+        ("Api::OneMe::Types::VideoCollage", "VideoCollage"),
+        ("Api::OneMe::Types::Crop", "Crop"),
+        ("Api::OneMe::Types::Keyboard", "Keyboard"),
+        ("Api::OneMe::Types::StoryOwner", "StoryOwner"),
+        ("Api::OneMe::Types::WidgetContent", "WidgetContent"),
+    ] {
+        let model = result
+            .models
+            .iter()
+            .find(|m| m.name == expected_name)
+            .unwrap_or_else(|| {
+                panic!("Standalone model {expected_name} referenced by variant must exist in models")
+            });
+        assert_eq!(model.ident, expected_ident);
+        assert!(
+            !model.fields.is_empty(),
+            "Standalone model {expected_name} must have extracted fields"
+        );
+    }
+
     let video_collage = result
         .models
         .iter()
         .find(|m| m.name == "Api::OneMe::Types::VideoCollage")
         .expect("VideoCollage must be transitively discovered in models");
-    assert_eq!(video_collage.ident, "VideoCollage");
     let vc_field_names: Vec<&str> = video_collage
         .fields
         .iter()
@@ -208,8 +367,74 @@ fn test_dumper_full_pipeline_structural_invariants() {
         vec!["url", "frequency", "height", "width", "count"]
     );
 
-    // 6. Cleanliness invariants: no blacklisted false fields & no raw MSVC primitives
+    // 6. Cleanliness & DecomposedType invariants:
+    //    - No blacklisted false fields, raw MSVC primitives, "struct ", or "Utilities::StrongTypedef"
+    //    - `bytes: true` iff array of `std::byte` or `char`
+    //    - Recursive `map_key_type` and `map_value_type` on all maps
     let blacklisted = ["PUBLIC", "POLL", "BlacklistConverter"];
+    fn check_decomposed_type(
+        dt: &dumper_rust::type_parser::DecomposedType,
+        is_valid_ident: &dyn Fn(&str) -> bool,
+    ) {
+        for s in [
+            Some(dt.full.as_str()),
+            dt.name.as_deref(),
+            dt.map_key.as_deref(),
+            dt.map_value.as_deref(),
+            dt.polymorphic_base.as_deref(),
+        ]
+        .into_iter()
+        .flatten()
+        {
+            assert!(!s.contains("__int64"), "Raw __int64 in type: {s}");
+            assert!(!s.contains("signed char"), "Raw signed char in type: {s}");
+            assert!(!s.contains("basic_string"), "Raw basic_string in type: {s}");
+            assert!(!s.contains("struct "), "Raw 'struct ' qualifier in type: {s}");
+            assert!(
+                !s.contains("Utilities::StrongTypedef"),
+                "Unwrapped StrongTypedef leaked in type: {s}"
+            );
+        }
+
+        if let Some(ref ident) = dt.ident {
+            assert!(
+                is_valid_ident(ident),
+                "DecomposedType '{}' has invalid ident '{}'",
+                dt.full,
+                ident
+            );
+        }
+
+        let expected_bytes = dt.array && matches!(dt.name.as_deref(), Some("std::byte" | "char"));
+        assert_eq!(
+            dt.bytes, expected_bytes,
+            "DecomposedType '{}' bytes flag mismatch (expected {})",
+            dt.full, expected_bytes
+        );
+
+        if dt.map {
+            assert!(dt.name.is_none(), "Map type '{}' must have name: None", dt.full);
+            assert!(dt.ident.is_none(), "Map type '{}' must have ident: None", dt.full);
+            assert!(dt.map_key.is_some(), "Map type '{}' missing map_key", dt.full);
+            assert!(dt.map_value.is_some(), "Map type '{}' missing map_value", dt.full);
+            let kt = dt
+                .map_key_type
+                .as_ref()
+                .unwrap_or_else(|| panic!("Map type '{}' missing map_key_type", dt.full));
+            let vt = dt
+                .map_value_type
+                .as_ref()
+                .unwrap_or_else(|| panic!("Map type '{}' missing map_value_type", dt.full));
+            check_decomposed_type(kt, is_valid_ident);
+            check_decomposed_type(vt, is_valid_ident);
+        } else {
+            assert!(dt.map_key.is_none());
+            assert!(dt.map_value.is_none());
+            assert!(dt.map_key_type.is_none());
+            assert!(dt.map_value_type.is_none());
+        }
+    }
+
     let check_fields_cleanliness = |fields: &[dumper_rust::extractor::ExtractedField]| {
         for f in fields {
             for bad in &blacklisted {
@@ -220,18 +445,7 @@ fn test_dumper_full_pipeline_structural_invariants() {
                     bad
                 );
             }
-            let full = &f.field_type.full;
-            assert!(!full.contains("__int64"), "Raw __int64 in type: {}", full);
-            assert!(
-                !full.contains("signed char"),
-                "Raw signed char in type: {}",
-                full
-            );
-            assert!(
-                !full.contains("basic_string"),
-                "Raw basic_string in type: {}",
-                full
-            );
+            check_decomposed_type(&f.field_type, &is_valid_ident);
 
             if f.field_type.optional {
                 assert!(
@@ -250,6 +464,22 @@ fn test_dumper_full_pipeline_structural_invariants() {
         }
     };
 
+    for p in &result.packets {
+        check_fields_cleanliness(&p.request.fields);
+        check_fields_cleanliness(&p.response.fields);
+        assert!(p.request.fields.iter().all(|f| !f.recursive));
+        assert!(p.response.fields.iter().all(|f| !f.recursive));
+    }
+    for e in &result.events {
+        if let Some(req) = &e.request {
+            check_fields_cleanliness(&req.fields);
+            assert!(req.fields.iter().all(|f| !f.recursive));
+        }
+        if let Some(resp) = &e.response {
+            check_fields_cleanliness(&resp.fields);
+            assert!(resp.fields.iter().all(|f| !f.recursive));
+        }
+    }
     for m in &result.models {
         check_fields_cleanliness(&m.fields);
     }
@@ -261,7 +491,7 @@ fn test_dumper_full_pipeline_structural_invariants() {
         }
     }
 
-    // 7. Recursive ownership cycle detection invariants
+    // Concrete verification of StrongTypedef unwrapping, bytes: true, and recursive map_value_type
     let find_model_field = |model_name: &str, field_name: &str| {
         result
             .models
@@ -273,6 +503,66 @@ fn test_dumper_full_pipeline_structural_invariants() {
             .find(|f| f.name == field_name)
             .unwrap_or_else(|| panic!("Missing field {model_name}.{field_name}"))
     };
+
+    let ab_status = find_model_field("Api::OneMe::Types::ServerSettings", "ab-status");
+    assert_eq!(ab_status.field_type.full, "std::optional<int64_t>");
+    assert_eq!(ab_status.field_type.name.as_deref(), Some("int64_t"));
+    assert_eq!(ab_status.field_type.ident, None);
+
+    let chat_folder_filters = find_model_field("Api::OneMe::Types::ChatFolder", "filters");
+    assert_eq!(
+        chat_folder_filters.field_type.full,
+        "std::optional<std::vector<char>>"
+    );
+    assert!(chat_folder_filters.field_type.array);
+    assert!(chat_folder_filters.field_type.bytes);
+    assert_eq!(chat_folder_filters.field_type.ident, None);
+
+    let pkt_19 = result
+        .packets
+        .iter()
+        .find(|p| p.opcode == 19)
+        .expect("Opcode 19 (Auth::Login) must exist");
+    let fingerprint_field = pkt_19
+        .request
+        .fields
+        .iter()
+        .find(|f| f.name == "chatCacheFingerprint")
+        .expect("Auth::Login request must have chatCacheFingerprint");
+    assert_eq!(
+        fingerprint_field.field_type.full,
+        "std::optional<std::vector<std::byte>>"
+    );
+    assert!(fingerprint_field.field_type.array);
+    assert!(fingerprint_field.field_type.bytes);
+    assert_eq!(fingerprint_field.field_type.ident, None);
+
+    let login_messages_field = pkt_19
+        .response
+        .fields
+        .iter()
+        .find(|f| f.name == "messages")
+        .expect("Auth::Login response must have messages map");
+    assert_eq!(
+        login_messages_field.field_type.full,
+        "std::optional<std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Message>>>"
+    );
+    assert!(login_messages_field.field_type.map);
+    let msg_map_vt = login_messages_field
+        .field_type
+        .map_value_type
+        .as_ref()
+        .expect("messages map must have map_value_type");
+    assert_eq!(msg_map_vt.full, "std::vector<Api::OneMe::Types::Message>");
+    assert_eq!(
+        msg_map_vt.name.as_deref(),
+        Some("Api::OneMe::Types::Message")
+    );
+    assert_eq!(msg_map_vt.ident.as_deref(), Some("Message"));
+    assert!(msg_map_vt.array);
+    assert!(!msg_map_vt.bytes);
+
+    // 7. Recursive ownership cycle detection invariants (exact 7 cycle-forming fields)
     assert!(
         find_model_field("Api::OneMe::Types::Message", "link").recursive,
         "Message.link must be recursive"
@@ -323,10 +613,56 @@ fn test_dumper_full_pipeline_structural_invariants() {
         assert!(control_var.all_fields.iter().find(|f| f.name == "pinnedMessage").unwrap().recursive);
     }
 
-    // 8. JSON serialization validity
+    let mut recursive_edges = HashSet::new();
+    for m in &result.models {
+        for f in &m.fields {
+            if f.recursive {
+                recursive_edges.insert((m.name.as_str(), f.name.as_str()));
+            }
+        }
+    }
+    for pm in &result.polymorphic_models {
+        for f in &pm.base.fields {
+            if f.recursive {
+                recursive_edges.insert((pm.name.as_str(), f.name.as_str()));
+            }
+        }
+        for v in pm.variants.iter().chain(pm.rtti_subclasses.iter()) {
+            for f in v.fields.iter().chain(v.all_fields.iter()) {
+                if f.recursive {
+                    recursive_edges.insert((v.name.as_str(), f.name.as_str()));
+                }
+            }
+        }
+    }
+    let expected_recursive_edges: HashSet<(&str, &str)> = [
+        ("Api::OneMe::Types::Message", "link"),
+        ("Api::OneMe::Types::MessageLink", "message"),
+        ("Api::OneMe::Types::Message", "messagePreview"),
+        ("Api::OneMe::Types::MessagePreview", "attachment"),
+        ("Api::OneMe::Types::FileAttachment", "preview"),
+        ("Api::OneMe::Types::ShareAttachment", "media"),
+        ("Api::OneMe::Types::ControlAttachment", "pinnedMessage"),
+    ]
+    .into_iter()
+    .collect();
+    assert_eq!(
+        recursive_edges, expected_recursive_edges,
+        "Exact set of 7 cycle-forming fields must be marked recursive: true"
+    );
+
+    // 8. JSON serialization validity & global string cleanliness
     let json_str = serde_json::to_string_pretty(&result).expect("Failed to serialize to JSON");
     assert!(json_str.starts_with('{'));
     assert!(json_str.ends_with('}'));
+    assert!(
+        !json_str.contains("struct "),
+        "Serialized JSON must not contain any 'struct ' qualifier"
+    );
+    assert!(
+        !json_str.contains("Utilities::StrongTypedef"),
+        "Serialized JSON must not contain any 'Utilities::StrongTypedef'"
+    );
 }
 
 #[test]

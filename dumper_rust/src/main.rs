@@ -83,11 +83,11 @@ pub struct DumpArgs {
     pub compact_output: Option<PathBuf>,
 
     /// Manual app_version override (auto-detected from binary if omitted)
-    #[arg(long, default_value = "")]
+    #[arg(long, alias = "app_version", default_value = "")]
     pub app_version: String,
 
     /// Manual build_number override (auto-detected from binary if omitted)
-    #[arg(long, default_value_t = 0)]
+    #[arg(long, alias = "build_number", default_value_t = 0)]
     pub build_number: u32,
 }
 

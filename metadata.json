@@ -7,7 +7,7 @@
   "summary": {
     "total_packets": 133,
     "total_events": 24,
-    "total_models": 225,
+    "total_models": 139,
     "total_features": 262,
     "total_source_files": 210,
     "total_log_templates": 452
@@ -99,7 +99,7 @@
     "web_app_user_gesture_timeout": 3000
   },
   "features": {
-    "ab-status": "Utilities::StrongTypedef<std::optional<int64_t>>",
+    "ab-status": "std::optional<int64_t>",
     "account-nickname-enabled": "std::optional<bool>",
     "action-phone-number": "std::optional<bool>",
     "add-participants-to-gc": "std::optional<bool>",
@@ -442,11 +442,11 @@
       "BACKGROUND": "Api::OneMe::Types::Log::SettingsBackgoundParams",
       "BANNER": "Api::OneMe::Types::Log::BannerParams",
       "CHAT_MESSAGE_LINK": "Api::OneMe::Types::Log::ChatMessageLinkParams",
-      "CLICK": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::StoryLinkMeta>",
+      "CLICK": "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::StoryLinkMeta>",
       "DANGEROUS_FILE_ACTIONS": "Api::OneMe::Types::Log::UnsafeFilesAlertParams",
       "DANGEROUS_URL_ACTIONS": "Api::OneMe::Types::Log::UnsafeUrlAlertParams",
       "LOG": "Api::OneMe::Types::Log::QrAuthParams",
-      "MENU": "Api::OneMe::Types::Log::ClickParams<struct Api::OneMe::Types::Log::VideoSpeedChangeMeta>",
+      "MENU": "Api::OneMe::Types::Log::ClickParams<Api::OneMe::Types::Log::VideoSpeedChangeMeta>",
       "ORGANIZATION_INFO": "Api::OneMe::Types::Log::OrganizationInfoParams",
       "PERF": "Api::OneMe::Types::Log::UploadParams",
       "SEARCH_RESPONSE": "Api::OneMe::Types::Log::SearchEventParams",
