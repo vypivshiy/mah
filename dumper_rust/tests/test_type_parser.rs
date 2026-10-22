@@ -424,3 +424,35 @@ fn test_recursive_map_decomposition_and_ident_population() {
         })
     );
 }
+
+#[test]
+fn test_map_with_polymorphic_value_does_not_mark_outer_map_polymorphic() {
+    let raw =
+        "std::unordered_map<int64_t, Api::OneMe::Types::Polymorphic<Api::OneMe::Types::BaseAttachment>>";
+    let d = decompose_type(raw);
+
+    assert!(d.map);
+    assert!(!d.polymorphic);
+    assert_eq!(d.polymorphic_base, None);
+    assert_eq!(d.name, None);
+    assert_eq!(d.ident, None);
+
+    let key_type = d.map_key_type.as_ref().expect("map_key_type must be Some");
+    assert!(!key_type.polymorphic);
+    assert_eq!(key_type.polymorphic_base, None);
+
+    let val_type = d
+        .map_value_type
+        .as_ref()
+        .expect("map_value_type must be Some");
+    assert!(val_type.polymorphic);
+    assert_eq!(
+        val_type.polymorphic_base.as_deref(),
+        Some("Api::OneMe::Types::BaseAttachment")
+    );
+    assert_eq!(
+        val_type.name.as_deref(),
+        Some("Api::OneMe::Types::BaseAttachment")
+    );
+    assert_eq!(val_type.ident.as_deref(), Some("BaseAttachment"));
+}

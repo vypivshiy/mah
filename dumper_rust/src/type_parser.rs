@@ -166,7 +166,7 @@ pub fn normalize_primitive(s: &str) -> &str {
 
 pub fn normalize_type(raw: &str) -> String {
     let cleaned = strip_all_qualifiers(raw);
-    let s = strip_qualifiers(&cleaned);
+    let s = cleaned.as_str();
     if s.is_empty() {
         return String::new();
     }
@@ -186,7 +186,7 @@ pub fn normalize_type(raw: &str) -> String {
         None => return s.to_string(),
     };
 
-    let tpl_name = strip_qualifiers(&s[..idx]);
+    let tpl_name = s[..idx].trim();
     let rest = &s[idx + 1..];
 
     let mut depth = 0;
@@ -338,7 +338,7 @@ fn segment_to_pascal_case(seg: &str) -> String {
 
 fn cpp_to_ident_impl(cpp_name: &str, collapse_duplicates: bool) -> String {
     let cleaned = strip_all_qualifiers(cpp_name);
-    let s = strip_qualifiers(&cleaned);
+    let s = cleaned.as_str();
     if s.is_empty() {
         return String::new();
     }
@@ -434,7 +434,7 @@ pub fn cpp_to_ident_uncollapsed(cpp_name: &str) -> String {
 
 fn strip_operation_suffixes(cpp_name: &str) -> String {
     let cleaned = strip_all_qualifiers(cpp_name);
-    let mut s = strip_qualifiers(&cleaned);
+    let mut s = cleaned.as_str();
     for suffix in &["::Parameters", "::Payload", "::Response", "::Request"] {
         if let Some(stripped) = s.strip_suffix(suffix) {
             s = stripped;
@@ -450,11 +450,16 @@ fn strip_operation_suffixes(cpp_name: &str) -> String {
     s.to_string()
 }
 
-pub fn derive_packet_operation(opcode: u32, req_name: &str, resp_name: &str) -> (String, String) {
-    let source = if !is_empty_endpoint_type(req_name) {
-        Some(req_name)
-    } else if !is_empty_endpoint_type(resp_name) {
-        Some(resp_name)
+fn derive_operation_from_endpoints(
+    primary: &str,
+    secondary: &str,
+    fallback_prefix: &str,
+    opcode: u32,
+) -> (String, String) {
+    let source = if !is_empty_endpoint_type(primary) {
+        Some(primary)
+    } else if !is_empty_endpoint_type(secondary) {
+        Some(secondary)
     } else {
         None
     };
@@ -465,10 +470,14 @@ pub fn derive_packet_operation(opcode: u32, req_name: &str, resp_name: &str) -> 
         (op_name, op_ident)
     } else {
         (
-            format!("Api::OneMe::Packets::Opcode{opcode}"),
+            format!("{fallback_prefix}::Opcode{opcode}"),
             format!("Opcode{opcode}"),
         )
     }
+}
+
+pub fn derive_packet_operation(opcode: u32, req_name: &str, resp_name: &str) -> (String, String) {
+    derive_operation_from_endpoints(req_name, resp_name, "Api::OneMe::Packets", opcode)
 }
 
 pub fn derive_event_operation(
@@ -479,30 +488,12 @@ pub fn derive_event_operation(
 ) -> (String, String) {
     if let Some(n) = existing_name {
         let cleaned = strip_all_qualifiers(n);
-        let trimmed = strip_qualifiers(&cleaned);
-        if !trimmed.is_empty() {
-            return (trimmed.to_string(), cpp_to_ident(trimmed));
+        if !cleaned.is_empty() {
+            return (cleaned.clone(), cpp_to_ident(&cleaned));
         }
     }
 
-    let source = if !is_empty_endpoint_type(resp_name) {
-        Some(resp_name)
-    } else if !is_empty_endpoint_type(req_name) {
-        Some(req_name)
-    } else {
-        None
-    };
-
-    if let Some(src) = source {
-        let op_name = strip_operation_suffixes(src);
-        let op_ident = cpp_to_ident(&op_name);
-        (op_name, op_ident)
-    } else {
-        (
-            format!("Api::OneMe::Packets::Events::Opcode{opcode}"),
-            format!("Opcode{opcode}"),
-        )
-    }
+    derive_operation_from_endpoints(resp_name, req_name, "Api::OneMe::Packets::Events", opcode)
 }
 
 pub fn qualify_endpoint_ident(parent_ident: &str, endpoint_cpp_name: &str) -> String {
@@ -605,6 +596,8 @@ pub fn decompose_type(raw_type: &str) -> DecomposedType {
                     result.map_value_type = Some(Box::new(decompose_type(&val_norm)));
                     result.name = None;
                     result.ident = None;
+                    result.polymorphic = false;
+                    result.polymorphic_base = None;
                     return result;
                 }
             }

@@ -12,8 +12,9 @@ use crate::rtti::RttiEngine;
 use crate::scanner::ProtocolScanner;
 use crate::type_parser::{
     cpp_to_ident, cpp_to_ident_uncollapsed, derive_event_operation, derive_packet_operation,
-    extract_polymorphic_base, qualify_endpoint_ident,
+    extract_polymorphic_base, qualify_endpoint_ident, DecomposedType,
 };
+pub use crate::type_parser::is_primitive_or_builtin_type;
 use anyhow::Result;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -374,6 +375,16 @@ impl Dumper {
         let mut models_list =
             build_model_catalog(&packets, &events, &polymorphic_models, &mut find_type_entry);
 
+        let ident_overrides =
+            disambiguate_catalog_idents(&mut models_list, &mut polymorphic_models);
+        propagate_ident_overrides(
+            &mut packets,
+            &mut events,
+            &mut models_list,
+            &mut polymorphic_models,
+            &ident_overrides,
+        );
+
         mark_recursive_fields(&mut models_list, &mut polymorphic_models);
 
         let discriminators = build_discriminator_catalog(&polymorphic_models);
@@ -481,32 +492,6 @@ pub fn extract_polymorphic_base_from_field(field: &ExtractedField) -> Option<Str
                 .as_deref()
                 .and_then(extract_polymorphic_base)
         })
-}
-
-pub fn is_primitive_or_builtin_type(name: &str) -> bool {
-    matches!(
-        name,
-        "bool"
-            | "char"
-            | "int8_t"
-            | "uint8_t"
-            | "int16_t"
-            | "uint16_t"
-            | "int32_t"
-            | "uint32_t"
-            | "int64_t"
-            | "uint64_t"
-            | "int"
-            | "unsigned int"
-            | "short"
-            | "unsigned short"
-            | "long long"
-            | "unsigned long long"
-            | "float"
-            | "double"
-            | "std::string"
-            | "std::string_view"
-    ) || name.starts_with("std::")
 }
 
 static API_REF_RE: OnceLock<Regex> = OnceLock::new();
@@ -852,10 +837,7 @@ where
 
     let mut models: Vec<ModelEntry> = models_map.into_values().collect();
     disambiguate_model_idents(&mut models, polymorphic_models);
-    let adj = build_non_indirected_ownership_graph(&models, polymorphic_models);
-    for model in &mut models {
-        mark_fields_for_owner(&mut model.fields, &model.name, &adj);
-    }
+    mark_recursive_model_fields(&mut models, polymorphic_models);
     models
 }
 
@@ -952,15 +934,22 @@ fn mark_fields_for_owner(
     }
 }
 
+fn mark_recursive_model_fields(
+    models: &mut [ModelEntry],
+    polymorphic_models: &[PolymorphicModelEntry],
+) -> HashMap<String, HashSet<String>> {
+    let adj = build_non_indirected_ownership_graph(models, polymorphic_models);
+    for model in models.iter_mut() {
+        mark_fields_for_owner(&mut model.fields, &model.name, &adj);
+    }
+    adj
+}
+
 pub fn mark_recursive_fields(
     models: &mut [ModelEntry],
     polymorphic_models: &mut [PolymorphicModelEntry],
 ) {
-    let adj = build_non_indirected_ownership_graph(models, polymorphic_models);
-
-    for model in models.iter_mut() {
-        mark_fields_for_owner(&mut model.fields, &model.name, &adj);
-    }
+    let adj = mark_recursive_model_fields(models, polymorphic_models);
 
     for poly in polymorphic_models.iter_mut() {
         mark_fields_for_owner(&mut poly.base.fields, &poly.name, &adj);
@@ -975,25 +964,106 @@ pub fn mark_recursive_fields(
     }
 }
 
-fn disambiguate_polymorphic_idents(polymorphic_models: &mut [PolymorphicModelEntry]) {
+fn propagate_ident_overrides_to_type(
+    dt: &mut DecomposedType,
+    overrides: &HashMap<String, String>,
+) {
+    if let Some(name) = dt.name.as_deref() {
+        if let Some(new_ident) = overrides.get(name) {
+            dt.ident = Some(new_ident.clone());
+        }
+    } else if let Some(base) = dt.polymorphic_base.as_deref() {
+        if let Some(new_ident) = overrides.get(base) {
+            dt.ident = Some(new_ident.clone());
+        }
+    }
+    if let Some(key_type) = dt.map_key_type.as_deref_mut() {
+        propagate_ident_overrides_to_type(key_type, overrides);
+    }
+    if let Some(val_type) = dt.map_value_type.as_deref_mut() {
+        propagate_ident_overrides_to_type(val_type, overrides);
+    }
+}
+
+fn propagate_ident_overrides_to_fields(
+    fields: &mut [ExtractedField],
+    overrides: &HashMap<String, String>,
+) {
+    for field in fields {
+        propagate_ident_overrides_to_type(&mut field.field_type, overrides);
+    }
+}
+
+pub fn propagate_ident_overrides(
+    packets: &mut [PacketEntry],
+    events: &mut [EventEntry],
+    models: &mut [ModelEntry],
+    polymorphic_models: &mut [PolymorphicModelEntry],
+    overrides: &HashMap<String, String>,
+) {
+    if overrides.is_empty() {
+        return;
+    }
+    for packet in packets {
+        propagate_ident_overrides_to_fields(&mut packet.request.fields, overrides);
+        propagate_ident_overrides_to_fields(&mut packet.response.fields, overrides);
+    }
+    for event in events {
+        if let Some(req) = &mut event.request {
+            propagate_ident_overrides_to_fields(&mut req.fields, overrides);
+        }
+        if let Some(resp) = &mut event.response {
+            propagate_ident_overrides_to_fields(&mut resp.fields, overrides);
+        }
+    }
+    for model in models {
+        propagate_ident_overrides_to_fields(&mut model.fields, overrides);
+    }
+    for poly in polymorphic_models {
+        propagate_ident_overrides_to_fields(&mut poly.base.fields, overrides);
+        for variant in &mut poly.variants {
+            propagate_ident_overrides_to_fields(&mut variant.fields, overrides);
+            propagate_ident_overrides_to_fields(&mut variant.all_fields, overrides);
+        }
+        for sub in &mut poly.rtti_subclasses {
+            propagate_ident_overrides_to_fields(&mut sub.fields, overrides);
+            propagate_ident_overrides_to_fields(&mut sub.all_fields, overrides);
+        }
+    }
+}
+
+pub fn disambiguate_catalog_idents(
+    models: &mut [ModelEntry],
+    polymorphic_models: &mut [PolymorphicModelEntry],
+) -> HashMap<String, String> {
     let mut ident_to_names: HashMap<String, BTreeSet<String>> = HashMap::new();
-    for poly in polymorphic_models.iter() {
-        ident_to_names
-            .entry(poly.ident.clone())
-            .or_default()
-            .insert(poly.name.clone());
-        for v in &poly.variants {
+    let mut record_entry = |name: &str, current_ident: &str| {
+        let collapsed = cpp_to_ident(name);
+        if !collapsed.is_empty() {
             ident_to_names
-                .entry(v.ident.clone())
+                .entry(collapsed)
                 .or_default()
-                .insert(v.name.clone());
+                .insert(name.to_string());
+        }
+        if !current_ident.is_empty() {
+            ident_to_names
+                .entry(current_ident.to_string())
+                .or_default()
+                .insert(name.to_string());
+        }
+    };
+
+    for poly in polymorphic_models.iter() {
+        record_entry(&poly.name, &poly.ident);
+        for v in &poly.variants {
+            record_entry(&v.name, &v.ident);
         }
         for s in &poly.rtti_subclasses {
-            ident_to_names
-                .entry(s.ident.clone())
-                .or_default()
-                .insert(s.name.clone());
+            record_entry(&s.name, &s.ident);
         }
+    }
+    for m in models.iter() {
+        record_entry(&m.name, &m.ident);
     }
 
     let colliding_idents: HashSet<String> = ident_to_names
@@ -1001,83 +1071,51 @@ fn disambiguate_polymorphic_idents(polymorphic_models: &mut [PolymorphicModelEnt
         .filter_map(|(ident, names)| if names.len() > 1 { Some(ident) } else { None })
         .collect();
 
+    let mut overrides = HashMap::new();
     if colliding_idents.is_empty() {
-        return;
+        return overrides;
     }
 
-    for poly in polymorphic_models.iter_mut() {
-        if colliding_idents.contains(&poly.ident) {
-            let uncollapsed = cpp_to_ident_uncollapsed(&poly.name);
+    let mut update_ident = |name: &str, ident: &mut String| {
+        let collapsed = cpp_to_ident(name);
+        if colliding_idents.contains(ident.as_str()) || colliding_idents.contains(&collapsed) {
+            let uncollapsed = cpp_to_ident_uncollapsed(name);
             if !uncollapsed.is_empty() {
-                poly.ident = uncollapsed;
+                *ident = uncollapsed.clone();
+                overrides.insert(name.to_string(), uncollapsed);
             }
         }
+    };
+
+    for poly in polymorphic_models.iter_mut() {
+        update_ident(&poly.name, &mut poly.ident);
         for v in &mut poly.variants {
-            if colliding_idents.contains(&v.ident) {
-                let uncollapsed = cpp_to_ident_uncollapsed(&v.name);
-                if !uncollapsed.is_empty() {
-                    v.ident = uncollapsed;
-                }
-            }
+            update_ident(&v.name, &mut v.ident);
         }
         for s in &mut poly.rtti_subclasses {
-            if colliding_idents.contains(&s.ident) {
-                let uncollapsed = cpp_to_ident_uncollapsed(&s.name);
-                if !uncollapsed.is_empty() {
-                    s.ident = uncollapsed;
-                }
-            }
+            update_ident(&s.name, &mut s.ident);
         }
     }
+
+    for m in models.iter_mut() {
+        update_ident(&m.name, &mut m.ident);
+    }
+
+    propagate_ident_overrides(&mut [], &mut [], models, polymorphic_models, &overrides);
+
+    overrides
+}
+
+fn disambiguate_polymorphic_idents(polymorphic_models: &mut [PolymorphicModelEntry]) {
+    disambiguate_catalog_idents(&mut [], polymorphic_models);
 }
 
 fn disambiguate_model_idents(
     models: &mut [ModelEntry],
     polymorphic_models: &[PolymorphicModelEntry],
 ) {
-    let mut ident_to_names: HashMap<String, BTreeSet<String>> = HashMap::new();
-    for poly in polymorphic_models {
-        ident_to_names
-            .entry(poly.ident.clone())
-            .or_default()
-            .insert(poly.name.clone());
-        for v in &poly.variants {
-            ident_to_names
-                .entry(v.ident.clone())
-                .or_default()
-                .insert(v.name.clone());
-        }
-        for s in &poly.rtti_subclasses {
-            ident_to_names
-                .entry(s.ident.clone())
-                .or_default()
-                .insert(s.name.clone());
-        }
-    }
-    for m in models.iter() {
-        ident_to_names
-            .entry(m.ident.clone())
-            .or_default()
-            .insert(m.name.clone());
-    }
-
-    let colliding_idents: HashSet<String> = ident_to_names
-        .into_iter()
-        .filter_map(|(ident, names)| if names.len() > 1 { Some(ident) } else { None })
-        .collect();
-
-    if colliding_idents.is_empty() {
-        return;
-    }
-
-    for m in models.iter_mut() {
-        if colliding_idents.contains(&m.ident) {
-            let uncollapsed = cpp_to_ident_uncollapsed(&m.name);
-            if !uncollapsed.is_empty() {
-                m.ident = uncollapsed;
-            }
-        }
-    }
+    let mut poly_copy = polymorphic_models.to_vec();
+    disambiguate_catalog_idents(models, &mut poly_copy);
 }
 
 fn polymorphic_variant_from_entry(
@@ -2158,6 +2196,107 @@ mod tests {
 
         assert_eq!(short_model.ident, "FooBar");
         assert_eq!(dup_model.ident, "FooFooBar");
+    }
+
+    #[test]
+    fn disambiguated_idents_propagate_to_direct_and_nested_map_field_types() {
+        let custom_short = "Api::OneMe::Types::Foo::Bar";
+        let custom_dup = "Api::OneMe::Types::Foo::FooBar";
+        let nested_map_type =
+            "std::unordered_map<int64_t, std::vector<Api::OneMe::Types::Foo::FooBar>>";
+
+        let mut packets = vec![PacketEntry {
+            opcode: 1,
+            name: "Api::OneMe::Packets::Test".to_string(),
+            ident: "Test".to_string(),
+            request: entry(
+                "Api::OneMe::Packets::Test::Parameters",
+                "0x10",
+                vec![
+                    field("a", custom_short),
+                    field("b", custom_dup),
+                    field("nested_map", nested_map_type),
+                ],
+            ),
+            response: entry("Api::OneMe::Packets::Test::Response", "0x20", vec![]),
+        }];
+
+        let entries = vec![
+            entry(
+                custom_short,
+                "0x300",
+                vec![
+                    field("direct", custom_dup),
+                    field("nested_map", nested_map_type),
+                ],
+            ),
+            entry(custom_dup, "0x400", vec![field("y", "int32_t")]),
+        ];
+
+        let mut poly_models = Vec::new();
+        let mut models = build_test_model_catalog(packets.clone(), vec![], poly_models.clone(), entries);
+        let overrides = disambiguate_catalog_idents(&mut models, &mut poly_models);
+        propagate_ident_overrides(
+            &mut packets,
+            &mut [],
+            &mut models,
+            &mut poly_models,
+            &overrides,
+        );
+
+        let short_model = models.iter().find(|m| m.name == custom_short).unwrap();
+        let dup_model = models.iter().find(|m| m.name == custom_dup).unwrap();
+        assert_eq!(short_model.ident, "FooBar");
+        assert_eq!(dup_model.ident, "FooFooBar");
+
+        let direct_field = short_model
+            .fields
+            .iter()
+            .find(|f| f.name == "direct")
+            .unwrap();
+        assert_eq!(direct_field.field_type.ident.as_deref(), Some("FooFooBar"));
+
+        let nested_field = short_model
+            .fields
+            .iter()
+            .find(|f| f.name == "nested_map")
+            .unwrap();
+        assert_eq!(nested_field.field_type.ident, None);
+        assert_eq!(
+            nested_field
+                .field_type
+                .map_value_type
+                .as_ref()
+                .unwrap()
+                .ident
+                .as_deref(),
+            Some("FooFooBar")
+        );
+
+        let pkt_b = packets[0]
+            .request
+            .fields
+            .iter()
+            .find(|f| f.name == "b")
+            .unwrap();
+        assert_eq!(pkt_b.field_type.ident.as_deref(), Some("FooFooBar"));
+
+        let pkt_nested = packets[0]
+            .request
+            .fields
+            .iter()
+            .find(|f| f.name == "nested_map")
+            .unwrap();
+        assert_eq!(
+            pkt_nested
+                .field_type
+                .map_value_type
+                .as_ref()
+                .unwrap()
+                .ident
+                .as_deref(),
+            Some("FooFooBar")
+        );
     }
 
     #[test]

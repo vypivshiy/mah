@@ -5,6 +5,7 @@ use crate::extractor::{
 use crate::pe::PeImage;
 use crate::rtti::{clean_demangled_rtti_name, RttiEngine};
 use crate::type_parser::DecomposedType;
+pub use crate::type_parser::is_empty_endpoint_type as is_empty_model_type_name;
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
 
@@ -651,12 +652,4 @@ fn warn_for_no_data(type_name: &str) -> Option<String> {
     } else {
         Some("no data found".to_string())
     }
-}
-
-pub fn is_empty_model_type_name(name: &str) -> bool {
-    let kind = name.rsplit("::").next().unwrap_or(name);
-    matches!(
-        kind,
-        "EmptyResponse" | "EmptyParameters" | "NoParameters" | "EmptyData"
-    )
 }
