@@ -13,6 +13,8 @@ pub struct ExtractedField {
     #[serde(rename = "type")]
     pub field_type: DecomposedType,
     pub required: bool,
+    #[serde(default)]
+    pub recursive: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -33,6 +35,7 @@ impl FieldCandidate {
             name: self.name,
             field_type: self.field_type,
             required: self.required,
+            recursive: false,
         }
     }
 }

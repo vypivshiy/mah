@@ -139,6 +139,7 @@ pub fn ping_payload_fields() -> Vec<ExtractedField> {
         name: "interactive".to_string(),
         field_type: decompose_type("bool"),
         required: false,
+        recursive: false,
     }]
 }
 

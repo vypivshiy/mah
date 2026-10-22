@@ -11,6 +11,7 @@ fn field(name: &str, type_name: &str, required: bool) -> ExtractedField {
         name: name.to_string(),
         field_type: decompose_type(type_name),
         required,
+        recursive: false,
     }
 }
 

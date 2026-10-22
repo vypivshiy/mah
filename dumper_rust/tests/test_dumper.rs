@@ -1,6 +1,7 @@
 use dumper_rust::dumper::{
-    build_model_catalog, Dumper, DumperOptions, PolymorphicBase, PolymorphicDiscriminator,
-    PolymorphicModelEntry, PolymorphicVariant, TypeDescriptorEntry,
+    build_model_catalog, build_polymorphic_models, mark_recursive_fields, Dumper, DumperOptions,
+    PacketEntry, PolymorphicBase, PolymorphicDiscriminator, PolymorphicModelEntry,
+    PolymorphicVariant, RootSource, TypeDescriptorEntry,
 };
 use dumper_rust::extractor::ExtractedField;
 use dumper_rust::pe::PeImage;
@@ -239,6 +240,13 @@ fn test_dumper_full_pipeline_structural_invariants() {
                     f.name
                 );
             }
+            if f.field_type.array || f.field_type.map {
+                assert!(
+                    !f.recursive,
+                    "Indirected field '{}' (array/map) must have recursive: false",
+                    f.name
+                );
+            }
         }
     };
 
@@ -253,7 +261,69 @@ fn test_dumper_full_pipeline_structural_invariants() {
         }
     }
 
-    // 7. JSON serialization validity
+    // 7. Recursive ownership cycle detection invariants
+    let find_model_field = |model_name: &str, field_name: &str| {
+        result
+            .models
+            .iter()
+            .find(|m| m.name == model_name)
+            .unwrap_or_else(|| panic!("Missing model {model_name}"))
+            .fields
+            .iter()
+            .find(|f| f.name == field_name)
+            .unwrap_or_else(|| panic!("Missing field {model_name}.{field_name}"))
+    };
+    assert!(
+        find_model_field("Api::OneMe::Types::Message", "link").recursive,
+        "Message.link must be recursive"
+    );
+    assert!(
+        find_model_field("Api::OneMe::Types::MessageLink", "message").recursive,
+        "MessageLink.message must be recursive"
+    );
+    assert!(
+        find_model_field("Api::OneMe::Types::Message", "messagePreview").recursive,
+        "Message.messagePreview must be recursive"
+    );
+    assert!(
+        find_model_field("Api::OneMe::Types::MessagePreview", "attachment").recursive,
+        "MessagePreview.attachment must be recursive"
+    );
+    assert!(
+        !find_model_field("Api::OneMe::Types::Message", "attaches").recursive,
+        "Message.attaches (array: true) must remain recursive: false"
+    );
+
+    let base_attach_pm = result
+        .polymorphic_models
+        .iter()
+        .find(|pm| pm.name == "Api::OneMe::Types::BaseAttachment")
+        .expect("BaseAttachment polymorphic model must exist");
+    for variant_list in [&base_attach_pm.variants, &base_attach_pm.rtti_subclasses] {
+        let file_var = variant_list
+            .iter()
+            .find(|v| v.name == "Api::OneMe::Types::FileAttachment")
+            .expect("FileAttachment variant must exist");
+        assert!(file_var.fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+        assert!(file_var.all_fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+
+        let share_var = variant_list
+            .iter()
+            .find(|v| v.name == "Api::OneMe::Types::ShareAttachment")
+            .expect("ShareAttachment variant must exist");
+        assert!(share_var.fields.iter().find(|f| f.name == "media").unwrap().recursive);
+        assert!(share_var.all_fields.iter().find(|f| f.name == "media").unwrap().recursive);
+        assert!(!share_var.fields.iter().find(|f| f.name == "image").unwrap().recursive);
+
+        let control_var = variant_list
+            .iter()
+            .find(|v| v.name == "Api::OneMe::Types::ControlAttachment")
+            .expect("ControlAttachment variant must exist");
+        assert!(control_var.fields.iter().find(|f| f.name == "pinnedMessage").unwrap().recursive);
+        assert!(control_var.all_fields.iter().find(|f| f.name == "pinnedMessage").unwrap().recursive);
+    }
+
+    // 8. JSON serialization validity
     let json_str = serde_json::to_string_pretty(&result).expect("Failed to serialize to JSON");
     assert!(json_str.starts_with('{'));
     assert!(json_str.ends_with('}'));
@@ -586,6 +656,7 @@ fn test_model_catalog_filtering_and_variant_local_fields() {
         name: name.to_string(),
         field_type: decompose_type(type_name),
         required: false,
+        recursive: false,
     };
 
     let poly_models = vec![
@@ -896,4 +967,245 @@ fn test_discriminator_catalog_and_tag_discovery_invariants() {
 
     let audio_var = base_poly.variants.iter().find(|v| v.name == "Api::OneMe::Types::AudioAttachment").unwrap();
     assert_eq!(audio_var.tag.as_deref(), Some("AUDIO"));
+}
+
+#[test]
+fn test_recursive_ownership_cycle_detection_end_to_end() {
+    use std::collections::{BTreeMap, BTreeSet};
+
+    let base_attach = "Api::OneMe::Types::BaseAttachment";
+    let file_attach = "Api::OneMe::Types::FileAttachment";
+    let share_attach = "Api::OneMe::Types::ShareAttachment";
+    let control_attach = "Api::OneMe::Types::ControlAttachment";
+    let photo_attach = "Api::OneMe::Types::PhotoAttachment";
+    let msg = "Api::OneMe::Types::Message";
+    let msg_link = "Api::OneMe::Types::MessageLink";
+    let msg_preview = "Api::OneMe::Types::MessagePreview";
+    let out_msg = "Api::OneMe::Types::OutgoingMessage";
+    let out_msg_link = "Api::OneMe::Types::OutgoingMessage::OutgoingMessageLink";
+
+    let make_field = |name: &str, type_name: &str| ExtractedField {
+        name: name.to_string(),
+        field_type: decompose_type(type_name),
+        required: false,
+        recursive: false,
+    };
+
+    let make_entry = |name: &str, offset: &str, fields: Vec<ExtractedField>| TypeDescriptorEntry {
+        name: name.to_string(),
+        ident: dumper_rust::type_parser::cpp_to_ident(name),
+        offset: Some(offset.to_string()),
+        fields,
+        warn: None,
+    };
+
+    let entries: HashMap<String, TypeDescriptorEntry> = vec![
+        make_entry(base_attach, "0x100", vec![make_field("_type", "std::string")]),
+        make_entry(
+            file_attach,
+            "0x200",
+            vec![
+                make_field("fileId", "int64_t"),
+                make_field(
+                    "preview",
+                    &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                ),
+            ],
+        ),
+        make_entry(
+            share_attach,
+            "0x300",
+            vec![
+                make_field("shareId", "int64_t"),
+                make_field("image", &format!("std::optional<{photo_attach}>")),
+                make_field(
+                    "media",
+                    &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                ),
+            ],
+        ),
+        make_entry(
+            control_attach,
+            "0x400",
+            vec![
+                make_field("event", "std::string"),
+                make_field("pinnedMessage", &format!("std::optional<{msg}>")),
+            ],
+        ),
+        make_entry(photo_attach, "0x500", vec![make_field("photoId", "int64_t")]),
+        make_entry(
+            msg,
+            "0x600",
+            vec![
+                make_field(
+                    "attaches",
+                    &format!(
+                        "std::optional<std::vector<Api::OneMe::Types::Polymorphic<{base_attach}>>>"
+                    ),
+                ),
+                make_field(
+                    "link",
+                    &format!("std::optional<std::shared_ptr<{msg_link}>>"),
+                ),
+                make_field("messagePreview", &format!("std::optional<{msg_preview}>")),
+                make_field(
+                    "byId",
+                    &format!("std::unordered_map<int64_t, {msg}>"),
+                ),
+            ],
+        ),
+        make_entry(
+            msg_link,
+            "0x700",
+            vec![
+                make_field("type", "std::string"),
+                make_field("message", msg),
+            ],
+        ),
+        make_entry(
+            msg_preview,
+            "0x800",
+            vec![
+                make_field("text", "std::optional<std::string>"),
+                make_field(
+                    "attachment",
+                    &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                ),
+            ],
+        ),
+        make_entry(
+            out_msg,
+            "0x900",
+            vec![
+                make_field("text", "std::optional<std::string>"),
+                make_field("link", &format!("std::optional<{out_msg_link}>")),
+            ],
+        ),
+        make_entry(
+            out_msg_link,
+            "0xa00",
+            vec![
+                make_field("type", "std::string"),
+                make_field("message", &format!("std::optional<{out_msg}>")),
+            ],
+        ),
+    ]
+    .into_iter()
+    .map(|e| (e.name.clone(), e))
+    .collect();
+
+    let mut resolve = |name: &str| {
+        entries
+            .get(name)
+            .cloned()
+            .unwrap_or_else(|| panic!("missing entry for {name}"))
+    };
+
+    let mut roots = BTreeMap::new();
+    let mut sources = BTreeSet::new();
+    sources.insert(RootSource::ProtocolField);
+    roots.insert(base_attach.to_string(), sources);
+
+    let mut hierarchy = HashMap::new();
+    hierarchy.insert(
+        base_attach.to_string(),
+        vec![
+            file_attach.to_string(),
+            share_attach.to_string(),
+            control_attach.to_string(),
+            photo_attach.to_string(),
+        ],
+    );
+
+    let (mut poly_models, _) =
+        build_polymorphic_models(&roots, &hierarchy, &mut resolve, &BTreeMap::new());
+
+    let packet = PacketEntry {
+        opcode: 64,
+        name: "Api::OneMe::Packets::Msg::Send".to_string(),
+        ident: "MsgSend".to_string(),
+        request: make_entry(
+            "Api::OneMe::Packets::Msg::Send::Parameters",
+            "0x10",
+            vec![make_field("message", out_msg)],
+        ),
+        response: make_entry(
+            "Api::OneMe::Packets::Msg::Send::Response",
+            "0x20",
+            vec![make_field("message", msg)],
+        ),
+    };
+
+    let mut models = build_model_catalog(&[packet], &[], &poly_models, &mut resolve);
+    mark_recursive_fields(&mut models, &mut poly_models);
+
+    let find_model_field = |model_name: &str, field_name: &str| -> &ExtractedField {
+        models
+            .iter()
+            .find(|m| m.name == model_name)
+            .unwrap_or_else(|| panic!("missing model {model_name}"))
+            .fields
+            .iter()
+            .find(|f| f.name == field_name)
+            .unwrap_or_else(|| panic!("missing field {model_name}.{field_name}"))
+    };
+
+    // 1. 2-node model cycles: Message <-> MessageLink, OutgoingMessage <-> OutgoingMessageLink
+    assert!(find_model_field(msg, "link").recursive);
+    assert!(find_model_field(msg_link, "message").recursive);
+    assert!(!find_model_field(msg_link, "type").recursive);
+
+    assert!(find_model_field(out_msg, "link").recursive);
+    assert!(find_model_field(out_msg_link, "message").recursive);
+    assert!(!find_model_field(out_msg, "text").recursive);
+
+    // 2. Indirected fields (array: true, map: true) remain recursive: false
+    assert!(!find_model_field(msg, "attaches").recursive);
+    assert!(!find_model_field(msg, "byId").recursive);
+
+    // 3. Multi-hop cycle: BaseAttachment -> ControlAttachment.pinnedMessage -> Message -> MessagePreview -> BaseAttachment
+    assert!(find_model_field(msg, "messagePreview").recursive);
+    assert!(find_model_field(msg_preview, "attachment").recursive);
+    assert!(!find_model_field(msg_preview, "text").recursive);
+
+    // 4. Polymorphic base-variant cycles across variants and rtti_subclasses (both fields and all_fields)
+    let poly = &poly_models[0];
+    assert!(poly.base.fields.iter().all(|f| !f.recursive));
+    for list in [&poly.variants, &poly.rtti_subclasses] {
+        let file = list.iter().find(|v| v.name == file_attach).unwrap();
+        assert!(file.fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+        assert!(file.all_fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+        assert!(!file.fields.iter().find(|f| f.name == "fileId").unwrap().recursive);
+
+        let share = list.iter().find(|v| v.name == share_attach).unwrap();
+        assert!(share.fields.iter().find(|f| f.name == "media").unwrap().recursive);
+        assert!(share.all_fields.iter().find(|f| f.name == "media").unwrap().recursive);
+        assert!(!share.fields.iter().find(|f| f.name == "image").unwrap().recursive);
+
+        let control = list.iter().find(|v| v.name == control_attach).unwrap();
+        assert!(
+            control
+                .fields
+                .iter()
+                .find(|f| f.name == "pinnedMessage")
+                .unwrap()
+                .recursive
+        );
+        assert!(
+            control
+                .all_fields
+                .iter()
+                .find(|f| f.name == "pinnedMessage")
+                .unwrap()
+                .recursive
+        );
+    }
+
+    // 5. Verify serde serialization emits `"recursive": true` / `"recursive": false`
+    let msg_json = serde_json::to_value(models.iter().find(|m| m.name == msg).unwrap()).unwrap();
+    let msg_fields = msg_json["fields"].as_array().unwrap();
+    let link_json = msg_fields.iter().find(|f| f["name"] == "link").unwrap();
+    let attaches_json = msg_fields.iter().find(|f| f["name"] == "attaches").unwrap();
+    assert_eq!(link_json["recursive"], serde_json::json!(true));
+    assert_eq!(attaches_json["recursive"], serde_json::json!(false));
 }

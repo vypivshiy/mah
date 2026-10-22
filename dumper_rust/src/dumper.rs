@@ -363,7 +363,7 @@ impl Dumper {
             collect_polymorphic_variant_names(&poly_roots, &rtti.hierarchy.base_to_derived);
         let (discriminator_values, discriminator_diagnostics) =
             scan_discriminator_values_with_diagnostics(pe, rtti, &polymorphic_variant_names);
-        let (polymorphic_models, _polymorphic_type_names) = build_polymorphic_models(
+        let (mut polymorphic_models, _polymorphic_type_names) = build_polymorphic_models(
             &poly_roots,
             &rtti.hierarchy.base_to_derived,
             &mut find_type_entry,
@@ -371,8 +371,10 @@ impl Dumper {
         );
 
         // 5. Models catalog construction (standalone models and active variants)
-        let models_list =
+        let mut models_list =
             build_model_catalog(&packets, &events, &polymorphic_models, &mut find_type_entry);
+
+        mark_recursive_fields(&mut models_list, &mut polymorphic_models);
 
         let discriminators = build_discriminator_catalog(&polymorphic_models);
 
@@ -850,7 +852,127 @@ where
 
     let mut models: Vec<ModelEntry> = models_map.into_values().collect();
     disambiguate_model_idents(&mut models, polymorphic_models);
+    let adj = build_non_indirected_ownership_graph(&models, polymorphic_models);
+    for model in &mut models {
+        mark_fields_for_owner(&mut model.fields, &model.name, &adj);
+    }
     models
+}
+
+fn non_indirected_field_target(field: &ExtractedField) -> Option<&str> {
+    if field.field_type.array || field.field_type.map {
+        return None;
+    }
+    let target = field
+        .field_type
+        .polymorphic_base
+        .as_deref()
+        .or(field.field_type.name.as_deref())?;
+    if is_primitive_or_builtin_type(target) || is_empty_model_type_name(target) {
+        return None;
+    }
+    Some(target)
+}
+
+fn build_non_indirected_ownership_graph(
+    models: &[ModelEntry],
+    polymorphic_models: &[PolymorphicModelEntry],
+) -> HashMap<String, HashSet<String>> {
+    let mut adj: HashMap<String, HashSet<String>> = HashMap::new();
+
+    for poly in polymorphic_models {
+        for field in &poly.base.fields {
+            if let Some(target) = non_indirected_field_target(field) {
+                adj.entry(poly.name.clone())
+                    .or_default()
+                    .insert(target.to_string());
+            }
+        }
+        for variant in &poly.variants {
+            adj.entry(poly.name.clone())
+                .or_default()
+                .insert(variant.name.clone());
+            for field in variant.fields.iter().chain(variant.all_fields.iter()) {
+                if let Some(target) = non_indirected_field_target(field) {
+                    adj.entry(variant.name.clone())
+                        .or_default()
+                        .insert(target.to_string());
+                }
+            }
+        }
+    }
+
+    for model in models {
+        for field in &model.fields {
+            if let Some(target) = non_indirected_field_target(field) {
+                adj.entry(model.name.clone())
+                    .or_default()
+                    .insert(target.to_string());
+            }
+        }
+    }
+
+    adj
+}
+
+fn can_reach(adj: &HashMap<String, HashSet<String>>, start: &str, goal: &str) -> bool {
+    if start == goal {
+        return true;
+    }
+    let mut visited = HashSet::new();
+    let mut stack = vec![start];
+    visited.insert(start);
+
+    while let Some(curr) = stack.pop() {
+        if let Some(neighbors) = adj.get(curr) {
+            for next in neighbors {
+                if next == goal {
+                    return true;
+                }
+                if visited.insert(next.as_str()) {
+                    stack.push(next.as_str());
+                }
+            }
+        }
+    }
+
+    false
+}
+
+fn mark_fields_for_owner(
+    fields: &mut [ExtractedField],
+    owner: &str,
+    adj: &HashMap<String, HashSet<String>>,
+) {
+    for field in fields {
+        field.recursive = match non_indirected_field_target(field) {
+            Some(target) => can_reach(adj, target, owner),
+            None => false,
+        };
+    }
+}
+
+pub fn mark_recursive_fields(
+    models: &mut [ModelEntry],
+    polymorphic_models: &mut [PolymorphicModelEntry],
+) {
+    let adj = build_non_indirected_ownership_graph(models, polymorphic_models);
+
+    for model in models.iter_mut() {
+        mark_fields_for_owner(&mut model.fields, &model.name, &adj);
+    }
+
+    for poly in polymorphic_models.iter_mut() {
+        mark_fields_for_owner(&mut poly.base.fields, &poly.name, &adj);
+        for variant in &mut poly.variants {
+            mark_fields_for_owner(&mut variant.fields, &variant.name, &adj);
+            mark_fields_for_owner(&mut variant.all_fields, &variant.name, &adj);
+        }
+        for sub in &mut poly.rtti_subclasses {
+            mark_fields_for_owner(&mut sub.fields, &sub.name, &adj);
+            mark_fields_for_owner(&mut sub.all_fields, &sub.name, &adj);
+        }
+    }
 }
 
 fn disambiguate_polymorphic_idents(polymorphic_models: &mut [PolymorphicModelEntry]) {
@@ -1045,6 +1167,7 @@ mod tests {
             name: name.to_string(),
             field_type: crate::type_parser::decompose_type(type_name),
             required: false,
+            recursive: false,
         }
     }
 
@@ -1479,6 +1602,7 @@ mod tests {
             name: "existing".to_string(),
             field_type: crate::type_parser::decompose_type("int32_t"),
             required: false,
+            recursive: false,
         }];
         let entry = TypeDescriptorEntry {
             offset: Some("0x1234".to_string()),
@@ -1659,6 +1783,7 @@ mod tests {
                 polymorphic_base: None,
             },
             required: false,
+            recursive: false,
         };
 
         assert_eq!(
@@ -2153,5 +2278,332 @@ mod tests {
             !model_names.contains(&event_req),
             "Event request must not be treated as standalone model in models"
         );
+    }
+
+    #[test]
+    fn recursive_cycle_detection_marks_two_node_model_cycles() {
+        let msg = "Api::OneMe::Types::Message";
+        let msg_link = "Api::OneMe::Types::MessageLink";
+        let out_msg = "Api::OneMe::Types::OutgoingMessage";
+        let out_msg_link = "Api::OneMe::Types::OutgoingMessage::OutgoingMessageLink";
+
+        let packet = PacketEntry {
+            opcode: 1,
+            name: "Api::OneMe::Packets::Msg::Send".to_string(),
+            ident: "MsgSend".to_string(),
+            request: entry(
+                "Api::OneMe::Packets::Msg::Send::Parameters",
+                "0x10",
+                vec![field("outgoing", out_msg)],
+            ),
+            response: entry(
+                "Api::OneMe::Packets::Msg::Send::Response",
+                "0x20",
+                vec![field("message", msg)],
+            ),
+        };
+
+        let entries = vec![
+            entry(
+                msg,
+                "0x100",
+                vec![
+                    field("text", "std::string"),
+                    field("link", &format!("std::optional<std::shared_ptr<{msg_link}>>")),
+                ],
+            ),
+            entry(
+                msg_link,
+                "0x110",
+                vec![field("type", "std::string"), field("message", msg)],
+            ),
+            entry(
+                out_msg,
+                "0x200",
+                vec![
+                    field("text", "std::optional<std::string>"),
+                    field("link", &format!("std::optional<{out_msg_link}>")),
+                ],
+            ),
+            entry(
+                out_msg_link,
+                "0x210",
+                vec![
+                    field("type", "std::string"),
+                    field("message", &format!("std::optional<{out_msg}>")),
+                ],
+            ),
+        ];
+
+        let models = build_test_model_catalog(vec![packet], vec![], vec![], entries);
+
+        let find_field = |model_name: &str, field_name: &str| -> &ExtractedField {
+            models
+                .iter()
+                .find(|m| m.name == model_name)
+                .unwrap_or_else(|| panic!("missing model {model_name}"))
+                .fields
+                .iter()
+                .find(|f| f.name == field_name)
+                .unwrap_or_else(|| panic!("missing field {model_name}.{field_name}"))
+        };
+
+        assert!(find_field(msg, "link").recursive);
+        assert!(!find_field(msg, "text").recursive);
+        assert!(find_field(msg_link, "message").recursive);
+        assert!(!find_field(msg_link, "type").recursive);
+
+        assert!(find_field(out_msg, "link").recursive);
+        assert!(!find_field(out_msg, "text").recursive);
+        assert!(find_field(out_msg_link, "message").recursive);
+        assert!(!find_field(out_msg_link, "type").recursive);
+    }
+
+    #[test]
+    fn recursive_cycle_detection_marks_polymorphic_base_variant_cycles() {
+        let base_attach = "Api::OneMe::Types::BaseAttachment";
+        let file_attach = "Api::OneMe::Types::FileAttachment";
+        let share_attach = "Api::OneMe::Types::ShareAttachment";
+        let photo_attach = "Api::OneMe::Types::PhotoAttachment";
+
+        let (mut poly_models, _) = build_test_polymorphic_models(
+            roots(base_attach, &["protocol_field"]),
+            hierarchy(base_attach, &[file_attach, share_attach, photo_attach]),
+            vec![
+                entry(base_attach, "0x100", vec![field("_type", "std::string")]),
+                entry(
+                    file_attach,
+                    "0x200",
+                    vec![
+                        field("fileId", "int64_t"),
+                        field(
+                            "preview",
+                            &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                        ),
+                    ],
+                ),
+                entry(
+                    share_attach,
+                    "0x300",
+                    vec![
+                        field("shareId", "int64_t"),
+                        field("image", &format!("std::optional<{photo_attach}>")),
+                        field(
+                            "media",
+                            &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                        ),
+                    ],
+                ),
+                entry(photo_attach, "0x400", vec![field("photoId", "int64_t")]),
+            ],
+        );
+
+        let mut models = Vec::new();
+        mark_recursive_fields(&mut models, &mut poly_models);
+
+        let poly = &poly_models[0];
+        assert!(poly.base.fields.iter().all(|f| !f.recursive));
+
+        for list in [&poly.variants, &poly.rtti_subclasses] {
+            let file = list.iter().find(|v| v.name == file_attach).unwrap();
+            assert!(file.fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+            assert!(!file.fields.iter().find(|f| f.name == "fileId").unwrap().recursive);
+            assert!(file.all_fields.iter().find(|f| f.name == "preview").unwrap().recursive);
+            assert!(!file.all_fields.iter().find(|f| f.name == "_type").unwrap().recursive);
+
+            let share = list.iter().find(|v| v.name == share_attach).unwrap();
+            assert!(share.fields.iter().find(|f| f.name == "media").unwrap().recursive);
+            assert!(!share.fields.iter().find(|f| f.name == "image").unwrap().recursive);
+            assert!(share.all_fields.iter().find(|f| f.name == "media").unwrap().recursive);
+            assert!(!share.all_fields.iter().find(|f| f.name == "image").unwrap().recursive);
+
+            let photo = list.iter().find(|v| v.name == photo_attach).unwrap();
+            assert!(photo.fields.iter().all(|f| !f.recursive));
+            assert!(photo.all_fields.iter().all(|f| !f.recursive));
+        }
+    }
+
+    #[test]
+    fn recursive_cycle_detection_marks_multi_hop_cycles_and_ignores_indirected_containers() {
+        let base_attach = "Api::OneMe::Types::BaseAttachment";
+        let control_attach = "Api::OneMe::Types::ControlAttachment";
+        let photo_attach = "Api::OneMe::Types::PhotoAttachment";
+        let msg = "Api::OneMe::Types::Message";
+        let msg_preview = "Api::OneMe::Types::MessagePreview";
+
+        let entries = vec![
+            entry(base_attach, "0x100", vec![field("_type", "std::string")]),
+            entry(
+                control_attach,
+                "0x200",
+                vec![
+                    field("event", "std::string"),
+                    field("pinnedMessage", &format!("std::optional<{msg}>")),
+                ],
+            ),
+            entry(photo_attach, "0x250", vec![field("photoId", "int64_t")]),
+            entry(
+                msg,
+                "0x300",
+                vec![
+                    field(
+                        "attaches",
+                        &format!(
+                            "std::optional<std::vector<Api::OneMe::Types::Polymorphic<{base_attach}>>>"
+                        ),
+                    ),
+                    field(
+                        "byId",
+                        &format!("std::unordered_map<int64_t, {msg}>"),
+                    ),
+                    field("messagePreview", &format!("std::optional<{msg_preview}>")),
+                ],
+            ),
+            entry(
+                msg_preview,
+                "0x400",
+                vec![
+                    field("text", "std::optional<std::string>"),
+                    field(
+                        "attachment",
+                        &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                    ),
+                ],
+            ),
+        ];
+
+        let (mut poly_models, _) = build_test_polymorphic_models(
+            roots(base_attach, &["protocol_field"]),
+            hierarchy(base_attach, &[control_attach, photo_attach]),
+            entries.clone(),
+        );
+
+        let mut models = build_test_model_catalog(vec![], vec![], poly_models.clone(), entries);
+        mark_recursive_fields(&mut models, &mut poly_models);
+
+        let poly = &poly_models[0];
+        for list in [&poly.variants, &poly.rtti_subclasses] {
+            let control = list.iter().find(|v| v.name == control_attach).unwrap();
+            assert!(
+                control
+                    .fields
+                    .iter()
+                    .find(|f| f.name == "pinnedMessage")
+                    .unwrap()
+                    .recursive
+            );
+            assert!(
+                control
+                    .all_fields
+                    .iter()
+                    .find(|f| f.name == "pinnedMessage")
+                    .unwrap()
+                    .recursive
+            );
+            assert!(
+                !control
+                    .fields
+                    .iter()
+                    .find(|f| f.name == "event")
+                    .unwrap()
+                    .recursive
+            );
+        }
+
+        let msg_model = models.iter().find(|m| m.name == msg).unwrap();
+        assert!(
+            msg_model
+                .fields
+                .iter()
+                .find(|f| f.name == "messagePreview")
+                .unwrap()
+                .recursive
+        );
+        assert!(
+            !msg_model
+                .fields
+                .iter()
+                .find(|f| f.name == "attaches")
+                .unwrap()
+                .recursive,
+            "array: true indirection must remain recursive: false"
+        );
+        assert!(
+            !msg_model
+                .fields
+                .iter()
+                .find(|f| f.name == "byId")
+                .unwrap()
+                .recursive,
+            "map: true indirection must remain recursive: false"
+        );
+
+        let preview_model = models.iter().find(|m| m.name == msg_preview).unwrap();
+        assert!(
+            preview_model
+                .fields
+                .iter()
+                .find(|f| f.name == "attachment")
+                .unwrap()
+                .recursive
+        );
+        assert!(
+            !preview_model
+                .fields
+                .iter()
+                .find(|f| f.name == "text")
+                .unwrap()
+                .recursive
+        );
+
+        // Verify that indirected edges alone (array/map) do not create a cycle when the non-indirected edge is absent
+        let entries_indirected_only = vec![
+            entry(base_attach, "0x100", vec![field("_type", "std::string")]),
+            entry(
+                control_attach,
+                "0x200",
+                vec![
+                    field("event", "std::string"),
+                    field("pinnedMessages", &format!("std::vector<{msg}>")),
+                ],
+            ),
+            entry(
+                msg,
+                "0x300",
+                vec![field("messagePreview", &format!("std::optional<{msg_preview}>"))],
+            ),
+            entry(
+                msg_preview,
+                "0x400",
+                vec![field(
+                    "attachment",
+                    &format!("std::optional<Api::OneMe::Types::Polymorphic<{base_attach}>>"),
+                )],
+            ),
+        ];
+        let (mut poly_indirected, _) = build_test_polymorphic_models(
+            roots(base_attach, &["protocol_field"]),
+            hierarchy(base_attach, &[control_attach]),
+            entries_indirected_only.clone(),
+        );
+        let mut models_indirected = build_test_model_catalog(
+            vec![],
+            vec![],
+            poly_indirected.clone(),
+            entries_indirected_only,
+        );
+        mark_recursive_fields(&mut models_indirected, &mut poly_indirected);
+
+        for m in &models_indirected {
+            assert!(
+                m.fields.iter().all(|f| !f.recursive),
+                "Model {} should have no recursive fields when cycle is broken by vector indirection",
+                m.name
+            );
+        }
+        for v in &poly_indirected[0].variants {
+            assert!(v.fields.iter().all(|f| !f.recursive));
+            assert!(v.all_fields.iter().all(|f| !f.recursive));
+        }
     }
 }
