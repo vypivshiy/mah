@@ -1,5 +1,6 @@
 {
   "allow_message_text_with_files": false,
+  "api_fallback_url": "https://r-push.org/desktop/healthcheck.json",
   "api_version_uint": 11,
   "app_folder_name": "ONEME",
   "app_settings_version": 1,
