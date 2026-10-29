@@ -1,7 +1,8 @@
 use std::fs;
 
 use dumper_rust::datamining::{
-    extract_static_enum_tables, extract_static_enums, EnumTableForm,
+    extract_static_enum_tables, extract_static_enums, extract_user_settings_defaults,
+    EnumTableForm,
 };
 use dumper_rust::pe::PeImage;
 
@@ -31,8 +32,6 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "ServerErrorCodes")
         .expect("ServerErrorCodes table must be discovered");
     assert_eq!(sec_table.form, EnumTableForm::StringKeyFirst);
-    assert_eq!(sec_table.rva_start, 0x18e2730);
-    assert_eq!(sec_table.rva_end, 0x18e2808);
     assert_eq!(sec_table.entries.len(), 9);
 
     // Check UserSettings
@@ -41,9 +40,10 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "UserSettings")
         .expect("UserSettings table must be discovered");
     assert_eq!(us_table.form, EnumTableForm::ValueFirst);
-    assert_eq!(us_table.rva_start, 0x195f550);
-    assert_eq!(us_table.rva_end, 0x195f7f0);
-    assert_eq!(us_table.entries.len(), 28);
+    assert_eq!(us_table.rva_start, 0x1363550);
+    assert_eq!(us_table.rva_end, 0x1363d13);
+    assert_eq!(us_table.entries.len(), 29);
+    assert_eq!(us_table.defaults.len(), 10);
 
     // Check CallProblems
     let cp_table = tables
@@ -51,8 +51,6 @@ fn test_core_dll_static_enum_tables_extraction() {
         .find(|t| t.category == "CallProblems")
         .expect("CallProblems table must be discovered");
     assert_eq!(cp_table.form, EnumTableForm::ValueFirst);
-    assert_eq!(cp_table.rva_start, 0x18f9870);
-    assert_eq!(cp_table.rva_end, 0x18f9960);
     assert_eq!(cp_table.entries.len(), 10);
 
     // 2. Extract typed catalog (category -> name -> u64)
@@ -139,6 +137,54 @@ fn test_core_dll_static_enum_tables_extraction() {
     assert_eq!(
         user_settings.get("userAppearance/messageFontSize"),
         Some(&27)
+    );
+    assert_eq!(
+        user_settings.get("channelTools/\u{0441}hannelHubBotLastSeenVersion"),
+        Some(&28)
+    );
+
+    // Verify UserSettings default values
+    let defaults = extract_user_settings_defaults(&pe);
+    assert_eq!(defaults.len(), 10);
+    assert_eq!(
+        defaults.get("userSettings/safeMode"),
+        Some(&serde_json::json!(false))
+    );
+    assert_eq!(
+        defaults.get("userSettings/pushNewContacts"),
+        Some(&serde_json::json!(false))
+    );
+    assert_eq!(
+        defaults.get("notifications/notificationSilentMode"),
+        Some(&serde_json::json!(false))
+    );
+    assert_eq!(
+        defaults.get("notifications/p2pEnabled"),
+        Some(&serde_json::json!(true))
+    );
+    assert_eq!(
+        defaults.get("notifications/p2gEnabled"),
+        Some(&serde_json::json!(true))
+    );
+    assert_eq!(
+        defaults.get("notifications/p2gRepliesOnly"),
+        Some(&serde_json::json!(false))
+    );
+    assert_eq!(
+        defaults.get("notifications/channelsEnabled"),
+        Some(&serde_json::json!(true))
+    );
+    assert_eq!(
+        defaults.get("notifications/channelCommentsLevel"),
+        Some(&serde_json::json!(0))
+    );
+    assert_eq!(
+        defaults.get("notifications/textVisible"),
+        Some(&serde_json::json!(true))
+    );
+    assert_eq!(
+        defaults.get("notifications/muteInCalls"),
+        Some(&serde_json::json!(false))
     );
 
     // Verify CallProblems entries

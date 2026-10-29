@@ -15,10 +15,11 @@ pub use coordinator::{
     MetadataMeta, MetadataPacketEntry, MetadataSnapshot, MetadataSummary,
 };
 pub use enums::{
-    create_buffer_string_resolver, default_categorizer, extract_static_enum_tables,
-    extract_static_enum_tables_from_buffer, extract_static_enums,
-    extract_static_enums_from_buffer, scan_table_at, DiscoveredEnumTable, EnumTableForm,
-    RawEnumEntry, RawEnumTable, StaticEnumCatalog,
+    create_buffer_string_resolver, default_categorizer, extract_dynamic_user_settings_table,
+    extract_static_enum_tables, extract_static_enum_tables_from_buffer, extract_static_enums,
+    extract_static_enums_from_buffer, extract_user_settings_defaults, scan_table_at,
+    DiscoveredEnumTable, EnumTableForm, HelperDefaultKind, RawEnumEntry, RawEnumTable,
+    StaticEnumCatalog, UserSettingsDefaultsCatalog,
 };
 pub use features::{
     extract_server_settings, extract_server_settings_features,

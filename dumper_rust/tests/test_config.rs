@@ -11,6 +11,7 @@ use common::resolve_config_dll;
 
 const EXPECTED_CONFIG_KEYS: &[&str] = &[
     "allow_message_text_with_files",
+    "api_fallback_url",
     "api_version_uint",
     "app_folder_name",
     "app_settings_version",
@@ -101,25 +102,25 @@ fn test_config_extraction_from_real_dll() {
 
     // 1. Test balanced brace scanner candidate extraction
     let candidate = extract_config_candidate(&bytes, 20).expect("Must extract config candidate");
-    assert_eq!(candidate.key_count, 74, "Config must contain exactly 74 keys");
+    assert_eq!(candidate.key_count, 75, "Config must contain exactly 75 keys");
     assert_eq!(
-        candidate.offset, 0x8a2c4,
-        "JSON opening brace in CM_FP_Unspecified.config.dll must match known offset 0x8a2c4 (+4 from Qt resource header 0x8a2c0)"
+        candidate.offset, 0x8a0c4,
+        "JSON opening brace in CM_FP_Unspecified.config.dll must match known offset 0x8a0c4 (+4 from Qt resource header 0x8a0c0)"
     );
 
     // 2. Test file-based helper
     let config_val = extract_config_from_file(&dll_path).expect("Must extract config from file");
     let map = config_val.as_object().expect("Config must be a JSON object");
-    assert_eq!(map.len(), 74, "Object must have 74 keys");
+    assert_eq!(map.len(), 75, "Object must have 75 keys");
 
-    // 3. Verify all 74 keys match expected keys from scripts/config_extractor.py
+    // 3. Verify all 75 keys match expected keys from scripts/config_extractor.py
     let actual_keys: HashSet<&str> = map.keys().map(|k| k.as_str()).collect();
     let expected_keys: HashSet<&str> = EXPECTED_CONFIG_KEYS.iter().copied().collect();
 
     assert_eq!(
         actual_keys.len(),
-        74,
-        "Actual unique key count must be 74"
+        75,
+        "Actual unique key count must be 75"
     );
     assert_eq!(
         actual_keys, expected_keys,

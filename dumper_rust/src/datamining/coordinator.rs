@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 
-use crate::datamining::enums::extract_static_enums;
 use crate::datamining::features::extract_server_settings_features;
 use crate::datamining::logger::{LoggerAnalyzer, PacketHandlerInfo};
 use crate::discriminator::build_discriminator_catalog;
@@ -52,6 +51,8 @@ pub struct MetadataSnapshot {
     pub client_config: serde_json::Value,
     pub features: BTreeMap<String, String>,
     pub enums: BTreeMap<String, BTreeMap<String, u64>>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub user_settings_defaults: BTreeMap<String, serde_json::Value>,
     pub discriminators: BTreeMap<String, BTreeMap<String, String>>,
     pub packets_catalog: Vec<MetadataPacketEntry>,
     pub source_files: Vec<String>,
@@ -87,11 +88,25 @@ pub fn build_metadata_snapshot(
     // 1. Features from ServerSettings (sorted BTreeMap<String, String>)
     let features = extract_server_settings_features(pe, rtti).unwrap_or_default();
 
-    // 2. Typed enum tables
-    let enums = if !dump.enums.is_empty() {
-        dump.enums.clone()
+    // 2. Typed enum tables & UserSettings default values
+    let (enums, user_settings_defaults) = if !dump.enums.is_empty() {
+        let defaults = if !dump.user_settings_defaults.is_empty() {
+            dump.user_settings_defaults.clone()
+        } else {
+            crate::datamining::enums::extract_user_settings_defaults(pe)
+        };
+        (dump.enums.clone(), defaults)
     } else {
-        extract_static_enums(pe)
+        let tables = crate::datamining::enums::extract_static_enum_tables(pe);
+        let mut catalog = BTreeMap::new();
+        let mut defaults = BTreeMap::new();
+        for table in tables {
+            if table.category == "UserSettings" && !table.defaults.is_empty() {
+                defaults = table.defaults;
+            }
+            catalog.insert(table.category, table.entries);
+        }
+        (catalog, defaults)
     };
 
     // 3. Polymorphic model discriminators catalog
@@ -200,6 +215,7 @@ pub fn build_metadata_snapshot(
         client_config,
         features,
         enums,
+        user_settings_defaults,
         discriminators,
         packets_catalog,
         source_files,
@@ -270,6 +286,7 @@ mod tests {
                 "TestCategory".to_string(),
                 BTreeMap::from([("TEST_KEY".to_string(), 10u64)]),
             )]),
+            user_settings_defaults: BTreeMap::new(),
             discriminators: BTreeMap::from([(
                 "BaseModel".to_string(),
                 BTreeMap::from([("TAG".to_string(), "DerivedModel".to_string())]),
@@ -321,6 +338,7 @@ mod tests {
             client_config: serde_json::json!({}),
             features: BTreeMap::new(),
             enums: BTreeMap::new(),
+            user_settings_defaults: BTreeMap::new(),
             discriminators: BTreeMap::new(),
             packets_catalog: vec![MetadataPacketEntry {
                 opcode: 10,
@@ -360,6 +378,7 @@ mod tests {
             client_config: serde_json::json!({ "api_version_uint": 11 }),
             features: BTreeMap::new(),
             enums: BTreeMap::new(),
+            user_settings_defaults: BTreeMap::new(),
             discriminators: BTreeMap::new(),
             packets_catalog: Vec::new(),
             source_files: Vec::new(),

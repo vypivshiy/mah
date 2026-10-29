@@ -1,4 +1,5 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
+use iced_x86::{Decoder, DecoderOptions, Instruction, MemorySize, Mnemonic, OpKind, Register};
 use serde::{Deserialize, Serialize};
 
 use crate::pe::PeImage;
@@ -49,10 +50,15 @@ pub struct DiscoveredEnumTable {
     pub rva_start: u32,
     pub rva_end: u32,
     pub entries: BTreeMap<String, u64>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub defaults: BTreeMap<String, serde_json::Value>,
 }
 
 /// Typed enum catalog mapping category name -> (string key -> numeric ID).
 pub type StaticEnumCatalog = BTreeMap<String, BTreeMap<String, u64>>;
+
+/// Typed catalog mapping UserSettings string key -> default JSON value.
+pub type UserSettingsDefaultsCatalog = BTreeMap<String, serde_json::Value>;
 
 /// Maximum string length for an enum identifier.
 pub const MAX_ENUM_STRING_LEN: usize = 256;
@@ -260,6 +266,7 @@ where
                                 rva_start: table.rva_start,
                                 rva_end: table.rva_end,
                                 entries: entries_map,
+                                defaults: BTreeMap::new(),
                             },
                             (table.rva_end - rdata_rva) as usize,
                         ));
@@ -280,6 +287,437 @@ where
     discovered
 }
 
+/// Resolves an in-image UTF-8 string literal (without control characters) by VA and length.
+pub fn resolve_pe_utf8_string(pe: &PeImage, va: u64, len: usize) -> Option<String> {
+    if len == 0 || len > MAX_ENUM_STRING_LEN || va < pe.image_base {
+        return None;
+    }
+    let rva = va - pe.image_base;
+    if rva > u32::MAX as u64 {
+        return None;
+    }
+    let slice = pe.slice_at_rva(rva as u32, len)?;
+    let s = std::str::from_utf8(slice).ok()?;
+    if s.chars().all(|c| !c.is_control()) {
+        Some(s.to_string())
+    } else {
+        None
+    }
+}
+
+/// Classification of a `UserSettings` helper constructor's default value behavior.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HelperDefaultKind {
+    /// Entry constructor sets `has_value = 0` (`std::nullopt`).
+    None,
+    /// Entry constructor sets `variant_tag = tag` (`+0x68`) and `has_value = 1` (`+0x70`).
+    Variant(u8),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum InitRegVal {
+    Va(u64),
+    Imm(u64),
+    StackPtr(Register, i64),
+}
+
+#[derive(Debug, Clone)]
+struct PendingInlinedEntry {
+    name: String,
+    value: u64,
+    base: Register,
+    entry_disp: i64,
+}
+
+#[inline]
+fn is_immediate_op(kind: OpKind) -> bool {
+    matches!(
+        kind,
+        OpKind::Immediate8
+            | OpKind::Immediate16
+            | OpKind::Immediate32
+            | OpKind::Immediate64
+            | OpKind::Immediate8to16
+            | OpKind::Immediate8to32
+            | OpKind::Immediate8to64
+            | OpKind::Immediate32to64
+    )
+}
+
+#[inline]
+fn insn_immediate_u64(insn: &Instruction) -> u64 {
+    match insn.op1_kind() {
+        OpKind::Immediate8 => insn.immediate8() as u64,
+        OpKind::Immediate16 => insn.immediate16() as u64,
+        OpKind::Immediate32 => insn.immediate32() as u64,
+        OpKind::Immediate64 => insn.immediate64(),
+        OpKind::Immediate8to16 => insn.immediate8to16() as i64 as u64,
+        OpKind::Immediate8to32 => insn.immediate8to32() as i64 as u64,
+        OpKind::Immediate8to64 => insn.immediate8to64() as u64,
+        OpKind::Immediate32to64 => insn.immediate32to64() as u64,
+        _ => 0,
+    }
+}
+
+#[inline]
+fn variant_default_to_json(tag: u8, raw_val: u64) -> Option<serde_json::Value> {
+    match tag {
+        5 => Some(serde_json::Value::Bool((raw_val & 0xFF) != 0)),
+        2 | 3 | 4 => Some(serde_json::Value::Number((raw_val as i64).into())),
+        _ => None,
+    }
+}
+
+/// Classifies a `UserSettings` entry constructor helper function by inspecting its stores to `+0x68` and `+0x70`.
+pub fn classify_user_settings_helper_ctor(pe: &PeImage, mut target_va: u64) -> Option<HelperDefaultKind> {
+    for _ in 0..3 {
+        if target_va < pe.image_base {
+            return None;
+        }
+        let rva = (target_va - pe.image_base) as u32;
+        let slice = pe.slice_at_rva(rva, 16)?;
+        let mut dec = Decoder::with_ip(64, slice, target_va, DecoderOptions::NONE);
+        if !dec.can_decode() {
+            return None;
+        }
+        let insn = dec.decode();
+        if insn.mnemonic() == Mnemonic::Jmp && insn.op0_kind() == OpKind::NearBranch64 {
+            target_va = insn.near_branch64();
+        } else {
+            break;
+        }
+    }
+
+    if target_va < pe.image_base {
+        return None;
+    }
+    let rva = (target_va - pe.image_base) as u32;
+    let slice = pe.slice_at_rva(rva, 128)?;
+    let mut dec = Decoder::with_ip(64, slice, target_va, DecoderOptions::NONE);
+
+    let mut tag_68: Option<u8> = None;
+    let mut has_70: Option<u8> = None;
+    let mut count = 0;
+
+    while dec.can_decode() && count < 40 {
+        let insn = dec.decode();
+        count += 1;
+
+        if insn.mnemonic() == Mnemonic::Mov
+            && insn.op0_kind() == OpKind::Memory
+            && is_immediate_op(insn.op1_kind())
+        {
+            let disp = insn.memory_displacement64() as i64;
+            let imm = (insn_immediate_u64(&insn) & 0xFF) as u8;
+            if disp == 0x68 {
+                tag_68 = Some(imm);
+            } else if disp == 0x70 {
+                has_70 = Some(imm);
+            }
+        } else if insn.mnemonic() == Mnemonic::Ret {
+            break;
+        }
+    }
+
+    match (has_70, tag_68) {
+        (Some(0), _) => Some(HelperDefaultKind::None),
+        (Some(1), Some(tag)) => Some(HelperDefaultKind::Variant(tag)),
+        _ => None,
+    }
+}
+
+/// Decodes an x86-64 initializer function constructing `UserSettings` descriptors (120-byte records)
+/// and returns `(name, numeric_id, optional_default_value)` tuples.
+pub fn extract_user_settings_from_initializer_code<F, H>(
+    code: &[u8],
+    func_va: u64,
+    resolve_string: F,
+    classify_helper: H,
+) -> Vec<(String, u64, Option<serde_json::Value>)>
+where
+    F: Fn(u64, usize) -> Option<String>,
+    H: Fn(u64) -> Option<HelperDefaultKind>,
+{
+    let mut decoder = Decoder::with_ip(64, code, func_va, DecoderOptions::NONE);
+    let mut reg_val: HashMap<Register, InitRegVal> = HashMap::new();
+    let mut stack_qword: HashMap<(Register, i64), u64> = HashMap::new();
+    let mut stack_byte: HashMap<(Register, i64), u8> = HashMap::new();
+    let mut pending_inlined: Option<PendingInlinedEntry> = None;
+    let mut results: Vec<(String, u64, Option<serde_json::Value>)> = Vec::new();
+
+    let finalize_pending = |pending: PendingInlinedEntry,
+                            stack_byte: &HashMap<(Register, i64), u8>,
+                            stack_qword: &HashMap<(Register, i64), u64>,
+                            results: &mut Vec<(String, u64, Option<serde_json::Value>)>| {
+        let has_val = stack_byte
+            .get(&(pending.base, pending.entry_disp + 0x70))
+            .copied()
+            .unwrap_or(0);
+        let default_val = if has_val == 1 {
+            let tag = stack_byte
+                .get(&(pending.base, pending.entry_disp + 0x68))
+                .copied()
+                .unwrap_or(0);
+            let raw = stack_qword
+                .get(&(pending.base, pending.entry_disp + 0x28))
+                .copied()
+                .or_else(|| {
+                    stack_byte
+                        .get(&(pending.base, pending.entry_disp + 0x28))
+                        .map(|&b| b as u64)
+                })
+                .unwrap_or(0);
+            variant_default_to_json(tag, raw)
+        } else {
+            None
+        };
+        if !results.iter().any(|(k, _, _)| k == &pending.name) {
+            results.push((pending.name, pending.value, default_val));
+        }
+    };
+
+    while decoder.can_decode() {
+        let mut insn = Instruction::default();
+        decoder.decode_out(&mut insn);
+
+        match insn.mnemonic() {
+            Mnemonic::Lea => {
+                let dest = insn.op0_register().full_register();
+                if insn.op1_kind() == OpKind::Memory {
+                    let base = insn.memory_base();
+                    if base == Register::RIP {
+                        reg_val.insert(dest, InitRegVal::Va(insn.memory_displacement64()));
+                    } else if base == Register::RSP || base == Register::RBP {
+                        reg_val.insert(
+                            dest,
+                            InitRegVal::StackPtr(base, insn.memory_displacement64() as i64),
+                        );
+                    } else {
+                        reg_val.remove(&dest);
+                    }
+                } else {
+                    reg_val.remove(&dest);
+                }
+            }
+            Mnemonic::Mov | Mnemonic::Movzx => {
+                if insn.op0_kind() == OpKind::Register {
+                    let dest = insn.op0_register().full_register();
+                    if insn.op1_kind() == OpKind::Register {
+                        let src = insn.op1_register().full_register();
+                        if let Some(&val) = reg_val.get(&src) {
+                            reg_val.insert(dest, val);
+                        } else {
+                            reg_val.remove(&dest);
+                        }
+                    } else if is_immediate_op(insn.op1_kind()) {
+                        reg_val.insert(dest, InitRegVal::Imm(insn_immediate_u64(&insn)));
+                    } else {
+                        reg_val.remove(&dest);
+                    }
+                } else if insn.op0_kind() == OpKind::Memory {
+                    let base = insn.memory_base();
+                    if base == Register::RSP || base == Register::RBP {
+                        let disp = insn.memory_displacement64() as i64;
+                        if insn.op1_kind() == OpKind::Register {
+                            let src = insn.op1_register().full_register();
+                            match reg_val.get(&src).copied() {
+                                Some(InitRegVal::Va(va)) => {
+                                    stack_qword.insert((base, disp), va);
+                                }
+                                Some(InitRegVal::Imm(v)) => {
+                                    stack_qword.insert((base, disp), v);
+                                    stack_byte.insert((base, disp), (v & 0xFF) as u8);
+                                }
+                                _ => {}
+                            }
+                        } else if is_immediate_op(insn.op1_kind()) {
+                            let imm = insn_immediate_u64(&insn);
+                            let mem_size = insn.memory_size();
+                            if mem_size == MemorySize::UInt8
+                                || mem_size == MemorySize::Int8
+                                || insn.op1_kind() == OpKind::Immediate8
+                            {
+                                stack_byte.insert((base, disp), (imm & 0xFF) as u8);
+                            } else {
+                                stack_qword.insert((base, disp), imm);
+                                stack_byte.insert((base, disp), (imm & 0xFF) as u8);
+                            }
+                        }
+                    }
+                }
+            }
+            Mnemonic::Xor | Mnemonic::Sub => {
+                if insn.op0_kind() == OpKind::Register
+                    && insn.op1_kind() == OpKind::Register
+                    && insn.op0_register() == insn.op1_register()
+                {
+                    let dest = insn.op0_register().full_register();
+                    reg_val.insert(dest, InitRegVal::Imm(0));
+                } else if insn.op0_kind() == OpKind::Register {
+                    reg_val.remove(&insn.op0_register().full_register());
+                }
+            }
+            Mnemonic::Call => {
+                if let Some(pending) = pending_inlined.take() {
+                    finalize_pending(pending, &stack_byte, &stack_qword, &mut results);
+                }
+
+                let rcx_val = reg_val.get(&Register::RCX).copied();
+                let rdx_val = reg_val.get(&Register::RDX).copied();
+                let r8_val = reg_val.get(&Register::R8).copied();
+                let r9_val = reg_val.get(&Register::R9).copied();
+
+                match (rcx_val, rdx_val, r8_val) {
+                    // Form 1: helper ctor `ctor(rcx = &entry, edx = id, r8 = &string_view, [r9 = default_val])`
+                    (
+                        Some(InitRegVal::StackPtr(_, _)),
+                        Some(InitRegVal::Imm(id)),
+                        Some(InitRegVal::StackPtr(sv_base, sv_disp)),
+                    ) if id < MAX_ENUM_VALUE => {
+                        if let (Some(&str_va), Some(&str_len)) = (
+                            stack_qword.get(&(sv_base, sv_disp)),
+                            stack_qword.get(&(sv_base, sv_disp + 8)),
+                        ) {
+                            if let Some(name) = resolve_string(str_va, str_len as usize) {
+                                let default_val = if insn.op0_kind() == OpKind::NearBranch64 {
+                                    match classify_helper(insn.near_branch64()) {
+                                        Some(HelperDefaultKind::Variant(tag)) => {
+                                            if let Some(InitRegVal::Imm(raw)) = r9_val {
+                                                variant_default_to_json(tag, raw)
+                                            } else {
+                                                None
+                                            }
+                                        }
+                                        _ => None,
+                                    }
+                                } else {
+                                    None
+                                };
+                                if !results.iter().any(|(k, _, _)| k == &name) {
+                                    results.push((name, id, default_val));
+                                }
+                            }
+                        }
+                    }
+                    // Form 2: inlined `std::string::assign(rcx = &entry.key, rdx = str_va, r8 = str_len)`
+                    (
+                        Some(InitRegVal::StackPtr(e_base, rcx_disp)),
+                        Some(InitRegVal::Va(str_va)),
+                        Some(InitRegVal::Imm(str_len)),
+                    ) => {
+                        let entry_disp = rcx_disp - 8;
+                        if let Some(&id) = stack_qword.get(&(e_base, entry_disp)) {
+                            if id < MAX_ENUM_VALUE {
+                                if let Some(name) = resolve_string(str_va, str_len as usize) {
+                                    pending_inlined = Some(PendingInlinedEntry {
+                                        name,
+                                        value: id,
+                                        base: e_base,
+                                        entry_disp,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
+                for volatile in [
+                    Register::RAX,
+                    Register::RCX,
+                    Register::RDX,
+                    Register::R8,
+                    Register::R9,
+                    Register::R10,
+                    Register::R11,
+                ] {
+                    reg_val.remove(&volatile);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(pending) = pending_inlined.take() {
+        finalize_pending(pending, &stack_byte, &stack_qword, &mut results);
+    }
+
+    results
+}
+
+/// Locates and extracts the runtime-initialized `UserSettings` descriptor table (26.38.0+)
+/// from the `.text` initializer function referencing `"userSettings/showReadmark"`.
+pub fn extract_dynamic_user_settings_table(pe: &PeImage) -> Option<DiscoveredEnumTable> {
+    const ANCHOR: &[u8] = b"userSettings/showReadmark\0";
+
+    let rdata_sec = pe.section_by_name(".rdata")?;
+    let rdata_data = pe.section_data(".rdata")?;
+    let anchor_off = rdata_data
+        .windows(ANCHOR.len())
+        .position(|w| w == ANCHOR)?;
+    let anchor_rva = rdata_sec.virtual_address + anchor_off as u32;
+
+    let text_sec = pe.section_by_name(".text")?;
+    let text_data = pe.section_data(".text")?;
+    let text_rva = text_sec.virtual_address;
+
+    let mut ref_insn_rva = None;
+    if text_data.len() >= 7 {
+        for i in 0..=(text_data.len() - 7) {
+            if text_data[i + 1] == 0x8D && (text_data[i + 2] & 0xC7) == 0x05 {
+                let disp = i32::from_le_bytes(text_data[i + 3..i + 7].try_into().unwrap());
+                let next_rva = (text_rva + i as u32 + 7) as i64;
+                if next_rva + (disp as i64) == anchor_rva as i64 {
+                    ref_insn_rva = Some(text_rva + i as u32);
+                    break;
+                }
+            }
+        }
+    }
+
+    let insn_rva = ref_insn_rva?;
+    let func = pe.find_function(insn_rva)?;
+    let func_len = (func.end_address - func.begin_address) as usize;
+    let code = pe.slice_at_rva(func.begin_address, func_len)?;
+
+    let extracted = extract_user_settings_from_initializer_code(
+        code,
+        pe.image_base + func.begin_address as u64,
+        |va, len| resolve_pe_utf8_string(pe, va, len),
+        |target_va| classify_user_settings_helper_ctor(pe, target_va),
+    );
+
+    if extracted.len() < 3 {
+        return None;
+    }
+
+    let entry_tuples: Vec<(String, u64)> = extracted
+        .iter()
+        .map(|(k, v, _)| (k.clone(), *v))
+        .collect();
+    if !categorize_user_settings(&entry_tuples) {
+        return None;
+    }
+
+    let mut entries = BTreeMap::new();
+    let mut defaults = BTreeMap::new();
+    for (name, val, def) in extracted {
+        if let Some(d) = def {
+            defaults.insert(name.clone(), d);
+        }
+        entries.insert(name, val);
+    }
+
+    Some(DiscoveredEnumTable {
+        category: "UserSettings".to_string(),
+        form: EnumTableForm::ValueFirst,
+        rva_start: func.begin_address,
+        rva_end: func.end_address,
+        entries,
+        defaults,
+    })
+}
+
 /// Discovers categorized static enum tables in a parsed PE image.
 pub fn extract_static_enum_tables(pe: &PeImage) -> Vec<DiscoveredEnumTable> {
     let rdata_sec = match pe.section_by_name(".rdata") {
@@ -295,13 +733,30 @@ pub fn extract_static_enum_tables(pe: &PeImage) -> Vec<DiscoveredEnumTable> {
 
     let resolver = |va: u64, len: usize| resolve_pe_string(pe, va, len);
 
-    extract_static_enum_tables_from_buffer(
+    let mut tables = extract_static_enum_tables_from_buffer(
         rdata_data,
         rdata_rva,
         image_base,
         resolver,
         default_categorizer,
-    )
+    );
+
+    if !tables.iter().any(|t| t.category == "UserSettings") {
+        if let Some(us_table) = extract_dynamic_user_settings_table(pe) {
+            tables.push(us_table);
+        }
+    }
+
+    tables
+}
+
+/// Extracts default values for `UserSettings` entries when present in the binary.
+pub fn extract_user_settings_defaults(pe: &PeImage) -> UserSettingsDefaultsCatalog {
+    extract_static_enum_tables(pe)
+        .into_iter()
+        .find(|t| t.category == "UserSettings")
+        .map(|t| t.defaults)
+        .unwrap_or_default()
 }
 
 /// Extracts static enum tables and populates a typed catalog: category -> (identifier -> integer ID).
@@ -637,5 +1092,132 @@ mod tests {
         assert_eq!(discovered[0].category, "ServerErrorCodes");
         assert_eq!(discovered[0].form, EnumTableForm::StringKeyFirst);
         assert_eq!(discovered[0].rva_start, rdata_rva + 0x80);
+    }
+
+    #[test]
+    fn test_extract_user_settings_from_initializer_code_both_forms_and_defaults() {
+        let mut strings: HashMap<u64, String> = HashMap::new();
+        strings.insert(0x1819f4878, "userSettings/showReadmark".to_string());
+        strings.insert(0x1819f48f0, "userSettings/safeMode".to_string());
+        strings.insert(0x1819f4ce8, "notifications/channelCommentsLevel".to_string());
+        strings.insert(
+            0x1819f4d80,
+            "channelTools/\u{0441}hannelHubBotLastSeenVersion".to_string(),
+        );
+
+        let base_ip = 0x1813635fau64;
+        let mut buf: Vec<u8> = Vec::new();
+
+        let push_lea_rip = |buf: &mut Vec<u8>, reg_opcode: [u8; 3], target_va: u64| {
+            let next_ip = base_ip + buf.len() as u64 + 7;
+            let disp = (target_va as i64 - next_ip as i64) as i32;
+            buf.extend_from_slice(&reg_opcode);
+            buf.extend_from_slice(&disp.to_le_bytes());
+        };
+        let push_call = |buf: &mut Vec<u8>, target_va: u64| {
+            let next_ip = base_ip + buf.len() as u64 + 5;
+            let disp = (target_va as i64 - next_ip as i64) as i32;
+            buf.push(0xe8);
+            buf.extend_from_slice(&disp.to_le_bytes());
+        };
+
+        // 1) Entry 0 (Form 1, no default): id=0, str=0x1819f4878, len=0x19, call 0x180040ec6
+        push_lea_rip(&mut buf, [0x48, 0x8d, 0x05], 0x1819f4878); // lea rax, [rip+...]
+        buf.extend_from_slice(&[
+            0x48, 0x89, 0x44, 0x24, 0x20,                         // mov [rsp+0x20], rax
+            0x48, 0xc7, 0x44, 0x24, 0x28, 0x19, 0x00, 0x00, 0x00, // mov qword ptr [rsp+0x28], 0x19
+            0x4c, 0x8d, 0x44, 0x24, 0x20,                         // lea r8, [rsp+0x20]
+            0x33, 0xd2,                                           // xor edx, edx
+            0x48, 0x8d, 0x4c, 0x24, 0x40,                         // lea rcx, [rsp+0x40]
+        ]);
+        push_call(&mut buf, 0x180040ec6);
+
+        // 2) Entry 4 (Form 2, inlined with bool default = false):
+        buf.extend_from_slice(&[
+            0x48, 0xc7, 0x85, 0x20, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, // mov qword ptr [rbp+0x120], 4
+            0x41, 0xb8, 0x15, 0x00, 0x00, 0x00,                               // mov r8d, 0x15
+        ]);
+        push_lea_rip(&mut buf, [0x48, 0x8d, 0x15], 0x1819f48f0); // lea rdx, [rip+...]
+        buf.extend_from_slice(&[
+            0x48, 0x8d, 0x8d, 0x28, 0x01, 0x00, 0x00, // lea rcx, [rbp+0x128]
+        ]);
+        push_call(&mut buf, 0x18001d9f8);
+        buf.extend_from_slice(&[
+            0xc6, 0x85, 0x48, 0x01, 0x00, 0x00, 0x00, // mov byte ptr [rbp+0x148], 0
+            0xc6, 0x85, 0x88, 0x01, 0x00, 0x00, 0x05, // mov byte ptr [rbp+0x188], 5
+            0xc6, 0x85, 0x90, 0x01, 0x00, 0x00, 0x01, // mov byte ptr [rbp+0x190], 1
+        ]);
+
+        // 3) Entry 24 (Form 1, int64 default = 0):
+        push_lea_rip(&mut buf, [0x48, 0x8d, 0x05], 0x1819f4ce8); // lea rax, [rip+...]
+        buf.extend_from_slice(&[
+            0x48, 0x89, 0x44, 0x24, 0x20,                         // mov [rsp+0x20], rax
+            0x48, 0xc7, 0x44, 0x24, 0x28, 0x22, 0x00, 0x00, 0x00, // mov qword ptr [rsp+0x28], 0x22
+            0x45, 0x33, 0xc9,                                     // xor r9d, r9d
+            0x4c, 0x8d, 0x44, 0x24, 0x20,                         // lea r8, [rsp+0x20]
+            0xba, 0x18, 0x00, 0x00, 0x00,                         // mov edx, 0x18
+            0x48, 0x8d, 0x8d, 0x80, 0x0a, 0x00, 0x00,             // lea rcx, [rbp+0xa80]
+        ]);
+        push_call(&mut buf, 0x18009318a);
+
+        // 4) Entry 28 (Form 1, no default, UTF-8 key):
+        push_lea_rip(&mut buf, [0x48, 0x8d, 0x05], 0x1819f4d80); // lea rax, [rip+...]
+        buf.extend_from_slice(&[
+            0x48, 0x89, 0x44, 0x24, 0x20,
+            0x48, 0xc7, 0x44, 0x24, 0x28, 0x2a, 0x00, 0x00, 0x00,
+            0x4c, 0x8d, 0x44, 0x24, 0x20,
+            0xba, 0x1c, 0x00, 0x00, 0x00,
+            0x48, 0x8d, 0x8d, 0x60, 0x0c, 0x00, 0x00,
+        ]);
+        push_call(&mut buf, 0x180040ec6);
+
+        let extracted = extract_user_settings_from_initializer_code(
+            &buf,
+            0x1813635fa,
+            |va, len| {
+                strings.get(&va).and_then(|s| {
+                    if s.len() == len {
+                        Some(s.clone())
+                    } else {
+                        None
+                    }
+                })
+            },
+            |target| match target {
+                0x180040ec6 => Some(HelperDefaultKind::None),
+                0x18009318a => Some(HelperDefaultKind::Variant(3)),
+                _ => None,
+            },
+        );
+
+        assert_eq!(extracted.len(), 4);
+        assert_eq!(
+            extracted[0],
+            ("userSettings/showReadmark".to_string(), 0, None)
+        );
+        assert_eq!(
+            extracted[1],
+            (
+                "userSettings/safeMode".to_string(),
+                4,
+                Some(serde_json::json!(false))
+            )
+        );
+        assert_eq!(
+            extracted[2],
+            (
+                "notifications/channelCommentsLevel".to_string(),
+                24,
+                Some(serde_json::json!(0))
+            )
+        );
+        assert_eq!(
+            extracted[3],
+            (
+                "channelTools/\u{0441}hannelHubBotLastSeenVersion".to_string(),
+                28,
+                None
+            )
+        );
     }
 }

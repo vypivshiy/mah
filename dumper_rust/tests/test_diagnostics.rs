@@ -59,6 +59,7 @@ fn main_dump_serialization_does_not_include_diagnostics_by_default() {
         models: Vec::new(),
         polymorphic_models: Vec::new(),
         enums: Default::default(),
+        user_settings_defaults: Default::default(),
         discriminators: Default::default(),
         string_enums: None,
         error: serde_json::json!({}),

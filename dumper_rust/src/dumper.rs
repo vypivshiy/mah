@@ -171,6 +171,8 @@ pub struct DumpResult {
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub enums: BTreeMap<String, BTreeMap<String, u64>>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub user_settings_defaults: BTreeMap<String, serde_json::Value>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub discriminators: BTreeMap<String, BTreeMap<String, String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub string_enums: Option<Vec<String>>,
@@ -412,7 +414,15 @@ impl Dumper {
             discriminator: discriminator_diagnostics,
         };
 
-        let enums = crate::datamining::enums::extract_static_enums(pe);
+        let enum_tables = crate::datamining::enums::extract_static_enum_tables(pe);
+        let mut enums = BTreeMap::new();
+        let mut user_settings_defaults = BTreeMap::new();
+        for table in enum_tables {
+            if table.category == "UserSettings" && !table.defaults.is_empty() {
+                user_settings_defaults = table.defaults;
+            }
+            enums.insert(table.category, table.entries);
+        }
         let string_enums = if enums.is_empty() {
             Some(scanner.string_enums.clone())
         } else {
@@ -432,6 +442,7 @@ impl Dumper {
                 models: models_list,
                 polymorphic_models,
                 enums,
+                user_settings_defaults,
                 discriminators,
                 string_enums,
                 error: default_error_payload,
