@@ -1,16 +1,16 @@
 {
   "meta": {
-    "app_version": "26.38.0",
-    "build_number": 82021,
+    "app_version": "26.39.0",
+    "build_number": 82726,
     "protocol_version": 11
   },
   "summary": {
-    "total_packets": 133,
+    "total_packets": 137,
     "total_events": 25,
-    "total_models": 145,
-    "total_features": 265,
-    "total_source_files": 215,
-    "total_log_templates": 470
+    "total_models": 149,
+    "total_features": 268,
+    "total_source_files": 219,
+    "total_log_templates": 483
   },
   "client_config": {
     "allow_message_text_with_files": false,
@@ -93,7 +93,7 @@
     "update_fallback_url_self_service_mac": "jamfselfservice://content?entity=policy&id=899&action=view",
     "update_fallback_url_self_service_win": "softwarecenter:SoftwareID=ScopeId_62870913-F37D-4CC9-9FE3-D11CFBE99683/Application_8d2f16c9-cee9-412e-b3d2-0079fdda2078",
     "update_path": "",
-    "update_url": "https://download.max.ru",
+    "update_url": "https://download2.max.ru",
     "use_encrypted_connection": true,
     "user_agent": "OneMe Desktop",
     "user_agreement_url": "https://legal.max.ru/ps",
@@ -146,6 +146,7 @@
     "callVideoEncodersConfig": "std::optional<std::string>",
     "callYuvToBgrOnGpu": "std::optional<bool>",
     "calls-accept-on-counter-call-enabled": "std::optional<bool>",
+    "calls-admin-management": "std::optional<bool>",
     "calls-credentials-store-enabled": "std::optional<bool>",
     "calls-endpoint": "std::optional<std::string>",
     "calls-fakeboss-incoming-call-enabled": "std::optional<bool>",
@@ -163,6 +164,7 @@
     "channel-statistics-botid": "std::optional<int64_t>",
     "channel-strike-botid": "std::optional<int64_t>",
     "channel-subscriptions-recs-limit": "std::optional<int64_t>",
+    "channel-video-auto-play-duration-limit": "std::optional<int64_t>",
     "channels-bots-org-profile": "std::optional<bool>",
     "channels-complaint-enabled": "std::optional<bool>",
     "channels-enabled": "std::optional<bool>",
@@ -218,6 +220,7 @@
     "family-protection-botid": "std::optional<int64_t>",
     "february-23-26-theme": "std::optional<bool>",
     "file-upload-max-size": "std::optional<int64_t>",
+    "folder-mention-filter": "std::optional<bool>",
     "font-size-slider": "std::optional<bool>",
     "forwarded-post-views": "std::optional<bool>",
     "fullscreen-subtitle": "std::optional<bool>",
@@ -272,7 +275,6 @@
     "notification-settings": "std::optional<bool>",
     "official-bot-naming-enabled": "std::optional<bool>",
     "offline-statistic-enabled": "std::optional<bool>",
-    "often-reactions": "std::optional<Api::OneMe::Types::OftenReactions>",
     "oneme-media-player": "std::optional<Api::OneMe::Types::OneMeMediaPlayer>",
     "opus-recorder-bitrate": "std::optional<int64_t>",
     "opus-recorder-sample-rate": "std::optional<int64_t>",
@@ -296,6 +298,7 @@
     "presence-ttl": "std::optional<int64_t>",
     "raise-call-window-on-focus": "std::optional<bool>",
     "reactions-menu": "std::optional<std::vector<std::string>>",
+    "reactions-rank-config": "std::optional<Api::OneMe::Types::ReactionsRankConfig>",
     "reactions-settings-enabled": "std::optional<bool>",
     "readmark-validation-disabled": "std::optional<bool>",
     "recent-search-enabled": "std::optional<bool>",
@@ -317,7 +320,6 @@
     "show-fast-forward-button": "std::optional<bool>",
     "show-organization-type": "std::optional<bool>",
     "show-you-subscribed": "std::optional<bool>",
-    "sort-reactions": "std::optional<bool>",
     "spell-check-lin": "std::optional<bool>",
     "spell-check-mac": "std::optional<bool>",
     "spell-check-win": "std::optional<bool>",
@@ -362,6 +364,7 @@
     "webapp-phone-hash": "std::optional<bool>",
     "webapp-ss-keys-count": "std::optional<int64_t>",
     "webapp-video-stream": "std::optional<bool>",
+    "webp-config": "std::optional<Api::OneMe::Types::WebpConfig>",
     "welcome-sticker-ids": "std::optional<std::vector<int64_t>>",
     "wide-snippet-preview-width": "std::optional<int64_t>",
     "y-map": "std::optional<Api::OneMe::Types::YMapConfig>"
@@ -391,7 +394,7 @@
       "wait.for.admin": 4
     },
     "UserSettings": {
-      "channelTools/сhannelHubBotLastSeenVersion": 28,
+      "channelTools/channelHubBotLastSeenVersion": 28,
       "notifications/channelCommentsLevel": 24,
       "notifications/channelsEnabled": 23,
       "notifications/muteInCalls": 26,
@@ -741,7 +744,7 @@
       "name": "PersonalConfig",
       "handler": {
         "class": "Core::Chats::ControlInteractor",
-        "method": "doHideNonContactBanner",
+        "method": "doArchiveChat",
         "source": "components/core/src/business/chats/chat_control_interactor.cpp"
       }
     },
@@ -863,8 +866,8 @@
       "opcode": 80,
       "name": "PhotoUpload",
       "handler": {
-        "class": "Core::Attachment::AttachmentUrlInteractor",
-        "method": "doRequestPhotoUploadUrl",
+        "class": "Core::Attachment::`anonymous-namespace'",
+        "method": "makeUrlRequestFailure",
         "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
       }
     },
@@ -872,8 +875,8 @@
       "opcode": 82,
       "name": "VideoUpload",
       "handler": {
-        "class": "Core::Attachment::AttachmentUrlInteractor",
-        "method": "doRequestAudioUploadUrl",
+        "class": "Core::Attachment::`anonymous-namespace'",
+        "method": "makeUrlRequestFailure",
         "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
       }
     },
@@ -908,8 +911,8 @@
       "opcode": 87,
       "name": "FileUpload",
       "handler": {
-        "class": "Core::Attachment::AttachmentUrlInteractor",
-        "method": "doRequestFileUploadUrl",
+        "class": "Core::Attachment::`anonymous-namespace'",
+        "method": "makeUrlRequestFailure",
         "source": "components/core/src/business/attachment/attachment_url_interactor.cpp"
       }
     },
@@ -1170,6 +1173,15 @@
       "name": "PhotoUrlRefresh"
     },
     {
+      "opcode": 204,
+      "name": "GetExternalChatRestrictions",
+      "handler": {
+        "class": "Core::ExternalChatRestrictions::Requester",
+        "method": "doRequestChannelsRestrictions",
+        "source": "components/core/src/business/external_chat_restrictions/external_chat_restrictions_requester.cpp"
+      }
+    },
+    {
       "opcode": 208,
       "name": "StoriesList"
     },
@@ -1224,6 +1236,33 @@
     {
       "opcode": 223,
       "name": "ChatLinkDelete"
+    },
+    {
+      "opcode": 240,
+      "name": "GetStates",
+      "handler": {
+        "class": "Core::PinnedMessages::`anonymous-namespace'",
+        "method": "toApi",
+        "source": "components/core/src/business/pinned_messages/pinned_messages_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 241,
+      "name": "Get",
+      "handler": {
+        "class": "Core::PinnedMessages::`anonymous-namespace'",
+        "method": "toApi",
+        "source": "components/core/src/business/pinned_messages/pinned_messages_interactor.cpp"
+      }
+    },
+    {
+      "opcode": 242,
+      "name": "Update",
+      "handler": {
+        "class": "Core::PinnedMessages::`anonymous-namespace'",
+        "method": "toApi",
+        "source": "components/core/src/business/pinned_messages/pinned_messages_interactor.cpp"
+      }
     },
     {
       "opcode": 256,
@@ -1446,6 +1485,7 @@
     "components/core/src/business/event_processing/api_event_adapter.cpp",
     "components/core/src/business/event_processing/event_processor.cpp",
     "components/core/src/business/external_callback/external_callback_interactor.cpp",
+    "components/core/src/business/external_chat_restrictions/external_chat_restrictions_requester.cpp",
     "components/core/src/business/file_downloader/background_filesystem_worker.cpp",
     "components/core/src/business/file_downloader/download_files_reader.cpp",
     "components/core/src/business/file_downloader/file_downloader.cpp",
@@ -1473,6 +1513,7 @@
     "components/core/src/business/pendings/message_pending_provider.cpp",
     "components/core/src/business/pendings/message_pending_resend_scheduler.cpp",
     "components/core/src/business/pendings/pending_message_splitter.cpp",
+    "components/core/src/business/pinned_messages/pinned_messages_interactor.cpp",
     "components/core/src/business/pinned_messages/provider.cpp",
     "components/core/src/business/polls/polling_interval_reader.cpp",
     "components/core/src/business/polls/polls_provider.cpp",
@@ -1517,6 +1558,7 @@
     "components/core/src/business/retry_packet_sender/oneme_awaitable_retry_packet_sender.cpp",
     "components/core/src/business/self_info/self_info_reader.cpp",
     "components/core/src/business/session/account_session_controller.cpp",
+    "components/core/src/business/session/api_health_checker.cpp",
     "components/core/src/business/session/remote_sessions_interactor.cpp",
     "components/core/src/business/statistic/events_sender.cpp",
     "components/core/src/business/statistic/log_event_storage_converter.cpp",
@@ -1574,6 +1616,7 @@
     "shared/api/oneme/types/src/log_params.cpp",
     "shared/api/oneme/types/src/outgoing_attachment.cpp",
     "shared/api/oneme/types/src/polymorphic_impl.h",
+    "shared/me_types/src/health_check_info/health_check_info.cpp",
     "utils/ffmpeg_process/src/video_frame_reader.cpp",
     "utils/media_utils/src/size_reader.cpp"
   ],
@@ -1587,6 +1630,7 @@
     ": response json error: ",
     ": server error: ",
     "AAC codec selected in settings but response hasn't this value",
+    "API fallback URL is empty",
     "AccountManager",
     "Add contact failed!",
     "Add contact name for {}: '{}'",
@@ -1648,6 +1692,7 @@
     "Delete folder with id={}",
     "Download failed",
     "DownloadFile packet redirected to:",
+    "Downloaded API fallback json to {}",
     "Downloaded file has wrong size:  expected size = {}, downloaded size = {} (file id: {})",
     "Downloaded file has wrong size: expected size = {}, downloaded size = {} (url: {}, path: {})",
     "Downloading paused",
@@ -1659,6 +1704,7 @@
     "Failed to add to recent: {}",
     "Failed to apply experiments changes: {}",
     "Failed to apply recent search setting: {}",
+    "Failed to apply server changes: {}",
     "Failed to apply server settings changes: {}",
     "Failed to check existance {}, with message {}",
     "Failed to cleanup history: {}",
@@ -1672,6 +1718,7 @@
     "Failed to create worker for id: {}",
     "Failed to delete folder: id={} sync={}, error code={}, error={}",
     "Failed to delete message({}): {}",
+    "Failed to download API fallback json",
     "Failed to edit message: {}",
     "Failed to filter by recent: {}",
     "Failed to filter recent: {}",
@@ -1698,9 +1745,11 @@
     "Failed to mark chat {} as readed up to message {}, error: {}",
     "Failed to move file {} -> {}: {}",
     "Failed to move paused file {} -> {}: {}",
+    "Failed to parse API fallback json",
     "Failed to ping, error: {}",
     "Failed to ping, state: {} error: {}",
     "Failed to reactions: {}",
+    "Failed to read downloaded file: {}",
     "Failed to read live streams for chat {}, error: {}",
     "Failed to remove active task for id:{}",
     "Failed to remove from recent: {}",
@@ -1723,12 +1772,9 @@
     "Failed to request presets avatar: {}, {}",
     "Failed to request profile delete state: {}, {}",
     "Failed to request url for audio attachment: {}",
-    "Failed to request url for upload audio files: {}",
-    "Failed to request url for upload files: {}",
-    "Failed to request url for upload photo files: {}",
-    "Failed to request url for upload video files: {}",
-    "Failed to request url for upload video message files: {}",
+    "Failed to request url for upload {}: {}",
     "Failed to request url for video attachment: {}",
+    "Failed to request {} upload urls: offset {}, requested {}, error: {}",
     "Failed to request {} upload urls: offset {}, requested {}, got 0",
     "Failed to run session: {}",
     "Failed to save chat: {}",
@@ -1782,8 +1828,10 @@
     "Invalid organization link: required appId or url.",
     "Invalid photo upload batch: {} photos",
     "Invalid photoId. In doc is required.",
+    "Invalid pinned messages state",
     "Invalid response data size",
     "Invalid response. Error handler required.",
+    "Is not object",
     "Load from storage",
     "Load messages: empty; chatId: {}; msgId: {}; time: {}; forward: {}; backward: {}",
     "Load messages: local size: {}; messages: [{},{}]; chatId: {}; msgId: {}; time {}; forward: {}; backward: {}",
@@ -1797,7 +1845,7 @@
     "Logout",
     "Logout error: {}, {}",
     "MP3 codec selected in settings but response hasn't this value",
-    "Map рeader is null",
+    "Map header is null",
     "Mark the story {} for owner {} beyond the known amount",
     "MaxMediaUrlsPerRequest changed: {}",
     "Media (chatId {} messageId {} mediaId {}) transcription failed: {}",
@@ -1823,6 +1871,7 @@
     "Opus codec selected in settings but response hasn't this value",
     "Packet with seq: {} is canceled at the moment of response",
     "Parse empty sequence",
+    "Parse error",
     "Parsing error, member: {}, error: {}",
     "Partial {} upload urls: offset {}, requested {}, got {}",
     "Participants do not exist for chatid {}",
@@ -1847,6 +1896,7 @@
     "Remove media attachment id={} from message id={}",
     "Removed from recent, remaining: {}",
     "Reorder folders with new order.size={}",
+    "Request failed",
     "Request folders sync={}",
     "Requested {} chats from {}; Loaded: {}",
     "Restart session on login network error",
@@ -1864,6 +1914,7 @@
     "Settings not initialized!",
     "Skipping notification after a parse error",
     "Start UpdatePolling",
+    "Start downloading fallback json from {}",
     "StartAuthorization",
     "Statistic event not sent, empty session id",
     "Statistic event not sent, event is null",
@@ -1874,6 +1925,7 @@
     "Success",
     "Successful ping!",
     "Successful ping! State: {}",
+    "Successfully parsed API fallback json",
     "Sync not match, make full update",
     "Temp file: {} exists, with size: {}",
     "The order has not changed",
@@ -1899,6 +1951,7 @@
     "Unknown statistic event params: type='{}' event='{}'",
     "UnknownCallerAlertStatisticEventConverter",
     "Unsupported attachment type '{}'",
+    "Unsupported chat type",
     "Unsupported story layer type = {}",
     "Unsupported typed chat id in pinned messages notification, type={} primaryId={}",
     "Update chat title for {}: '{}'",
@@ -1937,6 +1990,8 @@
     "emoji is empty",
     "error: {}",
     "error: {}, code: {}",
+    "failed move chat {} from archive",
+    "failed move chat {} to archive",
     "failed to allocate destination frame: {}x{}",
     "failed to clear chat history",
     "failed to create software scaling context",
@@ -1996,6 +2051,7 @@
     "resendPacketsOnSessionEstablished",
     "restart session disabled!",
     "restart session!",
+    "restrictions request failed {}",
     "run session!",
     "setCallState: {}",
     "setState: {}",
@@ -2035,11 +2091,11 @@
     "unsupported poll version = '{}'",
     "update requester is null",
     "updateChats: chats {} update chat_list",
-    "upload error code={}: '{}'",
     "upload error: File too large",
     "upload error: {}",
     "upload file url is empty",
     "upload media url is empty",
+    "upload photo server error: {}",
     "upload photo tokens is empty",
     "upload photo url is empty",
     "url:(",
