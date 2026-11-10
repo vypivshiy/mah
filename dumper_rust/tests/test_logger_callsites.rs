@@ -132,4 +132,23 @@ fn test_logger_callsites_and_packet_binding_integration() {
     assert_eq!(h109.class, "Core::Auth::OneMeAuthSession");
     assert_eq!(h109.method, "doSendEmailVerifyRequest");
     assert_eq!(h109.source, "components/core/src/oneme_auth/oneme_auth_session.cpp");
+
+    // Verify Opcode 80 & 82 (PhotoUpload / VideoUpload -> makeUrlRequestFailure)
+    for op in [80, 82, 87] {
+        let entry = result
+            .packets_catalog
+            .iter()
+            .find(|e| e.opcode == op)
+            .unwrap_or_else(|| panic!("Opcode {} must exist in catalog", op));
+        assert!(
+            entry.handler.is_some(),
+            "Opcode {} should have a resolved handler",
+            op
+        );
+        let h = entry.handler.as_ref().unwrap();
+        assert_eq!(
+            h.source,
+            "components/core/src/business/attachment/attachment_url_interactor.cpp"
+        );
+    }
 }

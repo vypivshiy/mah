@@ -558,7 +558,32 @@ impl LoggerAnalyzer {
             }
         }
 
-        // 7. Assemble catalog entries for all packets
+        // 7. 1-hop callee search: if caller_func still has no logger info, look at helper
+        //    functions called by caller_func (excluding api_types_converters).
+        for &(call_rva, callee_target_rva) in &calls {
+            if let Some(caller_func) = pe.find_function(call_rva) {
+                if let Some(ops) = caller_func_to_opcodes.get(&caller_func.begin_address) {
+                    let real_callee_rva = thunks
+                        .get(&callee_target_rva)
+                        .copied()
+                        .unwrap_or(callee_target_rva);
+                    if let Some((source, func_name)) = func_logger_info.get(&real_callee_rva) {
+                        if !source.contains("api_types_converters") {
+                            let (class, method) = split_function_name(func_name);
+                            for &op in ops {
+                                opcode_handlers.entry(op).or_insert(PacketHandlerInfo {
+                                    class: class.clone(),
+                                    method: method.clone(),
+                                    source: source.clone(),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 8. Assemble catalog entries for all packets
         let mut catalog = Vec::with_capacity(packets.len());
         for p in packets {
             let name = if p.is_special && p.special_name.is_some() {
