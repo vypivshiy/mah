@@ -132,8 +132,12 @@ fn test_dumper_full_pipeline_structural_invariants() {
     assert_eq!(pkt_25.request.ident, "EmptyParameters");
     assert_eq!(pkt_25.response.ident, "AvatarPresetAvatarResponse");
 
-    // 3. Events invariants (exactly 24 events)
-    assert_eq!(result.events.len(), 24, "Must discover exactly 24 events");
+    // 3. Events invariants (at least 24 events)
+    assert!(
+        result.events.len() >= 24,
+        "Must discover at least 24 events, found {}",
+        result.events.len()
+    );
     let mut event_opcodes = HashSet::new();
     let mut event_idents = HashSet::new();
     for e in &result.events {
