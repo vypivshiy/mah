@@ -19,7 +19,7 @@ use std::time::Instant;
 #[command(
     name = "dumper_rust",
     author = "mah project",
-    version = "0.1.0",
+    version = "1.0.0",
     about = "Autonomous MSVC C++ x64 DLL Protocol & Model Dumper in Rust without disassemblers"
 )]
 struct Cli {
