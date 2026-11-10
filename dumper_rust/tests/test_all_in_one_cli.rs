@@ -276,6 +276,7 @@ fn test_cli_help_and_subcommand_help() {
     assert!(update_out.contains("--json"));
     assert!(update_out.contains("--quiet"));
     assert!(update_out.contains("--appcast-url"));
+    assert!(update_out.contains("--insecure"));
 
     // 3. unpack --help
     let unpack = Command::new(bin).args(["unpack", "--help"]).output().unwrap();

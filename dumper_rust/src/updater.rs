@@ -11,6 +11,8 @@ use std::time::{Duration, Instant};
 pub const SPARKLE_NS: &str = "http://www.andymatuschak.org/xml-namespaces/sparkle";
 pub const DEFAULT_FEED_URL: &str = "https://download.max.ru/win/release/update.xml";
 pub const DEFAULT_INSTALLER_NAME: &str = "MAX.msi";
+pub const EMBEDDED_RUSSIAN_CA_PEM: &str =
+    include_str!("../../certs/russian_trusted_root_ca.cer");
 pub const BUFFER_SIZE: usize = 64 * 1024;
 pub const DEFAULT_CONCURRENCY: usize = 8;
 pub const DEFAULT_RETRIES: usize = 5;
@@ -248,6 +250,16 @@ pub struct UpdateArgs {
     /// Maximum retry attempts per chunk (defaults to 5)
     #[arg(long, value_name = "NUM", default_value = "5")]
     pub retries: Option<usize>,
+
+    /// Skip TLS server certificate verification
+    #[arg(
+        short = 'k',
+        long = "insecure",
+        visible_alias = "no-verify",
+        alias = "skip-verify",
+        alias = "no-check-certificate"
+    )]
+    pub insecure: bool,
 }
 
 impl Default for UpdateArgs {
@@ -262,6 +274,7 @@ impl Default for UpdateArgs {
             metadata_path: None,
             threads: Some(DEFAULT_CONCURRENCY),
             retries: Some(DEFAULT_RETRIES),
+            insecure: false,
         }
     }
 }
@@ -378,7 +391,14 @@ pub fn parse_appcast_xml(xml: &str) -> Result<ReleaseInfo, UpdaterError> {
 
 /// Fetch and parse Sparkle Appcast XML feed from remote URL.
 pub fn fetch_feed(url: &str) -> Result<ReleaseInfo, UpdaterError> {
-    let resp = ureq::get(url)
+    fetch_feed_with_tls(url, false)
+}
+
+/// Fetch and parse Sparkle Appcast XML feed from remote URL with configurable TLS verification.
+pub fn fetch_feed_with_tls(url: &str, insecure: bool) -> Result<ReleaseInfo, UpdaterError> {
+    let agent = create_http_agent_with_tls(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS, insecure);
+    let resp = agent
+        .get(url)
         .header("User-Agent", "OneMe Desktop Updater")
         .call()
         .map_err(|e| match e {
@@ -483,6 +503,7 @@ pub struct DownloadOptions {
     pub retries: usize,
     pub quiet: bool,
     pub chunk_size: u64,
+    pub insecure: bool,
 }
 
 impl Default for DownloadOptions {
@@ -492,6 +513,7 @@ impl Default for DownloadOptions {
             retries: DEFAULT_RETRIES,
             quiet: false,
             chunk_size: DEFAULT_CHUNK_SIZE,
+            insecure: false,
         }
     }
 }
@@ -563,14 +585,261 @@ pub fn compute_chunks(total_size: u64, chunk_size: u64) -> Vec<ChunkInfo> {
     chunks
 }
 
-/// Build standard ureq Agent with configured connection and read timeouts.
+/// Parse the embedded Russian Trusted Root CA certificate(s) from PEM into ureq `Certificate`s.
+pub fn parse_embedded_russian_ca_certs() -> Vec<ureq::tls::Certificate<'static>> {
+    ureq::tls::parse_pem(EMBEDDED_RUSSIAN_CA_PEM.as_bytes())
+        .filter_map(|item| match item {
+            Ok(ureq::tls::PemItem::Certificate(cert)) => Some(cert),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Build a `rustls::RootCertStore` containing both standard WebPKI roots and the
+/// embedded Russian Trusted Root CA certificate.
+pub fn build_default_root_cert_store() -> rustls::RootCertStore {
+    let mut root_store = rustls::RootCertStore {
+        roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
+    };
+    for cert in parse_embedded_russian_ca_certs() {
+        root_store
+            .add(rustls_pki_types::CertificateDer::from(cert.der().to_vec()))
+            .expect("valid embedded Russian Trusted Root CA certificate");
+    }
+    root_store
+}
+
+#[derive(Debug)]
+struct DisabledCertVerifier;
+
+impl rustls::client::danger::ServerCertVerifier for DisabledCertVerifier {
+    fn verify_server_cert(
+        &self,
+        _end_entity: &rustls_pki_types::CertificateDer<'_>,
+        _intermediates: &[rustls_pki_types::CertificateDer<'_>],
+        _server_name: &rustls_pki_types::ServerName<'_>,
+        _ocsp_response: &[u8],
+        _now: rustls_pki_types::UnixTime,
+    ) -> Result<rustls::client::danger::ServerCertVerified, rustls::Error> {
+        Ok(rustls::client::danger::ServerCertVerified::assertion())
+    }
+
+    fn verify_tls12_signature(
+        &self,
+        _message: &[u8],
+        _cert: &rustls_pki_types::CertificateDer<'_>,
+        _dss: &rustls::DigitallySignedStruct,
+    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+        Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+    }
+
+    fn verify_tls13_signature(
+        &self,
+        _message: &[u8],
+        _cert: &rustls_pki_types::CertificateDer<'_>,
+        _dss: &rustls::DigitallySignedStruct,
+    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+        Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+    }
+
+    fn supported_verify_schemes(&self) -> Vec<rustls::SignatureScheme> {
+        vec![
+            rustls::SignatureScheme::RSA_PKCS1_SHA1,
+            rustls::SignatureScheme::RSA_PKCS1_SHA256,
+            rustls::SignatureScheme::RSA_PKCS1_SHA384,
+            rustls::SignatureScheme::RSA_PKCS1_SHA512,
+            rustls::SignatureScheme::ECDSA_NISTP256_SHA256,
+            rustls::SignatureScheme::ECDSA_NISTP384_SHA384,
+            rustls::SignatureScheme::ECDSA_NISTP521_SHA512,
+            rustls::SignatureScheme::RSA_PSS_SHA256,
+            rustls::SignatureScheme::RSA_PSS_SHA384,
+            rustls::SignatureScheme::RSA_PSS_SHA512,
+            rustls::SignatureScheme::ED25519,
+            rustls::SignatureScheme::ED448,
+        ]
+    }
+}
+
+fn get_rustls_client_config(insecure: bool) -> Arc<rustls::ClientConfig> {
+    static VERIFIED_CONFIG: std::sync::OnceLock<Arc<rustls::ClientConfig>> =
+        std::sync::OnceLock::new();
+    static INSECURE_CONFIG: std::sync::OnceLock<Arc<rustls::ClientConfig>> =
+        std::sync::OnceLock::new();
+
+    if insecure {
+        INSECURE_CONFIG
+            .get_or_init(|| {
+                let provider = Arc::new(rustls::crypto::ring::default_provider());
+                let config = rustls::ClientConfig::builder_with_provider(provider)
+                    .with_protocol_versions(rustls::ALL_VERSIONS)
+                    .expect("all TLS versions")
+                    .dangerous()
+                    .with_custom_certificate_verifier(Arc::new(DisabledCertVerifier))
+                    .with_no_client_auth();
+                Arc::new(config)
+            })
+            .clone()
+    } else {
+        VERIFIED_CONFIG
+            .get_or_init(|| {
+                let provider = Arc::new(rustls::crypto::ring::default_provider());
+                let root_store = build_default_root_cert_store();
+                let config = rustls::ClientConfig::builder_with_provider(provider)
+                    .with_protocol_versions(rustls::ALL_VERSIONS)
+                    .expect("all TLS versions")
+                    .with_root_certificates(root_store)
+                    .with_no_client_auth();
+                Arc::new(config)
+            })
+            .clone()
+    }
+}
+
+#[derive(Debug, Default)]
+struct CombinedRustlsConnector;
+
+impl<In: ureq::unversioned::transport::Transport>
+    ureq::unversioned::transport::Connector<In> for CombinedRustlsConnector
+{
+    type Out = ureq::unversioned::transport::Either<In, CombinedRustlsTransport>;
+
+    fn connect(
+        &self,
+        details: &ureq::unversioned::transport::ConnectionDetails,
+        chained: Option<In>,
+    ) -> Result<Option<Self::Out>, ureq::Error> {
+        let Some(transport) = chained else {
+            panic!("CombinedRustlsConnector requires a chained transport");
+        };
+
+        if !details.needs_tls() || transport.is_tls() {
+            return Ok(Some(ureq::unversioned::transport::Either::A(transport)));
+        }
+
+        let insecure = details.config.tls_config().disable_verification();
+        let config = get_rustls_client_config(insecure);
+
+        let host = details
+            .uri
+            .authority()
+            .map(|a| {
+                let h = a.host();
+                h.strip_prefix('[')
+                    .and_then(|s| s.strip_suffix(']'))
+                    .unwrap_or(h)
+            })
+            .unwrap_or_default();
+
+        let name_borrowed: rustls_pki_types::ServerName<'_> =
+            host.try_into().map_err(|_| ureq::Error::Tls("Rustls invalid dns name error"))?;
+        let name = name_borrowed.to_owned();
+
+        let mut conn = rustls::ClientConnection::new(config, name)?;
+        let mut sock = ureq::unversioned::transport::TransportAdapter::new(transport.boxed());
+        sock.set_timeout(details.timeout);
+        conn.complete_io(&mut sock)?;
+        let stream = rustls::StreamOwned { conn, sock };
+
+        let buffers = ureq::unversioned::transport::LazyBuffers::new(
+            details.config.input_buffer_size(),
+            details.config.output_buffer_size(),
+        );
+
+        Ok(Some(ureq::unversioned::transport::Either::B(
+            CombinedRustlsTransport { buffers, stream },
+        )))
+    }
+}
+
+struct CombinedRustlsTransport {
+    buffers: ureq::unversioned::transport::LazyBuffers,
+    stream: rustls::StreamOwned<
+        rustls::ClientConnection,
+        ureq::unversioned::transport::TransportAdapter,
+    >,
+}
+
+impl std::fmt::Debug for CombinedRustlsTransport {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CombinedRustlsTransport").finish()
+    }
+}
+
+impl ureq::unversioned::transport::Transport for CombinedRustlsTransport {
+    fn buffers(&mut self) -> &mut dyn ureq::unversioned::transport::Buffers {
+        &mut self.buffers
+    }
+
+    fn transmit_output(
+        &mut self,
+        amount: usize,
+        timeout: ureq::unversioned::transport::NextTimeout,
+    ) -> Result<(), ureq::Error> {
+        use ureq::unversioned::transport::Buffers;
+        self.stream.get_mut().set_timeout(timeout);
+        let output = &self.buffers.output()[..amount];
+        self.stream.write_all(output)?;
+        Ok(())
+    }
+
+    fn await_input(
+        &mut self,
+        timeout: ureq::unversioned::transport::NextTimeout,
+    ) -> Result<bool, ureq::Error> {
+        use ureq::unversioned::transport::Buffers;
+        self.stream.get_mut().set_timeout(timeout);
+        let input = self.buffers.input_append_buf();
+        let amount = self.stream.read(input)?;
+        self.buffers.input_appended(amount);
+        Ok(amount > 0)
+    }
+
+    fn is_open(&mut self) -> bool {
+        self.stream.get_mut().get_mut().is_open()
+    }
+
+    fn is_tls(&self) -> bool {
+        true
+    }
+}
+
+/// Build standard ureq Agent with configured connection and read timeouts,
+/// trusting both WebPKI roots and the embedded Russian Trusted Root CA certificate.
 pub fn create_http_agent(connect_timeout_secs: u64, read_timeout_secs: u64) -> ureq::Agent {
-    ureq::Agent::config_builder()
+    create_http_agent_with_tls(connect_timeout_secs, read_timeout_secs, false)
+}
+
+/// Build ureq Agent with configured timeouts and optional TLS verification bypass.
+pub fn create_http_agent_with_tls(
+    connect_timeout_secs: u64,
+    read_timeout_secs: u64,
+    insecure: bool,
+) -> ureq::Agent {
+    use ureq::unversioned::transport::Connector;
+
+    let certs = parse_embedded_russian_ca_certs();
+    let tls_config = ureq::tls::TlsConfig::builder()
+        .root_certs(ureq::tls::RootCerts::new_with_certs(&certs))
+        .disable_verification(insecure)
+        .build();
+
+    let config = ureq::Agent::config_builder()
         .timeout_connect(Some(Duration::from_secs(connect_timeout_secs)))
         .timeout_recv_response(Some(Duration::from_secs(read_timeout_secs)))
         .timeout_recv_body(Some(Duration::from_secs(read_timeout_secs * 8)))
-        .build()
-        .new_agent()
+        .tls_config(tls_config)
+        .build();
+
+    let connector = ()
+        .chain(ureq::unversioned::transport::ConnectProxyConnector::default())
+        .chain(ureq::unversioned::transport::TcpConnector::default())
+        .chain(CombinedRustlsConnector);
+
+    ureq::Agent::with_parts(
+        config,
+        connector,
+        ureq::unversioned::resolver::DefaultResolver::default(),
+    )
 }
 
 /// Thread-safe progress reporter computing download speed and estimated time of arrival (ETA).
@@ -690,6 +959,7 @@ fn download_single_chunk(
     first_error: &Arc<Mutex<Option<UpdaterError>>>,
     max_retries: usize,
     quiet: bool,
+    insecure: bool,
 ) -> Result<(), UpdaterError> {
     let chunk_len = chunk.size();
     let mut bytes_downloaded_in_chunk = 0u64;
@@ -719,7 +989,7 @@ fn download_single_chunk(
         let range_end = chunk.end;
         let range_header = format!("bytes={range_start}-{range_end}");
 
-        let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+        let agent = create_http_agent_with_tls(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS, insecure);
         let req = agent
             .get(url)
             .header("User-Agent", "OneMe Desktop Updater")
@@ -948,6 +1218,7 @@ fn download_parallel_chunks(
                         &first_error,
                         options.retries,
                         options.quiet,
+                        options.insecure,
                     ) {
                         Ok(()) => {
                             let mut comp = completed_set.lock().unwrap();
@@ -1040,7 +1311,11 @@ fn download_sequential_with_retry(
         let resp = if let Some(resp) = probe_resp_opt.take() {
             resp
         } else {
-            let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+            let agent = create_http_agent_with_tls(
+                CONNECT_TIMEOUT_SECS,
+                READ_TIMEOUT_SECS,
+                options.insecure,
+            );
             let mut req = agent
                 .get(url)
                 .header("User-Agent", "OneMe Desktop Updater");
@@ -1229,7 +1504,11 @@ pub fn download_installer_with_options(
         "bytes=0-0".to_string()
     };
 
-    let agent = create_http_agent(CONNECT_TIMEOUT_SECS, READ_TIMEOUT_SECS);
+    let agent = create_http_agent_with_tls(
+        CONNECT_TIMEOUT_SECS,
+        READ_TIMEOUT_SECS,
+        options.insecure,
+    );
     let probe_req = agent
         .get(url)
         .header("User-Agent", "OneMe Desktop Updater")
@@ -1361,7 +1640,16 @@ pub fn check_update(
     feed_url: &str,
     metadata_path: Option<&Path>,
 ) -> Result<UpdateCheckResult, UpdaterError> {
-    let release = fetch_feed(feed_url)?;
+    check_update_with_tls(feed_url, metadata_path, false)
+}
+
+/// Perform an update check against the feed URL and local version metadata with configurable TLS verification.
+pub fn check_update_with_tls(
+    feed_url: &str,
+    metadata_path: Option<&Path>,
+    insecure: bool,
+) -> Result<UpdateCheckResult, UpdaterError> {
+    let release = fetch_feed_with_tls(feed_url, insecure)?;
     let local_version = resolve_local_version(metadata_path);
     let update_available = release.version > local_version;
     let checked_at = now_utc_iso();
@@ -1394,7 +1682,7 @@ pub fn execute_update(
         .unwrap_or(DEFAULT_FEED_URL);
 
     if args.check || args.json {
-        let result = check_update(feed_url, args.metadata_path.as_deref())?;
+        let result = check_update_with_tls(feed_url, args.metadata_path.as_deref(), args.insecure)?;
         if args.json {
             let json_str = serde_json::to_string(&result)
                 .map_err(|e| UpdaterError::Other(e.to_string()))?;
@@ -1417,7 +1705,7 @@ pub fn execute_update(
         });
     }
 
-    let release = fetch_feed(feed_url)?;
+    let release = fetch_feed_with_tls(feed_url, args.insecure)?;
     let local_version = resolve_local_version(args.metadata_path.as_deref());
     let has_update = release.version > local_version;
 
@@ -1448,6 +1736,7 @@ pub fn execute_update(
         retries: args.retries.unwrap_or(DEFAULT_RETRIES),
         quiet: args.quiet,
         chunk_size: DEFAULT_CHUNK_SIZE,
+        insecure: args.insecure,
     };
 
     download_installer_with_options(&release.url, &dest_file, &options)?;

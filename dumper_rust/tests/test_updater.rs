@@ -1168,6 +1168,7 @@ fn test_download_parallel_multiple_chunks() {
         retries: 3,
         quiet: true,
         chunk_size: 4096, // 32KB / 4KB = 8 chunks
+        ..Default::default()
     };
 
     let url = format!("{}/large.msi", server.base_url);
@@ -1214,6 +1215,7 @@ fn test_download_parallel_inter_process_resumption() {
         retries: 3,
         quiet: true,
         chunk_size: 4096,
+        ..Default::default()
     };
 
     download_installer_with_options(&url, &dest_file, &options).expect("resume download");
@@ -1229,6 +1231,7 @@ fn test_update_args_default_and_custom_threads_retries() {
     let args_default = UpdateArgs::default();
     assert_eq!(args_default.threads, Some(8));
     assert_eq!(args_default.retries, Some(5));
+    assert!(!args_default.insecure);
 
     use clap::Parser;
     #[derive(Parser, Debug)]
@@ -1245,4 +1248,182 @@ fn test_update_args_default_and_custom_threads_retries() {
     let TestSubcommand::Update(args) = parsed.cmd;
     assert_eq!(args.threads, Some(16));
     assert_eq!(args.retries, Some(10));
+    assert!(!args.insecure);
+
+    for flag in ["-k", "--insecure", "--no-verify", "--skip-verify"] {
+        let parsed = TestCli::try_parse_from(["app", "update", flag]).unwrap();
+        let TestSubcommand::Update(args) = parsed.cmd;
+        assert!(args.insecure, "flag {flag} should set insecure=true");
+    }
+}
+
+#[test]
+fn test_embedded_russian_ca_certificate_is_valid_and_in_root_store() {
+    assert!(updater::EMBEDDED_RUSSIAN_CA_PEM.contains("-----BEGIN CERTIFICATE-----"));
+    let certs = updater::parse_embedded_russian_ca_certs();
+    assert_eq!(certs.len(), 1, "Expected 1 embedded Russian Trusted Root CA certificate");
+    assert!(!certs[0].der().is_empty());
+
+    let store = updater::build_default_root_cert_store();
+    assert!(
+        store.len() > 100,
+        "Root store must contain both WebPKI roots and the Russian Trusted Root CA (got {})",
+        store.len()
+    );
+
+    let agent_secure = updater::create_http_agent_with_tls(5, 5, false);
+    assert!(!agent_secure.config().tls_config().disable_verification());
+
+    let agent_insecure = updater::create_http_agent_with_tls(5, 5, true);
+    assert!(agent_insecure.config().tls_config().disable_verification());
+}
+
+#[test]
+fn test_https_self_signed_fails_by_default_and_succeeds_with_insecure() {
+    const SELF_SIGNED_CERT_PEM: &str = "-----BEGIN CERTIFICATE-----\n\
+MIIBNTCB26ADAgECAgEBMAoGCCqGSM49BAMCMBQxEjAQBgNVBAMMCWxvY2FsaG9z\n\
+dDAeFw0yMDAxMDEwMDAwMDBaFw0zNTAxMDEwMDAwMDBaMBQxEjAQBgNVBAMMCWxv\n\
+Y2FsaG9zdDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABLVCs7snvjqeTB9/+h24\n\
+1T/N3yU3RJm+XmocAzsKhKTOivugp+YV9P49QSzEn1ok5lIePxd6RV2vnH8JTh7y\n\
+F9+jHjAcMBoGA1UdEQQTMBGCCWxvY2FsaG9zdIcEfwAAATAKBggqhkjOPQQDAgNJ\n\
+ADBGAiEA8S2/qX6GGjtGohqQjyJP1yyvr+x5fPaX+o0rOQ8hzHECIQCJ3AHU1TRr\n\
+DtnHlhbbE16wEhQfgNomOql+0sm6jtsVYw==\n\
+-----END CERTIFICATE-----\n";
+
+    const SELF_SIGNED_KEY_PEM: &str = "-----BEGIN PRIVATE KEY-----\n\
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgwyTgHQQbOrp9nAND\n\
+M49rJRJFiggx5YYhcDJAoxgQtnGhRANCAAS1QrO7J746nkwff/oduNU/zd8lN0SZ\n\
+vl5qHAM7CoSkzor7oKfmFfT+PUEsxJ9aJOZSHj8XekVdr5x/CU4e8hff\n\
+-----END PRIVATE KEY-----\n";
+
+    let cert = ureq::tls::Certificate::from_pem(SELF_SIGNED_CERT_PEM.as_bytes()).unwrap();
+    let key = ureq::tls::PrivateKey::from_pem(SELF_SIGNED_KEY_PEM.as_bytes()).unwrap();
+
+    let cert_der = rustls_pki_types::CertificateDer::from(cert.der().to_vec());
+    let key_der = rustls_pki_types::PrivateKeyDer::Pkcs8(
+        rustls_pki_types::PrivatePkcs8KeyDer::from(key.der().to_vec()),
+    );
+
+    let provider = Arc::new(rustls::crypto::ring::default_provider());
+    let server_config = Arc::new(
+        rustls::ServerConfig::builder_with_provider(provider)
+            .with_protocol_versions(rustls::ALL_VERSIONS)
+            .unwrap()
+            .with_no_client_auth()
+            .with_single_cert(vec![cert_der], key_der)
+            .unwrap(),
+    );
+
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let base_url = format!("https://localhost:{port}");
+
+    let installer_bytes = b"HTTPS_INSECURE_MSI_PAYLOAD_BYTES".to_vec();
+    let feed_xml = make_sparkle_feed(
+        "26.39.0",
+        &format!("{base_url}/MAX.msi"),
+        None,
+        None,
+        None,
+        false,
+    );
+
+    let running = Arc::new(AtomicBool::new(true));
+    let running_clone = Arc::clone(&running);
+    let installer_clone = installer_bytes.clone();
+
+    let handle = thread::spawn(move || {
+        listener.set_nonblocking(true).ok();
+        while running_clone.load(Ordering::Relaxed) {
+            match listener.accept() {
+                Ok((tcp, _)) => {
+                    let cfg = Arc::clone(&server_config);
+                    let xml = feed_xml.clone();
+                    let msi = installer_clone.clone();
+                    thread::spawn(move || {
+                        let _ = tcp.set_nonblocking(false);
+                        let _ = tcp.set_read_timeout(Some(std::time::Duration::from_secs(5)));
+                        let _ = tcp.set_write_timeout(Some(std::time::Duration::from_secs(5)));
+                        let Ok(conn) = rustls::ServerConnection::new(cfg) else {
+                            return;
+                        };
+                        let mut tls = rustls::StreamOwned::new(conn, tcp);
+                        let mut req_buf = [0u8; 2048];
+                        let Ok(n) = std::io::Read::read(&mut tls, &mut req_buf) else {
+                            return;
+                        };
+                        if n == 0 {
+                            return;
+                        }
+                        let req_str = String::from_utf8_lossy(&req_buf[..n]);
+                        let first_line = req_str.lines().next().unwrap_or("");
+                        if first_line.contains("/update.xml") {
+                            let body = xml.as_bytes();
+                            let resp = format!(
+                                "HTTP/1.1 200 OK\r\nContent-Type: application/xml\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                                body.len()
+                            );
+                            let _ = tls.write_all(resp.as_bytes());
+                            let _ = tls.write_all(body);
+                            let _ = tls.flush();
+                        } else if first_line.contains("/MAX.msi") {
+                            let resp = format!(
+                                "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                                msi.len()
+                            );
+                            let _ = tls.write_all(resp.as_bytes());
+                            let _ = tls.write_all(&msi);
+                            let _ = tls.flush();
+                        }
+                    });
+                }
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    thread::sleep(std::time::Duration::from_millis(5));
+                }
+                Err(_) => break,
+            }
+        }
+    });
+
+    let temp = TestDir::new("https_insecure");
+    let dest_file = temp.path().join("MAX.msi");
+    let meta_file = temp.path().join("metadata.json");
+    fs::write(&meta_file, r#"{"meta": {"app_version": "26.38.0"}}"#).unwrap();
+
+    // 1. Default (insecure: false) must reject self-signed cert
+    let args_strict = UpdateArgs {
+        check: true,
+        appcast_url: Some(format!("{base_url}/update.xml")),
+        metadata_path: Some(meta_file.clone()),
+        insecure: false,
+        ..Default::default()
+    };
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let code_strict = updater::run_with_output(&args_strict, &mut stdout, &mut stderr);
+    assert_eq!(code_strict, exit_codes::ERROR);
+
+    // 2. With insecure: true, both check and full download succeed
+    let args_insecure_dl = UpdateArgs {
+        output: Some(dest_file.clone()),
+        appcast_url: Some(format!("{base_url}/update.xml")),
+        metadata_path: Some(meta_file),
+        insecure: true,
+        threads: Some(1),
+        ..Default::default()
+    };
+    let mut stdout2 = Vec::new();
+    let mut stderr2 = Vec::new();
+    let code_insecure = updater::run_with_output(&args_insecure_dl, &mut stdout2, &mut stderr2);
+    assert_eq!(
+        code_insecure,
+        exit_codes::SUCCESS,
+        "stderr: {}",
+        String::from_utf8_lossy(&stderr2)
+    );
+    assert_eq!(fs::read(&dest_file).unwrap(), installer_bytes);
+
+    running.store(false, Ordering::Relaxed);
+    let _ = TcpStream::connect(format!("127.0.0.1:{port}"));
+    let _ = handle.join();
 }

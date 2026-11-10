@@ -618,6 +618,9 @@ cargo build --release -p dumper_rust
   -o, --output <PATH>         Путь для сохранения загруженного установщика [по умолчанию: MAX.msi]
       --appcast-url <URL>     URL Sparkle-фида [по умолчанию: https://download.max.ru/win/release/update.xml]
       --metadata-path <PATH>  Путь к metadata.json для считывания текущей версии
+  -j, --threads <NUM>         Количество потоков параллельного скачивания [по умолчанию: 8]
+      --retries <NUM>         Максимальное число повторных попыток для чанка [по умолчанию: 5]
+  -k, --insecure              Пропустить проверку TLS-сертификата сервера (алиасы: --no-verify, --skip-verify)
   -h, --help                  Вывод справочной информации
 ```
 

@@ -223,9 +223,12 @@ dependencies = [
  "msvc-demangler",
  "regex",
  "roxmltree",
+ "rustls",
+ "rustls-pki-types",
  "serde",
  "serde_json",
  "ureq",
+ "webpki-roots",
 ]
 
 [[package]]
