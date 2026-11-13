@@ -67,6 +67,7 @@
   "screen_type": "2.0x",
   "self_recovery_url": "https://go.max.ru/recovery",
   "send_error_logs_to_crash_server": false,
+  "send_fatal_logs_to_crash_server": true,
   "short_link_prefix_url": "max.ru",
   "single_instance_id": "oneme_instance",
   "sn_stream_ttl_sec": 43200,
